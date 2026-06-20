@@ -1,0 +1,27 @@
+{
+  "name": "mobile",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@arc/fitness-core": "workspace:*",
+    "@arc/types": "workspace:*",
+    "@arc/utils": "workspace:*",
+    "expo": "~51.0.0",
+    "expo-router": "~3.5.0",
+    "react": "18.2.0",
+    "react-native": "0.74.5",
+    "zustand": "^4.5.2"
+  },
+  "devDependencies": {
+    "@arc/config": "workspace:*",
+    "@types/react": "~18.2.45",
+    "typescript": "5.9.2"
+  }
+}

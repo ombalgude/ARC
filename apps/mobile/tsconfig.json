@@ -1,0 +1,14 @@
+{
+  "extends": "@arc/config/tsconfig/mobile.json",
+  "include": [
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "components/**/*.ts",
+    "components/**/*.tsx",
+    "features/**/*.ts",
+    "features/**/*.tsx",
+    "hooks/**/*.ts",
+    "hooks/**/*.tsx"
+  ],
+  "exclude": ["node_modules", "dist"]
+}
