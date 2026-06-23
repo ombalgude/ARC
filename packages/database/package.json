@@ -7,13 +7,20 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "db:push": "drizzle-kit push"
   },
   "devDependencies": {
     "@arc/config": "workspace:*",
+    "@types/pg": "^8.20.0",
+    "drizzle-kit": "^0.31.10",
     "typescript": "5.9.2"
   },
   "dependencies": {
+    "dotenv": "^16.4.7",
     "drizzle-orm": "^0.39.0",
     "pg": "^8.13.1"
   }
