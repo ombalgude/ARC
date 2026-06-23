@@ -8,7 +8,8 @@
     "features/**/*.ts",
     "features/**/*.tsx",
     "hooks/**/*.ts",
-    "hooks/**/*.tsx"
+    "hooks/**/*.tsx",
+    "lib/**/*.ts"
   ],
   "exclude": ["node_modules", "dist"]
 }
