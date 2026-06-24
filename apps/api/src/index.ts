@@ -7,6 +7,7 @@ import { generateWorkoutPlan, calculateMacros } from "@arc/fitness-core";
 import { workoutInputSchema, nutritionInputSchema } from "@arc/validations";
 import { requireAuth } from "./middleware/clerk-auth.js";
 import { requireUser } from "./middleware/require-user.js";
+import { onboardingRouter } from "./modules/onboarding/onboarding.router.js";
 
 dotenv.config();
 
@@ -47,8 +48,13 @@ app.post("/api/v1/workouts/generate", requireAuth, requireUser, (req, res) => {
     return;
   }
 
-  const { goals, experienceLevel } = result.data;
-  const plan = generateWorkoutPlan(goals, experienceLevel);
+  const plan = generateWorkoutPlan({
+    goals: result.data.goals,
+    experienceLevel: result.data.experienceLevel,
+    workoutFrequency: result.data.workoutFrequency,
+    environment: result.data.environment,
+    equipment: result.data.equipment,
+  });
 
   res.json({ success: true, data: { plan } });
 });
@@ -66,11 +72,12 @@ app.post("/api/v1/nutrition/calculate", requireAuth, requireUser, (req, res) => 
     return;
   }
 
-  const { weightKg, goal } = result.data;
-  const macros = calculateMacros(weightKg, goal);
+  const macros = calculateMacros(result.data);
 
   res.json({ success: true, data: { macros } });
 });
+
+app.use("/api/v1/onboarding", requireAuth, requireUser, onboardingRouter);
 
 app.listen(port, () => {
   console.log(`[API] Server is running on port ${port}`);

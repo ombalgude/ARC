@@ -1,15 +1,18 @@
 export interface WorkoutPlan {
-  id: string;
+  splitName: string;
+  days: WorkoutDay[];
+}
+
+export interface WorkoutDay {
+  dayNumber: number;
+  dayOfWeek: number;
   name: string;
-  description?: string;
-  difficulty: "beginner" | "intermediate" | "advanced";
   exercises: WorkoutExercise[];
-  scheduledDays: number[]; // 0-6 days of week
 }
 
 export interface WorkoutExercise {
   exerciseId: string;
   sets: number;
-  reps: number;
+  reps: string;
   restSeconds: number;
 }

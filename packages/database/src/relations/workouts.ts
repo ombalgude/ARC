@@ -33,10 +33,6 @@ export const workoutExercisesRelations = relations(workoutExercises, ({ one }) =
     fields: [workoutExercises.workoutDayId],
     references: [workoutDays.id],
   }),
-  exercise: one(exercises, {
-    fields: [workoutExercises.exerciseId],
-    references: [exercises.id],
-  }),
 }));
 
 export const workoutSessionsRelations = relations(workoutSessions, ({ many, one }) => ({

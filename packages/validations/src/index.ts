@@ -21,5 +21,20 @@ export const nutritionInputSchema = z.object({
   goal: z.enum(["lose_fat", "maintain", "build_muscle"]),
 });
 
+export const onboardingSchema = z.object({
+  age: z.number().int().min(13).max(100),
+  gender: z.enum(["male", "female", "other"]),
+  weightKg: z.number().positive().max(300),
+  heightCm: z.number().positive().max(300),
+  goal: z.enum(["lose_fat", "maintain", "build_muscle"]),
+  experienceLevel: z.enum(["beginner", "intermediate", "advanced"]),
+  activityLevel: z.enum(["sedentary", "light", "moderate", "active", "very_active"]),
+  dietaryPreference: z.string().max(100),
+  workoutDaysPerWeek: z.number().int().min(1).max(7),
+  environment: z.enum(["home", "gym"]),
+  equipment: z.array(z.string()).min(0),
+});
+
 export type WorkoutInput = z.infer<typeof workoutInputSchema>;
 export type NutritionInput = z.infer<typeof nutritionInputSchema>;
+export type OnboardingInput = z.infer<typeof onboardingSchema>;
