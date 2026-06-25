@@ -140,16 +140,58 @@ export async function findActivePlanWithDaysByUser(userId: string) {
   };
 }
 
-export async function createSession(input: CreateWorkoutSessionInput) {
-  const [session] = await db.insert(workoutSessions).values(input).returning();
+export async function findDayWithExercisesByUser(userId: string, workoutDayId: string) {
+  const [day] = await db
+    .select({
+      id: workoutDays.id,
+      workoutPlanId: workoutDays.workoutPlanId,
+      dayOfWeek: workoutDays.dayOfWeek,
+      name: workoutDays.name,
+      createdAt: workoutDays.createdAt,
+    })
+    .from(workoutDays)
+    .innerJoin(workoutPlans, eq(workoutDays.workoutPlanId, workoutPlans.id))
+    .where(
+      and(
+        eq(workoutDays.id, workoutDayId),
+        eq(workoutPlans.userId, userId),
+        eq(workoutPlans.isActive, true),
+      ),
+    )
+    .limit(1);
+
+  if (!day) {
+    return null;
+  }
+
+  const exercises = await db
+    .select()
+    .from(workoutExercises)
+    .where(eq(workoutExercises.workoutDayId, day.id))
+    .orderBy(asc(workoutExercises.orderIndex));
+
+  return {
+    ...day,
+    exercises,
+  };
+}
+
+export async function createSession(
+  input: CreateWorkoutSessionInput,
+  executor: DatabaseExecutor = db,
+) {
+  const [session] = await executor.insert(workoutSessions).values(input).returning();
   if (!session) {
     throw new Error("Workout repository did not return a session");
   }
   return session;
 }
 
-export async function logExercise(input: CreateExerciseLogInput) {
-  const [log] = await db.insert(exerciseLogs).values(input).returning();
+export async function logExercise(
+  input: CreateExerciseLogInput,
+  executor: DatabaseExecutor = db,
+) {
+  const [log] = await executor.insert(exerciseLogs).values(input).returning();
   if (!log) {
     throw new Error("Workout repository did not return an exercise log");
   }

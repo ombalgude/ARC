@@ -16,6 +16,7 @@ import {
   type DashboardNutrition,
   type DashboardWorkoutPlan,
 } from "../../lib/api";
+import { HabitTracker } from "../../components/dashboard/HabitTracker";
 
 export default function DashboardScreen(): React.JSX.Element {
   const { getToken } = useAuth();
@@ -114,6 +115,7 @@ export default function DashboardScreen(): React.JSX.Element {
       </View>
 
       <NutritionCard nutrition={dashboard!.nutrition!} />
+      <HabitTracker />
       <WorkoutPlanCard workoutPlan={dashboard!.workoutPlan!} />
     </ScrollView>
   );
@@ -178,8 +180,19 @@ function WorkoutPlanCard({
         {workoutPlan.days.map((day, index) => (
           <View key={day.id} style={styles.dayBlock}>
             <View style={styles.dayHeader}>
-              <Text style={styles.dayNumber}>Day {index + 1}</Text>
-              <Text style={styles.dayName}>{day.name ?? "Workout"}</Text>
+              <View style={styles.dayTitleGroup}>
+                <Text style={styles.dayNumber}>Day {index + 1}</Text>
+                <Text style={styles.dayName}>{day.name ?? "Workout"}</Text>
+              </View>
+              <Pressable
+                onPress={() => router.push(`/workout/${day.id}`)}
+                style={({ pressed }) => [
+                  styles.startWorkoutButton,
+                  pressed && styles.startWorkoutButtonPressed,
+                ]}
+              >
+                <Text style={styles.startWorkoutText}>Start Workout</Text>
+              </Pressable>
             </View>
 
             {day.exercises.map((exercise) => (
@@ -368,10 +381,14 @@ const styles = StyleSheet.create({
     padding: 14,
   },
   dayHeader: {
-    alignItems: "center",
+    alignItems: "flex-start",
     flexDirection: "row",
     gap: 10,
+    justifyContent: "space-between",
     marginBottom: 12,
+  },
+  dayTitleGroup: {
+    flex: 1,
   },
   dayNumber: {
     color: "#f2c46d",
@@ -381,8 +398,26 @@ const styles = StyleSheet.create({
   },
   dayName: {
     color: "#ffffff",
+    flexShrink: 1,
     fontSize: 18,
     fontWeight: "800",
+    marginTop: 3,
+  },
+  startWorkoutButton: {
+    alignItems: "center",
+    backgroundColor: "#f2c46d",
+    borderRadius: 8,
+    justifyContent: "center",
+    minHeight: 38,
+    paddingHorizontal: 12,
+  },
+  startWorkoutButtonPressed: {
+    transform: [{ scale: 0.98 }],
+  },
+  startWorkoutText: {
+    color: "#171717",
+    fontSize: 12,
+    fontWeight: "900",
   },
   exerciseRow: {
     alignItems: "center",

@@ -8,7 +8,9 @@ import { workoutInputSchema, nutritionInputSchema } from "@arc/validations";
 import { requireAuth } from "./middleware/clerk-auth.js";
 import { requireUser } from "./middleware/require-user.js";
 import { dashboardRouter } from "./modules/dashboard/dashboard.router.js";
+import { habitsRouter } from "./modules/habits/habits.router.js";
 import { onboardingRouter } from "./modules/onboarding/onboarding.router.js";
+import { sessionsRouter } from "./modules/sessions/sessions.router.js";
 import { usersRouter } from "./modules/users/users.router.js";
 
 dotenv.config();
@@ -87,6 +89,8 @@ app.post(
 app.use("/api/v1/onboarding", requireAuth, requireUser, onboardingRouter);
 app.use("/api/v1/users", requireAuth, requireUser, usersRouter);
 app.use("/api/v1/dashboard", requireAuth, requireUser, dashboardRouter);
+app.use("/api/v1/sessions", requireAuth, requireUser, sessionsRouter);
+app.use("/api/v1/habits", requireAuth, requireUser, habitsRouter);
 
 app.listen(port, () => {
   console.log(`[API] Server is running on port ${port}`);

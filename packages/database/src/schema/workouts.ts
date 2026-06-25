@@ -1,6 +1,5 @@
 import { boolean, index, integer, numeric, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
-import { exercises } from "./exercises.js";
 import { users } from "./users.js";
 
 export const workoutPlans = pgTable(
@@ -87,9 +86,7 @@ export const exerciseLogs = pgTable(
     sessionId: uuid("session_id")
       .notNull()
       .references(() => workoutSessions.id, { onDelete: "cascade" }),
-    exerciseId: uuid("exercise_id")
-      .notNull()
-      .references(() => exercises.id, { onDelete: "cascade" }),
+    exerciseId: text("exercise_id").notNull(),
     setNumber: integer("set_number"),
     repsCompleted: integer("reps_completed"),
     weightKg: numeric("weight_kg", { precision: 6, scale: 2 }),

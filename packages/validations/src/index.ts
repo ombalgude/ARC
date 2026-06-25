@@ -35,6 +35,31 @@ export const onboardingSchema = z.object({
   equipment: z.array(z.string()).min(0),
 });
 
+export const logSessionSchema = z.object({
+  workoutDayId: z.string().uuid(),
+  startedAt: z.string().datetime(),
+  completedAt: z.string().datetime(),
+  exercises: z.array(
+    z.object({
+      exerciseId: z.string().min(1),
+      completedSets: z.number().int().min(0),
+      notes: z.string().max(500).optional(),
+    }),
+  ),
+});
+
+export const logHabitSchema = z
+  .object({
+    habitId: z.string().uuid(),
+    value: z.number().positive().optional(),
+    completed: z.boolean().optional(),
+  })
+  .refine((input) => input.value !== undefined || input.completed !== undefined, {
+    message: "Provide either a value or completed status",
+  });
+
 export type WorkoutInput = z.infer<typeof workoutInputSchema>;
 export type NutritionInput = z.infer<typeof nutritionInputSchema>;
 export type OnboardingInput = z.infer<typeof onboardingSchema>;
+export type LogSessionInput = z.infer<typeof logSessionSchema>;
+export type LogHabitInput = z.infer<typeof logHabitSchema>;

@@ -1,6 +1,5 @@
 import { relations } from "drizzle-orm";
 
-import { exercises } from "../schema/exercises.js";
 import { users } from "../schema/users.js";
 import {
   exerciseLogs,
@@ -55,9 +54,5 @@ export const exerciseLogsRelations = relations(exerciseLogs, ({ one }) => ({
   workoutSession: one(workoutSessions, {
     fields: [exerciseLogs.sessionId],
     references: [workoutSessions.id],
-  }),
-  exercise: one(exercises, {
-    fields: [exerciseLogs.exerciseId],
-    references: [exercises.id],
   }),
 }));

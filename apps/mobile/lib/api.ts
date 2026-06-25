@@ -68,6 +68,38 @@ export interface DashboardData {
   workoutPlan: DashboardWorkoutPlan | null;
 }
 
+export interface WorkoutDayDetail extends DashboardWorkoutDay {}
+
+export interface LogSessionInput {
+  workoutDayId: string;
+  startedAt: string;
+  completedAt: string;
+  exercises: Array<{
+    exerciseId: string;
+    completedSets: number;
+    notes?: string;
+  }>;
+}
+
+export interface HabitSummary {
+  id: string;
+  userId: string;
+  type: "workout" | "water" | "sleep" | "steps" | "macros";
+  targetValue: string | null;
+  unit: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  todayValue: number;
+  completedToday: boolean;
+}
+
+export interface LogHabitInput {
+  habitId: string;
+  value?: number;
+  completed?: boolean;
+}
+
 export function getApiUrl(): string {
   if (process.env.EXPO_PUBLIC_API_URL) {
     return process.env.EXPO_PUBLIC_API_URL;
@@ -119,6 +151,27 @@ export function createApiClient(getToken: GetToken) {
     },
     getDashboard() {
       return request<DashboardData>("/api/v1/dashboard/me");
+    },
+    getWorkoutDay(dayId: string) {
+      return request<WorkoutDayDetail>(`/api/v1/sessions/days/${dayId}`);
+    },
+    logSession(input: LogSessionInput) {
+      return request<{ session: unknown; exerciseLogCount: number }>(
+        "/api/v1/sessions",
+        {
+          method: "POST",
+          body: JSON.stringify(input),
+        },
+      );
+    },
+    getHabits() {
+      return request<{ habits: HabitSummary[] }>("/api/v1/habits");
+    },
+    logHabit(input: LogHabitInput) {
+      return request<{ log: unknown }>("/api/v1/habits/log", {
+        method: "POST",
+        body: JSON.stringify(input),
+      });
     },
     submitOnboarding(input: OnboardingInput) {
       return request("/api/v1/onboarding", {
