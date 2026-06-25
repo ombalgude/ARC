@@ -35,6 +35,38 @@ export async function findById(id: string) {
   return user ?? null;
 }
 
+export async function findProfileByUserId(userId: string) {
+  const [profile] = await db.select().from(userProfiles).where(eq(userProfiles.userId, userId)).limit(1);
+
+  return profile ?? null;
+}
+
+export async function findPreferencesByUserId(userId: string) {
+  const [preferences] = await db
+    .select()
+    .from(userPreferences)
+    .where(eq(userPreferences.userId, userId))
+    .limit(1);
+
+  return preferences ?? null;
+}
+
+export async function findMeById(id: string) {
+  const [result] = await db
+    .select({
+      user: users,
+      profile: userProfiles,
+      preferences: userPreferences,
+    })
+    .from(users)
+    .leftJoin(userProfiles, eq(userProfiles.userId, users.id))
+    .leftJoin(userPreferences, eq(userPreferences.userId, users.id))
+    .where(and(eq(users.id, id), isNull(users.deletedAt)))
+    .limit(1);
+
+  return result ?? null;
+}
+
 export async function create(input: CreateUserInput) {
   const [user] = await db.insert(users).values(input).returning();
   if (!user) {

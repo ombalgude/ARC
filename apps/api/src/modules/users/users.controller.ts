@@ -1,0 +1,70 @@
+import type { ApiResponse } from "@arc/types";
+import { userRepository } from "@arc/database";
+import type { Request, Response } from "express";
+
+type UserMeResult = NonNullable<Awaited<ReturnType<typeof userRepository.findMeById>>> & {
+  profileComplete: boolean;
+};
+
+export async function handleGetMe(req: Request, res: Response<ApiResponse<UserMeResult>>): Promise<void> {
+  if (!req.dbUser?.id) {
+    res.status(401).json({
+      success: false,
+      error: {
+        code: "UNAUTHORIZED",
+        message: "Authentication required",
+      },
+    });
+    return;
+  }
+
+  try {
+    const result = await userRepository.findMeById(req.dbUser.id);
+
+    if (!result) {
+      res.status(404).json({
+        success: false,
+        error: {
+          code: "USER_NOT_FOUND",
+          message: "User not found",
+        },
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        ...result,
+        profileComplete: isProfileComplete(result.profile, result.preferences),
+      },
+    });
+  } catch {
+    res.status(500).json({
+      success: false,
+      error: {
+        code: "INTERNAL_ERROR",
+        message: "Unable to fetch user profile",
+      },
+    });
+  }
+}
+
+function isProfileComplete(
+  profile: Awaited<ReturnType<typeof userRepository.findProfileByUserId>>,
+  preferences: Awaited<ReturnType<typeof userRepository.findPreferencesByUserId>>,
+): boolean {
+  return Boolean(
+    profile?.age &&
+      profile.gender &&
+      profile.weightKg &&
+      profile.heightCm &&
+      profile.goal &&
+      profile.experienceLevel &&
+      profile.activityLevel &&
+      profile.dietaryPreference !== null &&
+      profile.workoutDaysPerWeek &&
+      preferences?.preferredEnvironment &&
+      Array.isArray(preferences.equipment),
+  );
+}

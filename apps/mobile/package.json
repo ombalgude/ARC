@@ -13,6 +13,7 @@
     "@arc/fitness-core": "workspace:*",
     "@arc/types": "workspace:*",
     "@arc/utils": "workspace:*",
+    "@arc/validations": "workspace:*",
     "@clerk/clerk-expo": "^2.19.31",
     "expo": "~51.0.0",
     "expo-router": "~3.5.0",
