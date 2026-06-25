@@ -18,12 +18,64 @@ export interface CurrentUserProfile {
   profileComplete: boolean;
 }
 
+export interface DashboardNutrition {
+  id: string;
+  userId: string;
+  caloriesTarget: number | null;
+  proteinG: number | null;
+  carbsG: number | null;
+  fatG: number | null;
+  goal: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DashboardWorkoutExercise {
+  id: string;
+  workoutDayId: string;
+  exerciseId: string;
+  exerciseName: string;
+  sets: number | null;
+  reps: string | null;
+  restSeconds: number | null;
+  orderIndex: number | null;
+  notes: string | null;
+}
+
+export interface DashboardWorkoutDay {
+  id: string;
+  workoutPlanId: string;
+  dayOfWeek: number | null;
+  name: string | null;
+  createdAt: string;
+  exercises: DashboardWorkoutExercise[];
+}
+
+export interface DashboardWorkoutPlan {
+  id: string;
+  userId: string;
+  name: string | null;
+  splitType: string | null;
+  generatedBy: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  days: DashboardWorkoutDay[];
+}
+
+export interface DashboardData {
+  nutrition: DashboardNutrition | null;
+  workoutPlan: DashboardWorkoutPlan | null;
+}
+
 export function getApiUrl(): string {
   if (process.env.EXPO_PUBLIC_API_URL) {
     return process.env.EXPO_PUBLIC_API_URL;
   }
 
-  return Platform.OS === "android" ? "http://10.0.2.2:3001" : "http://localhost:3001";
+  return Platform.OS === "android"
+    ? "http://10.0.2.2:3001"
+    : "http://localhost:3001";
 }
 
 export function createApiClient(getToken: GetToken) {
@@ -44,10 +96,14 @@ export function createApiClient(getToken: GetToken) {
       },
     });
 
-    const payload = (await response.json().catch(() => null)) as ApiResponse<T> | null;
+    const payload = (await response
+      .json()
+      .catch(() => null)) as ApiResponse<T> | null;
 
     if (!response.ok || !payload?.success) {
-      throw new Error(payload?.error?.message ?? "Unable to reach ARC right now.");
+      throw new Error(
+        payload?.error?.message ?? "Unable to reach ARC right now.",
+      );
     }
 
     if (!payload.data) {
@@ -60,6 +116,9 @@ export function createApiClient(getToken: GetToken) {
   return {
     getMe() {
       return request<CurrentUserProfile>("/api/v1/users/me");
+    },
+    getDashboard() {
+      return request<DashboardData>("/api/v1/dashboard/me");
     },
     submitOnboarding(input: OnboardingInput) {
       return request("/api/v1/onboarding", {

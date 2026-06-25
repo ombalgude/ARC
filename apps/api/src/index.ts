@@ -7,6 +7,7 @@ import { generateWorkoutPlan, calculateMacros } from "@arc/fitness-core";
 import { workoutInputSchema, nutritionInputSchema } from "@arc/validations";
 import { requireAuth } from "./middleware/clerk-auth.js";
 import { requireUser } from "./middleware/require-user.js";
+import { dashboardRouter } from "./modules/dashboard/dashboard.router.js";
 import { onboardingRouter } from "./modules/onboarding/onboarding.router.js";
 import { usersRouter } from "./modules/users/users.router.js";
 
@@ -60,26 +61,32 @@ app.post("/api/v1/workouts/generate", requireAuth, requireUser, (req, res) => {
   res.json({ success: true, data: { plan } });
 });
 
-app.post("/api/v1/nutrition/calculate", requireAuth, requireUser, (req, res) => {
-  const result = nutritionInputSchema.safeParse(req.body);
-  if (!result.success) {
-    res.status(400).json({
-      success: false,
-      error: {
-        code: "VALIDATION_ERROR",
-        message: "Invalid nutrition input",
-      },
-    });
-    return;
-  }
+app.post(
+  "/api/v1/nutrition/calculate",
+  requireAuth,
+  requireUser,
+  (req, res) => {
+    const result = nutritionInputSchema.safeParse(req.body);
+    if (!result.success) {
+      res.status(400).json({
+        success: false,
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Invalid nutrition input",
+        },
+      });
+      return;
+    }
 
-  const macros = calculateMacros(result.data);
+    const macros = calculateMacros(result.data);
 
-  res.json({ success: true, data: { macros } });
-});
+    res.json({ success: true, data: { macros } });
+  },
+);
 
 app.use("/api/v1/onboarding", requireAuth, requireUser, onboardingRouter);
 app.use("/api/v1/users", requireAuth, requireUser, usersRouter);
+app.use("/api/v1/dashboard", requireAuth, requireUser, dashboardRouter);
 
 app.listen(port, () => {
   console.log(`[API] Server is running on port ${port}`);
