@@ -50,6 +50,63 @@ export async function handleGetMe(req: Request, res: Response<ApiResponse<UserMe
   }
 }
 
+export async function handleUpdatePushToken(
+  req: Request,
+  res: Response<ApiResponse<{ saved: true }>>,
+): Promise<void> {
+  if (!req.dbUser?.id) {
+    res.status(401).json({
+      success: false,
+      error: {
+        code: "UNAUTHORIZED",
+        message: "Authentication required",
+      },
+    });
+    return;
+  }
+
+  const token = typeof req.body?.token === "string" ? req.body.token.trim() : "";
+
+  if (!token) {
+    res.status(400).json({
+      success: false,
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "Push token is required",
+      },
+    });
+    return;
+  }
+
+  try {
+    const updatedUser = await userRepository.updatePushToken(req.dbUser.id, token);
+
+    if (!updatedUser) {
+      res.status(404).json({
+        success: false,
+        error: {
+          code: "USER_NOT_FOUND",
+          message: "User not found",
+        },
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      data: { saved: true },
+    });
+  } catch {
+    res.status(500).json({
+      success: false,
+      error: {
+        code: "INTERNAL_ERROR",
+        message: "Unable to save push token",
+      },
+    });
+  }
+}
+
 function isProfileComplete(
   profile: Awaited<ReturnType<typeof userRepository.findProfileByUserId>>,
   preferences: Awaited<ReturnType<typeof userRepository.findPreferencesByUserId>>,

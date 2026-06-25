@@ -16,6 +16,7 @@
     "@arc/validations": "workspace:*",
     "@clerk/clerk-expo": "^2.19.31",
     "expo": "~51.0.0",
+    "expo-notifications": "~0.28.19",
     "expo-router": "~3.5.0",
     "expo-secure-store": "~13.0.2",
     "react": "18.2.0",

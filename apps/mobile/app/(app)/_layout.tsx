@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 import { createApiClient } from "../../lib/api";
+import { registerForPushNotificationsAsync } from "../../lib/notifications";
 
 export default function AppLayout(): React.JSX.Element {
   const { getToken, isLoaded, isSignedIn } = useAuth();
@@ -37,6 +38,34 @@ export default function AppLayout(): React.JSX.Element {
     }
 
     void loadProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [api, isLoaded, isSignedIn]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function registerPushToken(): Promise<void> {
+      if (!isLoaded || !isSignedIn) {
+        return;
+      }
+
+      const token = await registerForPushNotificationsAsync();
+
+      if (!isMounted || !token) {
+        return;
+      }
+
+      try {
+        await api.savePushToken(token);
+      } catch {
+        // Push token registration should not block the signed-in app shell.
+      }
+    }
+
+    void registerPushToken();
 
     return () => {
       isMounted = false;

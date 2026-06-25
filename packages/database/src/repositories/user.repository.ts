@@ -102,6 +102,19 @@ export async function updateProfile(
   return profile;
 }
 
+export async function updatePushToken(userId: string, token: string) {
+  const [user] = await db
+    .update(users)
+    .set({
+      pushToken: token,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, userId))
+    .returning();
+
+  return user ?? null;
+}
+
 export async function upsertPreferences(
   userId: string,
   input: { preferredEnvironment: "home" | "gym"; equipment: string[] },

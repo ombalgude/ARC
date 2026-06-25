@@ -173,6 +173,12 @@ export function createApiClient(getToken: GetToken) {
         body: JSON.stringify(input),
       });
     },
+    savePushToken(token: string) {
+      return request<{ saved: true }>("/api/v1/users/push-token", {
+        method: "POST",
+        body: JSON.stringify({ token }),
+      });
+    },
     submitOnboarding(input: OnboardingInput) {
       return request("/api/v1/onboarding", {
         method: "POST",
