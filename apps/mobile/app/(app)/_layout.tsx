@@ -1,5 +1,6 @@
 import { useAuth } from "@clerk/clerk-expo";
-import { Redirect, Slot, usePathname } from "expo-router";
+import { Redirect, Tabs, usePathname } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
@@ -101,7 +102,53 @@ export default function AppLayout(): React.JSX.Element {
     return <Redirect href="/(app)/dashboard" />;
   }
 
-  return <Slot />;
+  return (
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: "#111318",
+          borderTopColor: "#1d212b",
+        },
+        tabBarActiveTintColor: "#f2c46d",
+        tabBarInactiveTintColor: "#aeb4bf",
+      }}
+    >
+      <Tabs.Screen
+        name="dashboard"
+        options={{
+          title: "Dashboard",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="history"
+        options={{
+          title: "History",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="time" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="workout/[dayId]"
+        options={{
+          href: null,
+        }}
+      />
+    </Tabs>
+  );
 }
 
 const styles = StyleSheet.create({
