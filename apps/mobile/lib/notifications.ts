@@ -1,8 +1,16 @@
-import * as Notifications from "expo-notifications";
+import Constants, { ExecutionEnvironment } from "expo-constants";
 import { Platform } from "react-native";
+
+type NotificationsModule = typeof import("expo-notifications");
 
 export async function registerForPushNotificationsAsync(): Promise<string | null> {
   try {
+    const Notifications = await loadNotificationsModule();
+
+    if (!Notifications) {
+      return null;
+    }
+
     if (Platform.OS === "android") {
       await Notifications.setNotificationChannelAsync("default", {
         name: "default",
@@ -24,9 +32,24 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
       return null;
     }
 
-    const token = await Notifications.getExpoPushTokenAsync();
+    const projectId = Constants.easConfig?.projectId ?? Constants.expoConfig?.extra?.eas?.projectId;
+    const token = await Notifications.getExpoPushTokenAsync(
+      projectId ? { projectId } : undefined,
+    );
+
     return token.data;
   } catch {
     return null;
   }
+}
+
+async function loadNotificationsModule(): Promise<NotificationsModule | null> {
+  if (
+    Platform.OS === "android" &&
+    Constants.executionEnvironment === ExecutionEnvironment.StoreClient
+  ) {
+    return null;
+  }
+
+  return import("expo-notifications");
 }

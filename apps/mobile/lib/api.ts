@@ -1,3 +1,4 @@
+import Constants from "expo-constants";
 import { Platform } from "react-native";
 import type { ApiResponse } from "@arc/types";
 import type { OnboardingInput } from "@arc/validations";
@@ -101,13 +102,60 @@ export interface LogHabitInput {
 }
 
 export function getApiUrl(): string {
-  if (process.env.EXPO_PUBLIC_API_URL) {
-    return process.env.EXPO_PUBLIC_API_URL;
+  const configuredUrl = process.env.EXPO_PUBLIC_API_URL;
+
+  if (configuredUrl) {
+    return normalizeApiUrl(configuredUrl);
   }
 
   return Platform.OS === "android"
     ? "http://10.0.2.2:3001"
     : "http://localhost:3001";
+}
+
+function normalizeApiUrl(configuredUrl: string): string {
+  if (Platform.OS === "web") {
+    return configuredUrl;
+  }
+
+  try {
+    const url = new URL(configuredUrl);
+
+    if (!isLocalhost(url.hostname)) {
+      return configuredUrl;
+    }
+
+    const expoHost = getExpoDevServerHost();
+
+    if (expoHost && !isLocalhost(expoHost)) {
+      url.hostname = expoHost;
+      return url.toString().replace(/\/$/, "");
+    }
+
+    if (Platform.OS === "android") {
+      url.hostname = "10.0.2.2";
+      return url.toString().replace(/\/$/, "");
+    }
+  } catch {
+    return configuredUrl;
+  }
+
+  return configuredUrl;
+}
+
+function getExpoDevServerHost(): string | null {
+  const hostUri = Constants.expoConfig?.hostUri;
+
+  if (!hostUri) {
+    return null;
+  }
+
+  const host = hostUri.split(":")[0];
+  return host || null;
+}
+
+function isLocalhost(hostname: string): boolean {
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
 }
 
 export function createApiClient(getToken: GetToken) {
@@ -118,15 +166,22 @@ export function createApiClient(getToken: GetToken) {
       throw new Error("You need to sign in again.");
     }
 
-    const response = await fetch(`${getApiUrl()}${path}`, {
-      ...init,
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-        ...init.headers,
-      },
-    });
+    const apiUrl = getApiUrl();
+    let response: Response;
+
+    try {
+      response = await fetch(`${apiUrl}${path}`, {
+        ...init,
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          ...init.headers,
+        },
+      });
+    } catch {
+      throw new Error(`Unable to reach ARC at ${apiUrl}. Check that the API server is running and reachable from this device.`);
+    }
 
     const payload = (await response
       .json()

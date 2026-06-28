@@ -23,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>): React.JSX.Element {
   return (
-    <ClerkProvider>
+    <ClerkProvider unsafe_disableDevelopmentModeConsoleWarning>
       <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable}`}>
           {children}

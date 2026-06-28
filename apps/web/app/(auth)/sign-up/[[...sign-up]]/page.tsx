@@ -3,7 +3,7 @@ import { SignUp } from "@clerk/nextjs";
 export default function SignUpPage(): React.JSX.Element {
   return (
     <main style={styles.shell}>
-      <SignUp signInUrl="/sign-in" />
+      <SignUp signInUrl="/sign-in" fallbackRedirectUrl="/dashboard" />
     </main>
   );
 }
