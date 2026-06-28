@@ -179,7 +179,10 @@ export function createApiClient(getToken: GetToken) {
           ...init.headers,
         },
       });
-    } catch {
+    } catch (error) {
+      if (error instanceof TypeError && error.message === "Network request failed") {
+        throw new Error("Please check your internet connection.");
+      }
       throw new Error(`Unable to reach ARC at ${apiUrl}. Check that the API server is running and reachable from this device.`);
     }
 

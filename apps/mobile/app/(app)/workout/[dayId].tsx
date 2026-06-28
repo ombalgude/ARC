@@ -1,4 +1,5 @@
 import { useAuth } from "@clerk/clerk-expo";
+import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -69,6 +70,7 @@ export default function WorkoutScreen(): React.JSX.Element {
   }, [api, dayId]);
 
   function toggleSet(exerciseId: string, setIndex: number): void {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSetCompletion((current) => {
       const currentSets = current[exerciseId] ?? [];
       const nextSets = [...currentSets];
@@ -95,7 +97,7 @@ export default function WorkoutScreen(): React.JSX.Element {
         completedAt: new Date().toISOString(),
         exercises: workoutDay.exercises.map((exercise) => ({
           exerciseId: exercise.exerciseId,
-          completedSets: countCompletedSets(setCompletion[exercise.exerciseId]),
+          completedSets: countCompletedSets(setCompletion[exercise.id]),
         })),
       });
 
@@ -144,7 +146,7 @@ export default function WorkoutScreen(): React.JSX.Element {
 
   const completedSets = workoutDay.exercises.reduce(
     (total, exercise) =>
-      total + countCompletedSets(setCompletion[exercise.exerciseId]),
+      total + countCompletedSets(setCompletion[exercise.id]),
     0,
   );
   const totalSets = workoutDay.exercises.reduce(
@@ -189,31 +191,35 @@ export default function WorkoutScreen(): React.JSX.Element {
               </View>
 
               <View style={styles.setRow}>
-                {Array.from({ length: exercise.sets ?? 0 }).map((_, index) => {
-                  const isChecked =
-                    setCompletion[exercise.exerciseId]?.[index] ?? false;
+                {(exercise.sets && exercise.sets > 0) ? (
+                  Array.from({ length: exercise.sets }).map((_, index) => {
+                    const isChecked =
+                      setCompletion[exercise.id]?.[index] ?? false;
 
-                  return (
-                    <Pressable
-                      key={`${exercise.id}-${index}`}
-                      onPress={() => toggleSet(exercise.exerciseId, index)}
-                      style={({ pressed }) => [
-                        styles.setBox,
-                        isChecked && styles.setBoxChecked,
-                        pressed && styles.setBoxPressed,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.setBoxText,
-                          isChecked && styles.setBoxTextChecked,
+                    return (
+                      <Pressable
+                        key={`${exercise.id}-${index}`}
+                        onPress={() => toggleSet(exercise.id, index)}
+                        style={({ pressed }) => [
+                          styles.setBox,
+                          isChecked && styles.setBoxChecked,
+                          pressed && styles.setBoxPressed,
                         ]}
                       >
-                        {isChecked ? "✓" : index + 1}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
+                        <Text
+                          style={[
+                            styles.setBoxText,
+                            isChecked && styles.setBoxTextChecked,
+                          ]}
+                        >
+                          {isChecked ? "✓" : index + 1}
+                        </Text>
+                      </Pressable>
+                    );
+                  })
+                ) : (
+                  <Text style={styles.emptyText}>No sets programmed</Text>
+                )}
               </View>
             </View>
           ))}
@@ -241,7 +247,7 @@ export default function WorkoutScreen(): React.JSX.Element {
 
 function buildInitialSetState(exercises: DashboardWorkoutExercise[]): SetCompletionState {
   return exercises.reduce<SetCompletionState>((state, exercise) => {
-    state[exercise.exerciseId] = Array.from(
+    state[exercise.id] = Array.from(
       { length: exercise.sets ?? 0 },
       () => false,
     );

@@ -28,13 +28,21 @@ export async function handleGetHabits(
   }
 
   try {
-    let habits = await habitRepository.findActiveByUser(req.dbUser.id);
+    let rawHabits = await habitRepository.findActiveByUser(req.dbUser.id);
 
-    if (habits.length === 0) {
-      habits = await db.transaction((tx) =>
+    if (rawHabits.length === 0) {
+      rawHabits = await db.transaction((tx) =>
         habitRepository.seedDefaultHabits(req.dbUser!.id, tx),
       );
     }
+
+    const uniqueHabitsMap = new Map<string, HabitRecord>();
+    for (const h of rawHabits) {
+      if (!uniqueHabitsMap.has(h.type)) {
+        uniqueHabitsMap.set(h.type, h);
+      }
+    }
+    const habits = Array.from(uniqueHabitsMap.values());
 
     const today = getUtcDateString(new Date());
     const todayLogs = await habitRepository.findLogsForDate(req.dbUser.id, today);

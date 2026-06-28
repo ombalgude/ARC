@@ -1,4 +1,5 @@
 import { useAuth } from "@clerk/clerk-expo";
+import * as Haptics from "expo-haptics";
 import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -64,6 +65,9 @@ export function HabitTracker(): React.JSX.Element {
   }, [api]);
 
   async function handleLogHabit(habit: HabitSummary): Promise<void> {
+    if (!habit.completedToday) {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
     setPendingHabitId(habit.id);
 
     try {

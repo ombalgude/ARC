@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -174,7 +176,8 @@ export default function OnboardingScreen(): React.JSX.Element | null {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {currentStep === 0 ? (
           <View>
             <SectionTitle title="Demographics" subtitle="Used only to calculate accurate calorie targets." />
@@ -295,7 +298,8 @@ export default function OnboardingScreen(): React.JSX.Element | null {
             </View>
           </View>
         ) : null}
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       <View style={styles.footer}>
         <Pressable
@@ -403,6 +407,13 @@ function getStepError(step: number, form: Partial<OnboardingInput>): string | nu
     (!form.goal || !form.experienceLevel || !form.activityLevel || !form.workoutDaysPerWeek)
   ) {
     return "Choose your goal, experience, activity, and weekly training days.";
+  }
+
+  if (
+    step === 3 &&
+    (!form.dietaryPreference || !form.environment)
+  ) {
+    return "Complete your dietary and environment preferences.";
   }
 
   return null;
