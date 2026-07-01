@@ -1,10 +1,11 @@
 import { useSignIn } from '@clerk/clerk-expo';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, router } from 'expo-router';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
+  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -14,21 +15,19 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { useOAuth } from '@clerk/clerk-expo';
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
+
+WebBrowser.maybeCompleteAuthSession();
 
 // ARC dark-mode color palette
-const C = {
-  background: '#0A0912',
-  card: '#12102A',
-  foreground: '#EAE8FF',
-  brand: '#8F6FFF',
-  brandDark: '#7C5CFC',
-  textSecondary: '#9890BC',
-  textTertiary: '#5E5880',
-  border: 'rgba(143, 111, 255, 0.12)',
-  inputBg: 'rgba(255, 255, 255, 0.06)',
-  muted: 'rgba(255, 255, 255, 0.06)',
-  destructive: '#FF6B6B',
-} as const;
+import { Appearance } from 'react-native';
+import { LightColors, DarkColors } from '../../../../packages/ui/src/tokens/theme';
+
+const isDark = Appearance.getColorScheme() === 'dark';
+const C = isDark ? DarkColors : LightColors;
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -80,7 +79,7 @@ const wordmarkStyles = StyleSheet.create({
   text: { fontSize: 20, fontWeight: '800', color: '#EAE8FF', letterSpacing: 2 },
 });
 
-function SocialButton({ label, onPress }: { label: string; onPress: () => void }) {
+function SocialButton({ label, onPress, type }: { label: string; onPress: () => void; type: 'google' | 'apple' }) {
   const slug = label.toLowerCase().replace(/\s+/g, '-');
   return (
     <Pressable
@@ -88,6 +87,14 @@ function SocialButton({ label, onPress }: { label: string; onPress: () => void }
       onPress={onPress}
       style={({ pressed }) => [styles.socialButton, pressed && styles.pressed]}
     >
+      {type === 'google' ? (
+        <Image 
+          source={{ uri: 'https://developers.google.com/identity/images/g-logo.png' }}
+          style={styles.socialIconImage}
+        />
+      ) : (
+        <Ionicons name="logo-apple" size={20} color={C.textPrimary} style={styles.socialIcon} />
+      )}
       <Text style={styles.socialButtonText}>{label}</Text>
     </Pressable>
   );
@@ -95,11 +102,27 @@ function SocialButton({ label, onPress }: { label: string; onPress: () => void }
 
 export default function SignInScreen(): React.JSX.Element {
   const { isLoaded, signIn, setActive } = useSignIn();
+  const { startOAuthFlow: startGoogleFlow } = useOAuth({ strategy: 'oauth_google' });
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  
+  const handleGoogleSignIn = React.useCallback(async () => {
+    try {
+      const { createdSessionId, setActive: setOAuthActive } = await startGoogleFlow({
+        redirectUrl: Linking.createURL('/(app)/dashboard', { scheme: 'arc' }),
+      });
+      if (createdSessionId && setOAuthActive) {
+        await setOAuthActive({ session: createdSessionId });
+        router.replace('/(app)/dashboard');
+      }
+    } catch (err) {
+      setErrorMessage(getErrorMessage(err));
+    }
+  }, [startGoogleFlow]);
 
   async function handleSignIn(): Promise<void> {
     if (!isLoaded || isSubmitting) return;
@@ -154,8 +177,8 @@ export default function SignInScreen(): React.JSX.Element {
 
           {/* Social Auth */}
           <View style={styles.socialGroup}>
-            <SocialButton label="Continue with Google" onPress={() => {}} />
-            <SocialButton label="Continue with Apple" onPress={() => {}} />
+            <SocialButton label="Continue with Google" onPress={handleGoogleSignIn} type="google" />
+            <SocialButton label="Continue with Apple" onPress={() => {}} type="apple" />
           </View>
 
           {/* Divider */}
@@ -168,7 +191,7 @@ export default function SignInScreen(): React.JSX.Element {
           {/* Email + Password Inputs */}
           <View style={styles.inputGroup}>
             <View style={styles.inputWrapper}>
-              <Text style={styles.inputIcon}>✉</Text>
+              <Ionicons name="mail-outline" size={20} color={C.textTertiary} style={styles.inputIconVector || styles.inputIconVector} />
               <TextInput
                 id="sign-in-email-input"
                 autoCapitalize="none"
@@ -183,7 +206,7 @@ export default function SignInScreen(): React.JSX.Element {
             </View>
 
             <View style={styles.inputWrapper}>
-              <Text style={styles.inputIcon}>🔒</Text>
+              <Ionicons name="lock-closed-outline" size={20} color={C.textTertiary} style={styles.inputIconVector || styles.inputIconVector} />
               <TextInput
                 id="sign-in-password-input"
                 onChangeText={setPassword}
@@ -198,7 +221,7 @@ export default function SignInScreen(): React.JSX.Element {
                 onPress={() => setShowPassword((v) => !v)}
                 style={styles.inputTrailingAction}
               >
-                <Text style={styles.inputTrailingText}>{showPassword ? '🙈' : '👁'}</Text>
+                <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={20} color={C.textTertiary} />
               </Pressable>
             </View>
           </View>
@@ -276,24 +299,36 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 15, color: C.textSecondary },
   socialGroup: { gap: 10, marginBottom: 20 },
   socialButton: {
-    backgroundColor: C.card,
-    borderWidth: 1.5,
-    borderColor: C.border,
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
+    flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 16,
+    backgroundColor: C.cardRaised,
+    borderWidth: 1.5,
+    borderColor: C.border,
+  },
+  socialIconImage: {
+    width: 20,
+    height: 20,
+    marginRight: 8,
+  },
+  socialIcon: {
+    marginRight: 8,
   },
   socialButtonText: { fontSize: 14, fontWeight: '600', color: C.foreground },
   divider: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 20 },
   dividerLine: { flex: 1, height: 1, backgroundColor: C.border },
   dividerText: { fontSize: 12, fontWeight: '600', color: C.textTertiary, letterSpacing: 0.5 },
   inputGroup: { gap: 12, marginBottom: 8 },
+  inputIconVector: {
+    marginRight: 12,
+  },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: C.inputBg,
+    backgroundColor: C.inputBackground,
     borderWidth: 1.5,
     borderColor: C.border,
     borderRadius: 14,

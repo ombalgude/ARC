@@ -21,24 +21,11 @@ import {
 import { HabitTracker } from '../../components/dashboard/HabitTracker';
 
 // ARC design tokens
-const C = {
-  background: '#0A0912',
-  card: '#12102A',
-  cardRaised: '#1B1840',
-  foreground: '#EAE8FF',
-  brand: '#8F6FFF',
-  brandDark: '#7C5CFC',
-  health: '#00EDD0',
-  healthDark: '#00D9B8',
-  energy: '#FF8585',
-  energyDark: '#FF6B6B',
-  amber: '#FFC333',
-  amberDark: '#FFB300',
-  textSecondary: '#9890BC',
-  textTertiary: '#5E5880',
-  border: 'rgba(143, 111, 255, 0.12)',
-  muted: 'rgba(255, 255, 255, 0.06)',
-} as const;
+import { Appearance } from 'react-native';
+import { LightColors, DarkColors } from '../../../../packages/ui/src/tokens/theme';
+
+const isDark = Appearance.getColorScheme() === 'dark';
+const C = isDark ? DarkColors : LightColors;
 
 function formatRest(restSeconds: number): string {
   if (restSeconds < 60) return `${restSeconds}s`;

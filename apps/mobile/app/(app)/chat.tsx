@@ -13,18 +13,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const C = {
-  background: '#0A0912',
-  card: '#12102A',
-  cardRaised: '#1B1840',
-  foreground: '#EAE8FF',
-  brand: '#8F6FFF',
-  health: '#00EDD0',
-  textSecondary: '#9890BC',
-  textTertiary: '#5E5880',
-  border: 'rgba(143, 111, 255, 0.12)',
-  muted: 'rgba(255, 255, 255, 0.06)',
-} as const;
+import { Appearance } from 'react-native';
+import { LightColors, DarkColors } from '../../../../packages/ui/src/tokens/theme';
+
+const isDark = Appearance.getColorScheme() === 'dark';
+const C = isDark ? DarkColors : LightColors;
 
 const PROMPTS = [
   'How am I progressing this week?',

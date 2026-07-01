@@ -1,10 +1,15 @@
-import { useSignUp } from '@clerk/clerk-expo';
+import { useSignUp, useOAuth } from '@clerk/clerk-expo';
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, router } from 'expo-router';
-import { useState } from 'react';
+import React, { useCallback, useState } from 'react';
+
+WebBrowser.maybeCompleteAuthSession();
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
+  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -14,21 +19,15 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+
 
 // ARC dark-mode color palette
-const C = {
-  background: '#0A0912',
-  card: '#12102A',
-  foreground: '#EAE8FF',
-  brand: '#8F6FFF',
-  textSecondary: '#9890BC',
-  textTertiary: '#5E5880',
-  border: 'rgba(143, 111, 255, 0.12)',
-  inputBg: 'rgba(255, 255, 255, 0.06)',
-  muted: 'rgba(255, 255, 255, 0.06)',
-  destructive: '#FF6B6B',
-  health: '#00EDD0',
-} as const;
+import { Appearance } from 'react-native';
+import { LightColors, DarkColors } from '../../../../packages/ui/src/tokens/theme';
+
+const isDark = Appearance.getColorScheme() === 'dark';
+const C = isDark ? DarkColors : LightColors;
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -100,7 +99,7 @@ function RegistrationForm({ onSubmit, isSubmitting, errorMessage }: Registration
     <>
       <View style={formStyles.inputGroup}>
         <View style={formStyles.inputWrapper}>
-          <Text style={formStyles.inputIcon}>👤</Text>
+          <Ionicons name="person-outline" size={20} color={C.textTertiary} style={formStyles.inputIconVector || {}} />
           <TextInput
             id="sign-up-name-input"
             autoCapitalize="words"
@@ -114,7 +113,7 @@ function RegistrationForm({ onSubmit, isSubmitting, errorMessage }: Registration
         </View>
 
         <View style={formStyles.inputWrapper}>
-          <Text style={formStyles.inputIcon}>✉</Text>
+          <Ionicons name="mail-outline" size={20} color={C.textTertiary} style={formStyles.inputIconVector || {}} />
           <TextInput
             id="sign-up-email-input"
             autoCapitalize="none"
@@ -129,7 +128,7 @@ function RegistrationForm({ onSubmit, isSubmitting, errorMessage }: Registration
         </View>
 
         <View style={formStyles.inputWrapper}>
-          <Text style={formStyles.inputIcon}>🔒</Text>
+          <Ionicons name="lock-closed-outline" size={20} color={C.textTertiary} style={formStyles.inputIconVector || {}} />
           <TextInput
             id="sign-up-password-input"
             onChangeText={setPassword}
@@ -144,7 +143,7 @@ function RegistrationForm({ onSubmit, isSubmitting, errorMessage }: Registration
             onPress={() => setShowPassword((v) => !v)}
             style={formStyles.trailingAction}
           >
-            <Text>{showPassword ? '🙈' : '👁'}</Text>
+            <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={20} color={C.textTertiary} />
           </Pressable>
         </View>
       </View>
@@ -249,10 +248,13 @@ function VerificationForm({ onVerify, isSubmitting, errorMessage }: Verification
 
 const formStyles = StyleSheet.create({
   inputGroup: { gap: 12, marginBottom: 12 },
+  inputIconVector: {
+    marginRight: 12,
+  },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: C.inputBg,
+    backgroundColor: C.inputBackground,
     borderWidth: 1.5,
     borderColor: C.border,
     borderRadius: 14,
@@ -287,7 +289,7 @@ const formStyles = StyleSheet.create({
 const verifyStyles = StyleSheet.create({
   message: { fontSize: 15, color: C.textSecondary, lineHeight: 23, marginBottom: 24 },
   codeWrapper: {
-    backgroundColor: C.inputBg,
+    backgroundColor: C.inputBackground,
     borderWidth: 1.5,
     borderColor: C.border,
     borderRadius: 14,
@@ -326,6 +328,21 @@ const verifyStyles = StyleSheet.create({
 
 export default function SignUpScreen(): React.JSX.Element {
   const { isLoaded, signUp, setActive } = useSignUp();
+  const { startOAuthFlow: startGoogleFlow } = useOAuth({ strategy: 'oauth_google' });
+
+  const handleGoogleSignUp = React.useCallback(async () => {
+    try {
+      const { createdSessionId, setActive: setOAuthActive } = await startGoogleFlow({
+        redirectUrl: Linking.createURL('/(app)/dashboard', { scheme: 'arc' }),
+      });
+      if (createdSessionId && setOAuthActive) {
+        await setOAuthActive({ session: createdSessionId });
+        router.replace('/(app)/dashboard');
+      }
+    } catch (err) {
+      setErrorMessage(getErrorMessage(err));
+    }
+  }, [startGoogleFlow]);
   const [pendingVerification, setPendingVerification] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -411,14 +428,21 @@ export default function SignUpScreen(): React.JSX.Element {
               <View style={styles.socialGroup}>
                 <Pressable
                   id="sign-up-google-btn"
+                  onPress={handleGoogleSignUp}
                   style={({ pressed }) => [styles.socialButton, pressed && styles.pressed]}
                 >
+                  <Image 
+                    source={{ uri: 'https://developers.google.com/identity/images/g-logo.png' }}
+                    style={styles.socialIconImage}
+                  />
                   <Text style={styles.socialButtonText}>Continue with Google</Text>
                 </Pressable>
                 <Pressable
                   id="sign-up-apple-btn"
+                  onPress={() => {}}
                   style={({ pressed }) => [styles.socialButton, pressed && styles.pressed]}
                 >
+                  <Ionicons name="logo-apple" size={20} color={C.textPrimary} style={styles.socialIcon} />
                   <Text style={styles.socialButtonText}>Continue with Apple</Text>
                 </Pressable>
               </View>
@@ -496,6 +520,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  socialIconImage: {
+    width: 20,
+    height: 20,
+    marginRight: 8,
+  },
+  socialIcon: {
+    marginRight: 8,
   },
   socialButtonText: { fontSize: 14, fontWeight: '600', color: C.foreground },
   divider: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 20 },

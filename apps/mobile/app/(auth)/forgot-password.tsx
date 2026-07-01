@@ -1,7 +1,7 @@
 import { useSignIn } from '@clerk/clerk-expo';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -14,20 +14,13 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
-const C = {
-  background: '#0A0912',
-  card: '#12102A',
-  cardRaised: '#1B1840',
-  foreground: '#EAE8FF',
-  brand: '#8F6FFF',
-  textSecondary: '#9890BC',
-  textTertiary: '#5E5880',
-  border: 'rgba(143, 111, 255, 0.12)',
-  inputBg: 'rgba(255, 255, 255, 0.06)',
-  destructive: '#FF6B6B',
-  success: '#00EDD0',
-} as const;
+import { Appearance } from 'react-native';
+import { LightColors, DarkColors } from '../../../../packages/ui/src/tokens/theme';
+
+const isDark = Appearance.getColorScheme() === 'dark';
+const C = isDark ? DarkColors : LightColors;
 
 type Stage = 'email' | 'reset' | 'success';
 
@@ -46,7 +39,7 @@ function InputRow({
   maxLength,
   id,
 }: {
-  icon: string;
+  icon: React.ComponentProps<typeof Ionicons>['name'];
   placeholder: string;
   value: string;
   onChangeText: (text: string) => void;
@@ -57,7 +50,7 @@ function InputRow({
 }) {
   return (
     <View style={inputStyles.wrapper}>
-      <Text style={inputStyles.icon}>{icon}</Text>
+      <Ionicons name={icon} size={20} color={C.textTertiary} style={inputStyles.iconVector} />
       <TextInput
         id={id}
         autoCapitalize="none"
@@ -78,7 +71,7 @@ const inputStyles = StyleSheet.create({
   wrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: C.inputBg,
+    backgroundColor: C.inputBackground,
     borderWidth: 1.5,
     borderColor: C.border,
     borderRadius: 14,
@@ -86,7 +79,7 @@ const inputStyles = StyleSheet.create({
     minHeight: 52,
     marginBottom: 12,
   },
-  icon: { fontSize: 16, marginRight: 12 },
+  iconVector: { marginRight: 12 },
   input: { flex: 1, fontSize: 15, color: C.foreground, paddingVertical: 14 },
 });
 
@@ -182,7 +175,7 @@ export default function ForgotPasswordScreen(): React.JSX.Element {
 
           {/* Icon */}
           <View style={styles.iconContainer}>
-            <Text style={styles.icon}>{stageConfig.icon}</Text>
+            <Ionicons name={stageConfig.icon as any} size={32} color={C.brand} />
           </View>
 
           {/* Title & Subtitle */}
@@ -194,7 +187,7 @@ export default function ForgotPasswordScreen(): React.JSX.Element {
             <>
               <InputRow
                 id="forgot-password-email-input"
-                icon="✉"
+                icon="mail-outline"
                 keyboardType="email-address"
                 onChangeText={setEmail}
                 placeholder="Email address"
@@ -238,7 +231,7 @@ export default function ForgotPasswordScreen(): React.JSX.Element {
             <>
               <InputRow
                 id="forgot-password-code-input"
-                icon="🔢"
+                icon="keypad-outline"
                 keyboardType="number-pad"
                 maxLength={6}
                 onChangeText={setCode}
@@ -247,7 +240,7 @@ export default function ForgotPasswordScreen(): React.JSX.Element {
               />
               <InputRow
                 id="forgot-password-new-password-input"
-                icon="🔒"
+                icon="lock-closed-outline"
                 onChangeText={setNewPassword}
                 placeholder="New password"
                 secureTextEntry

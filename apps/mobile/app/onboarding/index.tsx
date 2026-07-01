@@ -21,24 +21,11 @@ import { createApiClient } from '../../lib/api';
 import { useOnboardingStore } from '../../lib/store/onboardingStore';
 
 // ── ARC Design Tokens ─────────────────────────────────────────────────────────
-const C = {
-  background: '#0A0912',
-  card: '#12102A',
-  cardRaised: '#1B1840',
-  foreground: '#EAE8FF',
-  brand: '#8F6FFF',
-  brandDark: '#7C5CFC',
-  health: '#00EDD0',
-  energy: '#FF8585',
-  energyDark: '#FF6B6B',
-  amber: '#FFC333',
-  textSecondary: '#9890BC',
-  textTertiary: '#5E5880',
-  border: 'rgba(143, 111, 255, 0.12)',
-  inputBg: 'rgba(255, 255, 255, 0.06)',
-  muted: 'rgba(255, 255, 255, 0.06)',
-  destructive: '#FF6B6B',
-} as const;
+import { Appearance } from 'react-native';
+import { LightColors, DarkColors } from '../../../../packages/ui/src/tokens/theme';
+
+const isDark = Appearance.getColorScheme() === 'dark';
+const C = isDark ? DarkColors : LightColors;
 
 // ── Step Definitions ──────────────────────────────────────────────────────────
 const STEP_TITLES = ['Profile', 'Metrics', 'Goals', 'Setup'] as const;
@@ -448,7 +435,7 @@ function StyledInput({
 
 const styledInputStyles = StyleSheet.create({
   input: {
-    backgroundColor: C.inputBg,
+    backgroundColor: C.inputBackground,
     borderWidth: 1.5,
     borderColor: C.border,
     borderRadius: 14,

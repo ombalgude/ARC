@@ -1,8 +1,78 @@
 // packages/ui/src/tokens/theme.ts
 // ARC Design System — Typed Token Constants
-// Dark-mode first (mobile default: dark background)
 
-export const Colors = {
+export const LightColors = {
+  // Brand
+  brand: '#7C5CFC',
+  brandDark: '#6344E8',
+  brandDeeper: '#4C2FD4',
+  brandLight: '#EDE8FF',
+  brandTint: 'rgba(124, 92, 252, 0.10)',
+  brandForeground: '#FFFFFF',
+
+  // Health / Completion
+  health: '#00D9B8',
+  healthDark: '#00B89B',
+  healthLight: '#DCFFF9',
+  healthTint: 'rgba(0, 217, 184, 0.12)',
+
+  // Energy / Effort
+  energy: '#FF6B6B',
+  energyDark: '#FF4444',
+  energyLight: '#FFEDED',
+  energyTint: 'rgba(255, 107, 107, 0.12)',
+
+  // Amber / Warning
+  amber: '#FFB300',
+  amberDark: '#FF9900',
+  amberLight: '#FFF4D6',
+  amberTint: 'rgba(255, 179, 0, 0.12)',
+
+  // Status
+  success: '#00D9B8',
+  warning: '#FFB300',
+  destructive: '#FF4444',
+  destructiveForeground: '#FFFFFF',
+
+  // Surfaces
+  background: '#F7F6FF',
+  backgroundSunken: '#EDEBFF',
+  card: '#FFFFFF',
+  cardRaised: '#F0EEFF',
+  cardForeground: '#0D0C1A',
+
+  // Semantic
+  foreground: '#0D0C1A',
+  primary: '#7C5CFC',
+  primaryForeground: '#FFFFFF',
+  secondary: '#EDE8FF',
+  secondaryForeground: '#6344E8',
+  muted: '#EDEBFF',
+  mutedForeground: '#A099BD',
+  accent: '#F0EEFF',
+  accentForeground: '#7C5CFC',
+  popover: '#FFFFFF',
+  popoverForeground: '#0D0C1A',
+  border: 'rgba(124, 92, 252, 0.12)',
+  input: 'rgba(124, 92, 252, 0.08)',
+  inputBackground: '#EDEBFF',
+  switchBackground: '#C8C0F0',
+  ring: 'rgba(124, 92, 252, 0.35)',
+
+  // Text
+  textPrimary: '#0D0C1A',
+  textSecondary: '#6B648A',
+  textTertiary: '#A099BD',
+
+  // Chart
+  chart1: '#7C5CFC',
+  chart2: '#00D9B8',
+  chart3: '#FF6B6B',
+  chart4: '#FFB300',
+  chart5: '#A78BFA',
+} as const;
+
+export const DarkColors = {
   // Brand
   brand: '#8F6FFF',
   brandDark: '#7C5CFC',
@@ -21,11 +91,13 @@ export const Colors = {
   energy: '#FF8585',
   energyDark: '#FF6B6B',
   energyLight: 'rgba(255, 107, 107, 0.18)',
+  energyTint: 'rgba(255, 107, 107, 0.12)',
 
   // Amber / Warning
   amber: '#FFC333',
   amberDark: '#FFB300',
   amberLight: 'rgba(255, 179, 0, 0.18)',
+  amberTint: 'rgba(255, 179, 0, 0.12)',
 
   // Status
   success: '#00EDD0',
@@ -33,14 +105,14 @@ export const Colors = {
   destructive: '#FF6B6B',
   destructiveForeground: '#FFFFFF',
 
-  // Dark Mode Surfaces
+  // Surfaces
   background: '#0A0912',
   backgroundSunken: '#060510',
   card: '#12102A',
   cardRaised: '#1B1840',
   cardForeground: '#EAE8FF',
 
-  // Dark Mode Semantic
+  // Semantic
   foreground: '#EAE8FF',
   primary: '#8F6FFF',
   primaryForeground: '#FFFFFF',
@@ -127,5 +199,5 @@ export const Typography = {
   buttonSm: { fontSize: 14, fontWeight: '600' as const, lineHeight: 20 },
 } as const;
 
-export type ArcColor = keyof typeof Colors;
+export type ArcColor = keyof typeof DarkColors;
 export type ArcRadius = keyof typeof Radius;

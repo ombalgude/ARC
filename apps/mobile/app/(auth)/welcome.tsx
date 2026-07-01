@@ -10,16 +10,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 // ARC Dark-mode colors (inline to avoid circular deps during bootstrap)
-const C = {
-  background: '#0A0912',
-  card: '#12102A',
-  foreground: '#EAE8FF',
-  brand: '#8F6FFF',
-  textSecondary: '#9890BC',
-  textTertiary: '#5E5880',
-  border: 'rgba(143, 111, 255, 0.12)',
-  muted: 'rgba(255, 255, 255, 0.06)',
-};
+import { Appearance } from 'react-native';
+import { LightColors, DarkColors } from '../../../../packages/ui/src/tokens/theme';
+
+const isDark = Appearance.getColorScheme() === 'dark';
+const C = isDark ? DarkColors : LightColors;
 
 const FEATURES = [
   { icon: '⚡', label: 'AI Coaching' },
@@ -28,51 +23,50 @@ const FEATURES = [
   { icon: '🥗', label: 'Nutrition Guide' },
 ] as const;
 
-function ArcLogoMark() {
+function ArcWordmark() {
   return (
-    <View style={logoStyles.container}>
-      <View style={logoStyles.outerArc} />
-      <View style={logoStyles.innerArc} />
-      <View style={logoStyles.dot} />
+    <View style={wordmarkStyles.container}>
+      <View style={wordmarkStyles.iconWrapper}>
+        <View style={wordmarkStyles.outerRing} />
+        <View style={wordmarkStyles.innerRing} />
+        <View style={wordmarkStyles.dot} />
+      </View>
+      <Text style={wordmarkStyles.text}>ARC</Text>
     </View>
   );
 }
 
-const logoStyles = StyleSheet.create({
-  container: {
-    width: 56,
-    height: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  outerArc: {
+const wordmarkStyles = StyleSheet.create({
+  container: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  iconWrapper: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
+  outerRing: {
     position: 'absolute',
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    borderWidth: 5.5,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 3,
     borderColor: '#8F6FFF',
     borderBottomColor: 'transparent',
   },
-  innerArc: {
+  innerRing: {
     position: 'absolute',
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 4,
-    borderColor: 'rgba(124,92,252,0.3)',
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 2.5,
+    borderColor: 'rgba(124,92,252,0.35)',
     borderBottomColor: 'transparent',
   },
   dot: {
     position: 'absolute',
-    bottom: 4,
-    width: 9,
-    height: 9,
-    borderRadius: 4.5,
+    bottom: 3,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
     backgroundColor: '#8F6FFF',
   },
+  text: { fontSize: 20, fontWeight: '800', color: '#EAE8FF', letterSpacing: 2 },
 });
-
 function FeaturePill({ icon, label }: { icon: string; label: string }) {
   return (
     <View style={styles.featurePill}>
@@ -104,7 +98,7 @@ export default function WelcomeScreen(): React.JSX.Element {
 
           {/* ARC Logo */}
           <View style={styles.logoContainer}>
-            <ArcLogoMark />
+            <ArcWordmark />
           </View>
 
           {/* Hero Text Content */}
