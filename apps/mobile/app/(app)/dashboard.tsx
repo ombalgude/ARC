@@ -1,6 +1,7 @@
-import { useAuth, useUser } from "@clerk/clerk-expo";
-import { router } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useAuth, useUser } from '@clerk/clerk-expo';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -8,15 +9,328 @@ import {
   StyleSheet,
   Text,
   View,
-} from "react-native";
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
   createApiClient,
   type DashboardData,
   type DashboardNutrition,
   type DashboardWorkoutPlan,
-} from "../../lib/api";
-import { HabitTracker } from "../../components/dashboard/HabitTracker";
+} from '../../lib/api';
+import { HabitTracker } from '../../components/dashboard/HabitTracker';
+
+// ARC design tokens
+const C = {
+  background: '#0A0912',
+  card: '#12102A',
+  cardRaised: '#1B1840',
+  foreground: '#EAE8FF',
+  brand: '#8F6FFF',
+  brandDark: '#7C5CFC',
+  health: '#00EDD0',
+  healthDark: '#00D9B8',
+  energy: '#FF8585',
+  energyDark: '#FF6B6B',
+  amber: '#FFC333',
+  amberDark: '#FFB300',
+  textSecondary: '#9890BC',
+  textTertiary: '#5E5880',
+  border: 'rgba(143, 111, 255, 0.12)',
+  muted: 'rgba(255, 255, 255, 0.06)',
+} as const;
+
+function formatRest(restSeconds: number): string {
+  if (restSeconds < 60) return `${restSeconds}s`;
+  const minutes = Math.floor(restSeconds / 60);
+  const seconds = restSeconds % 60;
+  return seconds ? `${minutes}m ${seconds}s` : `${minutes}m`;
+}
+
+// ── Nutrition Card ────────────────────────────────────────────────────────────
+
+function MacroTile({
+  label,
+  value,
+  color,
+  letter,
+}: {
+  label: string;
+  value: number;
+  color: string;
+  letter: string;
+}) {
+  return (
+    <View style={macroStyles.tile}>
+      <View style={[macroStyles.letterBadge, { backgroundColor: `${color}20` }]}>
+        <Text style={[macroStyles.letterText, { color }]}>{letter}</Text>
+      </View>
+      <Text style={macroStyles.value}>{value}g</Text>
+      <Text style={macroStyles.label}>{label}</Text>
+    </View>
+  );
+}
+
+const macroStyles = StyleSheet.create({
+  tile: {
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderWidth: 1,
+    borderColor: C.border,
+    borderRadius: 16,
+    padding: 14,
+    gap: 4,
+  },
+  letterBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  letterText: { fontSize: 14, fontWeight: '800' },
+  value: { fontSize: 20, fontWeight: '900', color: C.foreground },
+  label: { fontSize: 12, fontWeight: '600', color: C.textTertiary },
+});
+
+function NutritionCard({ nutrition }: { nutrition: DashboardNutrition }) {
+  const macros = [
+    { label: 'Protein', value: nutrition.proteinG ?? 0, color: C.energy, letter: 'P' },
+    { label: 'Carbs', value: nutrition.carbsG ?? 0, color: C.brand, letter: 'C' },
+    { label: 'Fat', value: nutrition.fatG ?? 0, color: C.amber, letter: 'F' },
+  ];
+
+  return (
+    <View style={cardStyles.card}>
+      <View style={cardStyles.cardHeader}>
+        <View>
+          <Text style={cardStyles.kicker}>NUTRITION TARGET</Text>
+          <Text style={cardStyles.title}>Daily Macros</Text>
+        </View>
+        <View style={cardStyles.calorieBadge}>
+          <Text style={cardStyles.calorieNumber}>{nutrition.caloriesTarget ?? 0}</Text>
+          <Text style={cardStyles.calorieUnit}>kcal</Text>
+        </View>
+      </View>
+      <View style={cardStyles.macroRow}>
+        {macros.map((m) => (
+          <MacroTile key={m.label} {...m} />
+        ))}
+      </View>
+    </View>
+  );
+}
+
+const cardStyles = StyleSheet.create({
+  card: {
+    backgroundColor: C.card,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: C.border,
+    padding: 20,
+    marginBottom: 14,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+    gap: 12,
+  },
+  kicker: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: C.textTertiary,
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  title: { fontSize: 18, fontWeight: '700', color: C.foreground, letterSpacing: -0.36 },
+  calorieBadge: {
+    backgroundColor: 'rgba(255,195,51,0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,195,51,0.20)',
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    alignItems: 'flex-end',
+    minWidth: 88,
+  },
+  calorieNumber: { fontSize: 22, fontWeight: '900', color: C.amber },
+  calorieUnit: { fontSize: 11, fontWeight: '700', color: C.amber, opacity: 0.7 },
+  macroRow: { flexDirection: 'row', gap: 8 },
+});
+
+// ── Workout Plan Card ─────────────────────────────────────────────────────────
+
+function WorkoutDayCard({
+  day,
+  index,
+}: {
+  day: DashboardWorkoutPlan['days'][number];
+  index: number;
+}) {
+  const visibleExercises = day.exercises.slice(0, 4);
+  const remaining = day.exercises.length - visibleExercises.length;
+
+  return (
+    <View style={workoutStyles.dayBlock}>
+      {/* Day header */}
+      <View style={workoutStyles.dayHeader}>
+        <View style={workoutStyles.dayTitleGroup}>
+          <Text style={workoutStyles.dayNumber}>DAY {index + 1}</Text>
+          <Text style={workoutStyles.dayName}>{day.name ?? 'Workout'}</Text>
+        </View>
+        <Pressable
+          id={`dashboard-start-workout-${day.id}-btn`}
+          onPress={() => router.push(`/workout/${day.id}`)}
+          style={({ pressed }) => [workoutStyles.startButton, pressed && workoutStyles.startButtonPressed]}
+        >
+          <LinearGradient
+            colors={['#8F6FFF', '#A07AF8']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={workoutStyles.startButtonGradient}
+          >
+            <Text style={workoutStyles.startButtonText}>Start ▶</Text>
+          </LinearGradient>
+        </Pressable>
+      </View>
+
+      {/* Exercise list */}
+      {visibleExercises.map((exercise, idx) => (
+        <View key={exercise.id} style={workoutStyles.exerciseRow}>
+          <View style={workoutStyles.exerciseIndex}>
+            <Text style={workoutStyles.exerciseIndexText}>{idx + 1}</Text>
+          </View>
+          <View style={workoutStyles.exerciseMain}>
+            <Text style={workoutStyles.exerciseName}>{exercise.exerciseName}</Text>
+            <Text style={workoutStyles.exerciseMeta}>
+              {exercise.sets ?? '-'} × {exercise.reps ?? '-'}
+              {exercise.restSeconds ? ` · ${formatRest(exercise.restSeconds)} rest` : ''}
+            </Text>
+          </View>
+        </View>
+      ))}
+
+      {remaining > 0 && (
+        <Text style={workoutStyles.moreText}>+{remaining} more exercises</Text>
+      )}
+    </View>
+  );
+}
+
+const workoutStyles = StyleSheet.create({
+  dayBlock: {
+    backgroundColor: 'rgba(255,255,255,0.025)',
+    borderWidth: 1,
+    borderColor: C.border,
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 10,
+  },
+  dayHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+    gap: 10,
+  },
+  dayTitleGroup: { flex: 1 },
+  dayNumber: { fontSize: 11, fontWeight: '700', color: C.brand, letterSpacing: 1, marginBottom: 3 },
+  dayName: { fontSize: 17, fontWeight: '700', color: C.foreground, letterSpacing: -0.34 },
+  startButton: { borderRadius: 12, overflow: 'hidden' },
+  startButtonPressed: { opacity: 0.85 },
+  startButtonGradient: {
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  startButtonText: { fontSize: 12, fontWeight: '700', color: '#FFF' },
+  exerciseRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(143, 111, 255, 0.08)',
+  },
+  exerciseIndex: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: 'rgba(143, 111, 255, 0.10)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  exerciseIndexText: { fontSize: 12, fontWeight: '800', color: C.brand },
+  exerciseMain: { flex: 1 },
+  exerciseName: { fontSize: 14, fontWeight: '700', color: C.foreground },
+  exerciseMeta: { fontSize: 12, fontWeight: '500', color: C.textSecondary, marginTop: 2 },
+  moreText: {
+    fontSize: 12,
+    color: C.brand,
+    fontWeight: '600',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+});
+
+function WorkoutPlanCard({ workoutPlan }: { workoutPlan: DashboardWorkoutPlan }) {
+  return (
+    <View style={planStyles.card}>
+      <View style={planStyles.header}>
+        <View style={planStyles.headerText}>
+          <Text style={planStyles.kicker}>ACTIVE WORKOUT</Text>
+          <Text style={planStyles.title}>
+            {workoutPlan.name ?? `${workoutPlan.splitType ?? 'Training'} Plan`}
+          </Text>
+        </View>
+        <View style={planStyles.splitPill}>
+          <Text style={planStyles.splitPillText}>{workoutPlan.splitType ?? 'Plan'}</Text>
+        </View>
+      </View>
+      {workoutPlan.days.map((day, index) => (
+        <WorkoutDayCard key={day.id} day={day} index={index} />
+      ))}
+    </View>
+  );
+}
+
+const planStyles = StyleSheet.create({
+  card: {
+    backgroundColor: C.card,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: C.border,
+    padding: 20,
+    marginBottom: 14,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+    gap: 12,
+  },
+  headerText: { flex: 1 },
+  kicker: { fontSize: 11, fontWeight: '700', color: C.textTertiary, letterSpacing: 1, marginBottom: 4 },
+  title: { fontSize: 18, fontWeight: '700', color: C.foreground, letterSpacing: -0.36 },
+  splitPill: {
+    backgroundColor: 'rgba(0,237,208,0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(0,237,208,0.20)',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    flexShrink: 0,
+  },
+  splitPillText: { fontSize: 11, fontWeight: '700', color: C.health },
+});
+
+// ── Main Dashboard Screen ─────────────────────────────────────────────────────
 
 export default function DashboardScreen(): React.JSX.Element {
   const { getToken } = useAuth();
@@ -32,7 +346,6 @@ export default function DashboardScreen(): React.JSX.Element {
     async function loadDashboard(): Promise<void> {
       try {
         const result = await api.getDashboard();
-
         if (isMounted) {
           setDashboard(result);
           setErrorMessage(null);
@@ -40,449 +353,173 @@ export default function DashboardScreen(): React.JSX.Element {
       } catch (error) {
         if (isMounted) {
           setErrorMessage(
-            error instanceof Error
-              ? error.message
-              : "Unable to load your dashboard.",
+            error instanceof Error ? error.message : 'Unable to load your dashboard.',
           );
         }
       } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        if (isMounted) setIsLoading(false);
       }
     }
 
     void loadDashboard();
-
     return () => {
       isMounted = false;
     };
   }, [api]);
 
+  const firstName = user?.firstName ?? 'there';
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
   if (isLoading) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator color="#f2c46d" size="large" />
-        <Text style={styles.loadingText}>Loading your plan</Text>
+        <ActivityIndicator color={C.brand} size="large" />
+        <Text style={styles.loadingText}>Loading your plan...</Text>
       </View>
     );
   }
 
   if (errorMessage) {
     return (
-      <View style={styles.emptyState}>
-        <Text style={styles.emptyTitle}>Dashboard unavailable</Text>
-        <Text style={styles.emptyText}>{errorMessage}</Text>
-      </View>
+      <SafeAreaView style={styles.errorContainer} edges={['top']}>
+        <View style={styles.stateContent}>
+          <Text style={styles.stateIcon}>⚠️</Text>
+          <Text style={styles.stateTitle}>Dashboard unavailable</Text>
+          <Text style={styles.stateText}>{errorMessage}</Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
-  const hasDashboardData = Boolean(
-    dashboard?.nutrition && dashboard.workoutPlan,
-  );
+  const hasDashboardData = Boolean(dashboard?.nutrition && dashboard.workoutPlan);
 
   if (!hasDashboardData) {
     return (
-      <View style={styles.emptyState}>
-        <Text style={styles.kicker}>ARC Fitness</Text>
-        <Text style={styles.emptyTitle}>Complete Profile Setup</Text>
-        <Text style={styles.emptyText}>
-          Finish onboarding to generate your nutrition targets and first
-          training plan.
-        </Text>
-        <Pressable
-          onPress={() => router.replace("/onboarding")}
-          style={styles.primaryButton}
-        >
-          <Text style={styles.primaryButtonText}>Complete Profile Setup</Text>
-        </Pressable>
-      </View>
+      <SafeAreaView style={styles.emptyContainer} edges={['top']}>
+        <View style={styles.stateContent}>
+          <View style={styles.stateIconBox}>
+            <Text style={{ fontSize: 36 }}>⚡</Text>
+          </View>
+          <Text style={styles.stateTitle}>Almost ready!</Text>
+          <Text style={styles.stateText}>
+            Finish your profile setup to generate your personalized nutrition and training plan.
+          </Text>
+          <Pressable
+            id="dashboard-complete-setup-btn"
+            onPress={() => router.replace('/onboarding')}
+            style={({ pressed }) => [styles.setupButton, pressed && styles.pressed]}
+          >
+            <LinearGradient
+              colors={['#8F6FFF', '#A07AF8']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.setupButtonGradient}
+            >
+              <Text style={styles.setupButtonText}>Complete Profile Setup</Text>
+            </LinearGradient>
+          </Pressable>
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-      style={styles.container}
-    >
-      <View style={styles.header}>
-        <Text style={styles.kicker}>Today</Text>
-        <Text style={styles.title}>Welcome, {user?.firstName ?? "there"}</Text>
-        <Text style={styles.subtitle}>
-          Your calories and active training split are ready.
-        </Text>
-      </View>
-
-      <NutritionCard nutrition={dashboard!.nutrition!} />
-      <HabitTracker />
-      <WorkoutPlanCard workoutPlan={dashboard!.workoutPlan!} />
-    </ScrollView>
-  );
-}
-
-function NutritionCard({
-  nutrition,
-}: {
-  nutrition: DashboardNutrition;
-}): React.JSX.Element {
-  const calories = nutrition.caloriesTarget ?? 0;
-  const macros = [
-    { label: "Protein", value: nutrition.proteinG ?? 0, color: "#f87171" },
-    { label: "Carbs", value: nutrition.carbsG ?? 0, color: "#60a5fa" },
-    { label: "Fat", value: nutrition.fatG ?? 0, color: "#f2c46d" },
-  ];
-
-  return (
-    <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <View>
-          <Text style={styles.cardLabel}>Nutrition target</Text>
-          <Text style={styles.cardTitle}>Daily macros</Text>
-        </View>
-        <View style={styles.calorieBadge}>
-          <Text style={styles.calorieNumber}>{calories}</Text>
-          <Text style={styles.calorieLabel}>kcal</Text>
-        </View>
-      </View>
-
-      <View style={styles.macroRow}>
-        {macros.map((macro) => (
-          <View key={macro.label} style={styles.macroTile}>
-            <View style={[styles.macroDot, { backgroundColor: macro.color }]} />
-            <Text style={styles.macroValue}>{macro.value}g</Text>
-            <Text style={styles.macroLabel}>{macro.label}</Text>
-          </View>
-        ))}
-      </View>
-    </View>
-  );
-}
-
-function WorkoutPlanCard({
-  workoutPlan,
-}: {
-  workoutPlan: DashboardWorkoutPlan;
-}): React.JSX.Element {
-  return (
-    <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <View>
-          <Text style={styles.cardLabel}>Active workout</Text>
-          <Text style={styles.cardTitle}>
-            {workoutPlan.name ?? `${workoutPlan.splitType ?? "Training"} Plan`}
-          </Text>
-        </View>
-        <Text style={styles.splitPill}>{workoutPlan.splitType ?? "Plan"}</Text>
-      </View>
-
-      <View style={styles.dayList}>
-        {workoutPlan.days.map((day, index) => (
-          <View key={day.id} style={styles.dayBlock}>
-            <View style={styles.dayHeader}>
-              <View style={styles.dayTitleGroup}>
-                <Text style={styles.dayNumber}>Day {index + 1}</Text>
-                <Text style={styles.dayName}>{day.name ?? "Workout"}</Text>
-              </View>
-              <Pressable
-                onPress={() => router.push(`/workout/${day.id}`)}
-                style={({ pressed }) => [
-                  styles.startWorkoutButton,
-                  pressed && styles.startWorkoutButtonPressed,
-                ]}
-              >
-                <Text style={styles.startWorkoutText}>Start Workout</Text>
-              </Pressable>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerRow}>
+            <View>
+              <Text style={styles.greeting}>{greeting},</Text>
+              <Text style={styles.name}>{firstName} 👋</Text>
             </View>
-
-            {day.exercises.map((exercise) => (
-              <View key={exercise.id} style={styles.exerciseRow}>
-                <View style={styles.exerciseIndex}>
-                  <Text style={styles.exerciseIndexText}>
-                    {exercise.orderIndex ?? "-"}
-                  </Text>
-                </View>
-                <View style={styles.exerciseMain}>
-                  <Text style={styles.exerciseName}>
-                    {exercise.exerciseName}
-                  </Text>
-                  <Text style={styles.exerciseMeta}>
-                    {exercise.sets ?? "-"} sets x {exercise.reps ?? "-"} reps
-                    {exercise.restSeconds
-                      ? ` - ${formatRest(exercise.restSeconds)} rest`
-                      : ""}
-                  </Text>
-                </View>
-              </View>
-            ))}
+            <View style={styles.streakBadge}>
+              <Text style={styles.streakEmoji}>🔥</Text>
+              <Text style={styles.streakText}>Streak</Text>
+            </View>
           </View>
-        ))}
-      </View>
-    </View>
+          <Text style={styles.headerSub}>Your calories and training plan are ready.</Text>
+        </View>
+
+        {/* Cards */}
+        <NutritionCard nutrition={dashboard!.nutrition!} />
+        <HabitTracker />
+        <WorkoutPlanCard workoutPlan={dashboard!.workoutPlan!} />
+
+        <View style={{ height: 24 }} />
+      </ScrollView>
+    </SafeAreaView>
   );
-}
-
-function formatRest(restSeconds: number): string {
-  if (restSeconds < 60) {
-    return `${restSeconds}s`;
-  }
-
-  const minutes = Math.floor(restSeconds / 60);
-  const seconds = restSeconds % 60;
-
-  return seconds ? `${minutes}m ${seconds}s` : `${minutes}m`;
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#111318",
-  },
-  content: {
-    paddingBottom: 36,
-    paddingHorizontal: 20,
-    paddingTop: 64,
-  },
+  container: { flex: 1, backgroundColor: C.background },
+  content: { paddingHorizontal: 20, paddingBottom: 40, paddingTop: 16 },
   loading: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#111318",
-    gap: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: C.background,
+    gap: 16,
   },
-  loadingText: {
-    color: "#aeb4bf",
-    fontSize: 15,
-    fontWeight: "700",
-  },
-  header: {
-    marginBottom: 20,
-  },
-  kicker: {
-    color: "#f2c46d",
-    fontSize: 13,
-    fontWeight: "800",
-    letterSpacing: 0,
-    marginBottom: 8,
-    textTransform: "uppercase",
-  },
-  title: {
-    color: "#ffffff",
-    fontSize: 31,
-    fontWeight: "800",
-    lineHeight: 38,
-  },
-  subtitle: {
-    color: "#aeb4bf",
-    fontSize: 15,
-    lineHeight: 22,
-    marginTop: 8,
-  },
-  card: {
-    backgroundColor: "#1a1f28",
-    borderColor: "#303642",
-    borderRadius: 8,
-    borderWidth: 1,
-    marginBottom: 16,
-    padding: 18,
-  },
-  cardHeader: {
-    alignItems: "flex-start",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 14,
-    marginBottom: 18,
-  },
-  cardLabel: {
-    color: "#8f98a7",
-    fontSize: 12,
-    fontWeight: "800",
-    letterSpacing: 0,
-    marginBottom: 6,
-    textTransform: "uppercase",
-  },
-  cardTitle: {
-    color: "#ffffff",
-    flexShrink: 1,
-    fontSize: 22,
-    fontWeight: "800",
-  },
-  calorieBadge: {
-    alignItems: "flex-end",
-    backgroundColor: "#24200f",
-    borderColor: "#705f2b",
-    borderRadius: 8,
-    borderWidth: 1,
-    minWidth: 96,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  calorieNumber: {
-    color: "#f2c46d",
-    fontSize: 23,
-    fontWeight: "900",
-  },
-  calorieLabel: {
-    color: "#d5c28f",
-    fontSize: 12,
-    fontWeight: "800",
-  },
-  macroRow: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  macroTile: {
-    backgroundColor: "#111318",
-    borderColor: "#2a303b",
-    borderRadius: 8,
-    borderWidth: 1,
+  loadingText: { fontSize: 15, color: C.textSecondary, fontWeight: '500' },
+  errorContainer: { flex: 1, backgroundColor: C.background },
+  emptyContainer: { flex: 1, backgroundColor: C.background },
+  stateContent: {
     flex: 1,
-    minHeight: 102,
-    padding: 12,
-  },
-  macroDot: {
-    borderRadius: 999,
-    height: 8,
-    marginBottom: 18,
-    width: 28,
-  },
-  macroValue: {
-    color: "#ffffff",
-    fontSize: 20,
-    fontWeight: "900",
-  },
-  macroLabel: {
-    color: "#8f98a7",
-    fontSize: 12,
-    fontWeight: "800",
-    marginTop: 4,
-  },
-  splitPill: {
-    backgroundColor: "#13231f",
-    borderColor: "#235347",
-    borderRadius: 8,
-    borderWidth: 1,
-    color: "#6ee7b7",
-    flexShrink: 0,
-    fontSize: 12,
-    fontWeight: "800",
-    overflow: "hidden",
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-  },
-  dayList: {
-    gap: 14,
-  },
-  dayBlock: {
-    backgroundColor: "#111318",
-    borderColor: "#2a303b",
-    borderRadius: 8,
-    borderWidth: 1,
-    padding: 14,
-  },
-  dayHeader: {
-    alignItems: "flex-start",
-    flexDirection: "row",
-    gap: 10,
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-  dayTitleGroup: {
-    flex: 1,
-  },
-  dayNumber: {
-    color: "#f2c46d",
-    fontSize: 12,
-    fontWeight: "900",
-    textTransform: "uppercase",
-  },
-  dayName: {
-    color: "#ffffff",
-    flexShrink: 1,
-    fontSize: 18,
-    fontWeight: "800",
-    marginTop: 3,
-  },
-  startWorkoutButton: {
-    alignItems: "center",
-    backgroundColor: "#f2c46d",
-    borderRadius: 8,
-    justifyContent: "center",
-    minHeight: 38,
-    paddingHorizontal: 12,
-  },
-  startWorkoutButtonPressed: {
-    transform: [{ scale: 0.98 }],
-  },
-  startWorkoutText: {
-    color: "#171717",
-    fontSize: 12,
-    fontWeight: "900",
-  },
-  exerciseRow: {
-    alignItems: "center",
-    flexDirection: "row",
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
     gap: 12,
-    paddingVertical: 10,
   },
-  exerciseIndex: {
-    alignItems: "center",
-    backgroundColor: "#222833",
-    borderRadius: 8,
-    height: 34,
-    justifyContent: "center",
-    width: 34,
+  stateIcon: { fontSize: 44 },
+  stateIconBox: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    backgroundColor: 'rgba(143,111,255,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
   },
-  exerciseIndexText: {
-    color: "#d7dce4",
-    fontSize: 13,
-    fontWeight: "900",
+  stateTitle: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: C.foreground,
+    letterSpacing: -0.52,
+    textAlign: 'center',
   },
-  exerciseMain: {
-    flex: 1,
+  stateText: { fontSize: 15, color: C.textSecondary, textAlign: 'center', lineHeight: 23 },
+  setupButton: { borderRadius: 16, overflow: 'hidden', alignSelf: 'stretch', marginTop: 8 },
+  setupButtonGradient: { paddingVertical: 16, alignItems: 'center' },
+  setupButtonText: { fontSize: 16, fontWeight: '700', color: '#FFF' },
+  pressed: { opacity: 0.85 },
+  // Header
+  header: { marginBottom: 20 },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 6,
   },
-  exerciseName: {
-    color: "#f4f6f8",
-    fontSize: 15,
-    fontWeight: "800",
+  greeting: { fontSize: 14, color: C.textSecondary, fontWeight: '500', marginBottom: 2 },
+  name: { fontSize: 26, fontWeight: '800', color: C.foreground, letterSpacing: -0.52 },
+  streakBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(255,195,51,0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,195,51,0.20)',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
   },
-  exerciseMeta: {
-    color: "#8f98a7",
-    fontSize: 13,
-    fontWeight: "600",
-    lineHeight: 19,
-    marginTop: 3,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: "center",
-    backgroundColor: "#111318",
-    padding: 24,
-  },
-  emptyTitle: {
-    color: "#ffffff",
-    fontSize: 28,
-    fontWeight: "900",
-    lineHeight: 34,
-  },
-  emptyText: {
-    color: "#aeb4bf",
-    fontSize: 15,
-    lineHeight: 22,
-    marginTop: 10,
-  },
-  primaryButton: {
-    alignItems: "center",
-    backgroundColor: "#f2c46d",
-    borderRadius: 8,
-    justifyContent: "center",
-    marginTop: 24,
-    minHeight: 52,
-    paddingHorizontal: 18,
-  },
-  primaryButtonText: {
-    color: "#171717",
-    fontSize: 16,
-    fontWeight: "900",
-  },
+  streakEmoji: { fontSize: 14 },
+  streakText: { fontSize: 12, fontWeight: '700', color: '#FFC333' },
+  headerSub: { fontSize: 14, color: C.textSecondary, lineHeight: 22 },
 });

@@ -1,8 +1,6 @@
-import { useAuth } from "@clerk/clerk-expo";
-import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
-import { LinearGradient } from "expo-linear-gradient";
-import { useEffect, useMemo, useState } from "react";
+import { useAuth } from '@clerk/clerk-expo';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -10,43 +8,94 @@ import {
   StyleSheet,
   Text,
   View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { createApiClient, type CurrentUserProfile } from "../../lib/api";
+import { createApiClient, type CurrentUserProfile } from '../../lib/api';
 
-function formatKey(key: string) {
+const C = {
+  background: '#0A0912',
+  card: '#12102A',
+  cardRaised: '#1B1840',
+  foreground: '#EAE8FF',
+  brand: '#8F6FFF',
+  brandDark: '#7C5CFC',
+  health: '#00EDD0',
+  energy: '#FF8585',
+  amber: '#FFC333',
+  textSecondary: '#9890BC',
+  textTertiary: '#5E5880',
+  border: 'rgba(143, 111, 255, 0.12)',
+  muted: 'rgba(255, 255, 255, 0.06)',
+  destructive: '#FF6B6B',
+} as const;
+
+function formatKey(key: string): string {
   return key
-    .replace(/([A-Z])/g, " $1")
+    .replace(/([A-Z])/g, ' $1')
     .replace(/^./, (str) => str.toUpperCase());
 }
 
 function RenderValue({ value }: { value: unknown }) {
   if (Array.isArray(value)) {
     return (
-      <View style={styles.badgeContainer}>
+      <View style={renderStyles.badgeContainer}>
         {value.map((item, i) => (
-          <View key={i} style={styles.valueBadge}>
-            <Text style={styles.valueBadgeText}>{String(item)}</Text>
+          <View key={i} style={renderStyles.badge}>
+            <Text style={renderStyles.badgeText}>{String(item)}</Text>
           </View>
         ))}
       </View>
     );
   }
   
-  if (typeof value === "boolean") {
-    return <Text style={styles.value}>{value ? "Yes" : "No"}</Text>;
+  if (typeof value === 'boolean') {
+    return <Text style={renderStyles.valueText}>{value ? 'Yes' : 'No'}</Text>;
   }
 
-  return <Text style={styles.value} numberOfLines={2} ellipsizeMode="tail">{String(value)}</Text>;
+  return (
+    <Text style={renderStyles.valueText} numberOfLines={2} ellipsizeMode="tail">
+      {String(value)}
+    </Text>
+  );
 }
 
-const EXCLUDED_KEYS = ["id", "userId", "createdAt", "updatedAt", "deletedAt", "clerkId"];
+const renderStyles = StyleSheet.create({
+  valueText: {
+    fontSize: 15,
+    color: C.foreground,
+    fontWeight: '600',
+    textAlign: 'right',
+    flex: 1,
+  },
+  badgeContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
+    gap: 6,
+    flex: 1,
+  },
+  badge: {
+    backgroundColor: C.muted,
+    borderWidth: 1,
+    borderColor: C.border,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  badgeText: {
+    fontSize: 12,
+    color: C.foreground,
+    fontWeight: '600',
+  },
+});
+
+const EXCLUDED_KEYS = ['id', 'userId', 'createdAt', 'updatedAt', 'deletedAt', 'clerkId'];
 
 export default function ProfileScreen(): React.JSX.Element {
   const { signOut, getToken } = useAuth();
   const api = useMemo(() => createApiClient(getToken), [getToken]);
-
+  
   const [profileData, setProfileData] = useState<CurrentUserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -63,29 +112,18 @@ export default function ProfileScreen(): React.JSX.Element {
         }
       } catch (error) {
         if (isMounted) {
-          setErrorMessage(
-            error instanceof Error
-              ? error.message
-              : "Unable to load profile data."
-          );
+          setErrorMessage(error instanceof Error ? error.message : 'Unable to load profile data.');
         }
       } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        if (isMounted) setIsLoading(false);
       }
     }
 
     void loadProfile();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [api]);
 
-  const handleSignOut = () => {
-    void signOut();
-  };
+  const handleSignOut = () => void signOut();
 
   const filteredProfile = profileData?.profile
     ? Object.entries(profileData.profile).filter(([key]) => !EXCLUDED_KEYS.includes(key))
@@ -95,346 +133,195 @@ export default function ProfileScreen(): React.JSX.Element {
     ? Object.entries(profileData.preferences).filter(([key]) => !EXCLUDED_KEYS.includes(key))
     : [];
 
+  if (isLoading) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator color={C.brand} size="large" />
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      {/* Background Gradient */}
-      <LinearGradient
-        colors={["#111318", "#1a1612", "#111318"]}
-        locations={[0, 0.4, 1]}
-        style={StyleSheet.absoluteFillObject}
-      />
-      
-      <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Profile</Text>
-        </View>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.pageTitle}>Profile</Text>
 
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          {isLoading ? (
-            <ActivityIndicator color="#f2c46d" style={styles.loader} size="large" />
-          ) : errorMessage ? (
-            <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>{errorMessage}</Text>
-            </View>
-          ) : profileData ? (
-            <View style={styles.content}>
-              
-              {/* Profile Card Header with Glassmorphism */}
-              <View style={styles.avatarGlassContainer}>
-                <BlurView intensity={20} tint="dark" style={styles.avatarBlur}>
-                  <View style={styles.avatarWrapper}>
-                    <LinearGradient
-                      colors={["#f2c46d", "#d9a13e"]}
-                      style={styles.avatarGradient}
-                    >
-                      <Ionicons name="person" size={40} color="#111318" />
-                    </LinearGradient>
-                  </View>
-                  <Text style={styles.userEmail}>{profileData.user.email}</Text>
-                  <View style={styles.badge}>
-                    <Text style={styles.badgeText}>
-                      {profileData.profileComplete ? "Active Member" : "Incomplete"}
-                    </Text>
-                  </View>
-                </BlurView>
+        {errorMessage ? (
+          <View style={styles.errorState}>
+            <Text style={styles.errorIcon}>⚠️</Text>
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          </View>
+        ) : profileData ? (
+          <>
+            {/* Header Card */}
+            <View style={styles.profileHeaderCard}>
+              <View style={styles.avatarWrapper}>
+                <Text style={styles.avatarEmoji}>👤</Text>
               </View>
-
-              {/* Data Sections */}
-              <View style={styles.sectionContainer}>
-                {/* Account Settings */}
-                <Text style={styles.sectionTitle}>Account</Text>
-                <View style={styles.glassCard}>
-                  <BlurView intensity={15} tint="dark" style={styles.glassInner}>
-                    <View style={styles.row}>
-                      <View style={styles.rowLeft}>
-                        <View style={styles.iconBox}>
-                          <Ionicons name="mail" size={16} color="#f2c46d" />
-                        </View>
-                        <Text style={styles.label}>Email Address</Text>
-                      </View>
-                      <Text style={styles.value}>{profileData.user.email}</Text>
-                    </View>
-                    <View style={[styles.row, styles.noBorder]}>
-                      <View style={styles.rowLeft}>
-                        <View style={styles.iconBox}>
-                          <Ionicons name="calendar" size={16} color="#f2c46d" />
-                        </View>
-                        <Text style={styles.label}>Member Since</Text>
-                      </View>
-                      <Text style={styles.value}>
-                        {new Date(profileData.user.createdAt).toLocaleDateString()}
-                      </Text>
-                    </View>
-                  </BlurView>
+              <View style={styles.headerInfo}>
+                <Text style={styles.userEmail}>{profileData.user.email}</Text>
+                <View style={styles.statusBadge}>
+                  <Text style={styles.statusBadgeText}>
+                    {profileData.profileComplete ? 'Active Member' : 'Incomplete Setup'}
+                  </Text>
                 </View>
-
-                {/* Personal Info */}
-                {filteredProfile.length > 0 && (
-                  <>
-                    <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Personal Info</Text>
-                    <View style={styles.glassCard}>
-                      <BlurView intensity={15} tint="dark" style={styles.glassInner}>
-                        {filteredProfile.map(([key, value], index, arr) => (
-                          <View key={key} style={[styles.row, index === arr.length - 1 && styles.noBorder]}>
-                            <View style={styles.rowLeft}>
-                              <View style={styles.iconBox}>
-                                <Ionicons name="person-outline" size={16} color="#f2c46d" />
-                              </View>
-                              <Text style={styles.label}>{formatKey(key)}</Text>
-                            </View>
-                            <RenderValue value={value} />
-                          </View>
-                        ))}
-                      </BlurView>
-                    </View>
-                  </>
-                )}
-
-                {/* Preferences */}
-                <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Preferences</Text>
-                <View style={styles.glassCard}>
-                  <BlurView intensity={15} tint="dark" style={styles.glassInner}>
-                    {filteredPreferences.length > 0 ? (
-                      filteredPreferences.map(([key, value], index, arr) => (
-                        <View key={key} style={[styles.row, index === arr.length - 1 && styles.noBorder]}>
-                          <View style={styles.rowLeft}>
-                            <View style={styles.iconBox}>
-                              <Ionicons name="options" size={16} color="#f2c46d" />
-                            </View>
-                            <Text style={styles.label}>{formatKey(key)}</Text>
-                          </View>
-                          <RenderValue value={value} />
-                        </View>
-                      ))
-                    ) : (
-                      <Text style={styles.emptyText}>No preferences set.</Text>
-                    )}
-                  </BlurView>
-                </View>
-
-                {/* Logout Button */}
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.signOutButton,
-                    pressed && styles.signOutButtonPressed,
-                  ]}
-                  onPress={handleSignOut}
-                >
-                  <LinearGradient
-                    colors={["rgba(255, 77, 77, 0.15)", "rgba(255, 77, 77, 0.05)"]}
-                    style={styles.signOutGradient}
-                  >
-                    <Ionicons name="log-out-outline" size={20} color="#ff4d4d" />
-                    <Text style={styles.signOutButtonText}>Sign Out</Text>
-                  </LinearGradient>
-                </Pressable>
               </View>
-
             </View>
-          ) : null}
-        </ScrollView>
-      </SafeAreaView>
-    </View>
+
+            {/* Account Details */}
+            <Text style={styles.sectionTitle}>Account Details</Text>
+            <View style={styles.card}>
+              <View style={styles.row}>
+                <Text style={styles.rowLabel}>Email</Text>
+                <Text style={styles.rowValue}>{profileData.user.email}</Text>
+              </View>
+              <View style={styles.divider} />
+              <View style={styles.row}>
+                <Text style={styles.rowLabel}>Member Since</Text>
+                <Text style={styles.rowValue}>
+                  {new Date(profileData.user.createdAt).toLocaleDateString(undefined, {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                </Text>
+              </View>
+            </View>
+
+            {/* Personal Info */}
+            {filteredProfile.length > 0 && (
+              <>
+                <Text style={styles.sectionTitle}>Body & Metrics</Text>
+                <View style={styles.card}>
+                  {filteredProfile.map(([key, value], idx) => (
+                    <View key={key}>
+                      <View style={styles.row}>
+                        <Text style={styles.rowLabel}>{formatKey(key)}</Text>
+                        <RenderValue value={value} />
+                      </View>
+                      {idx < filteredProfile.length - 1 && <View style={styles.divider} />}
+                    </View>
+                  ))}
+                </View>
+              </>
+            )}
+
+            {/* Preferences */}
+            {filteredPreferences.length > 0 && (
+              <>
+                <Text style={styles.sectionTitle}>Training Setup</Text>
+                <View style={styles.card}>
+                  {filteredPreferences.map(([key, value], idx) => (
+                    <View key={key}>
+                      <View style={styles.row}>
+                        <Text style={styles.rowLabel}>{formatKey(key)}</Text>
+                        <RenderValue value={value} />
+                      </View>
+                      {idx < filteredPreferences.length - 1 && <View style={styles.divider} />}
+                    </View>
+                  ))}
+                </View>
+              </>
+            )}
+          </>
+        ) : null}
+
+        <Pressable
+          id="profile-signout-btn"
+          onPress={handleSignOut}
+          style={({ pressed }) => [styles.signOutButton, pressed && styles.pressed]}
+        >
+          <Text style={styles.signOutText}>Sign Out</Text>
+        </Pressable>
+
+        <View style={{ height: 40 }} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#111318",
-  },
-  safeArea: {
-    flex: 1,
-  },
-  header: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 8,
-  },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: "800",
-    color: "#ffffff",
-    letterSpacing: 0.5,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 60,
-  },
-  loader: {
-    marginTop: 60,
-  },
-  errorContainer: {
-    padding: 16,
-    backgroundColor: "rgba(255, 77, 77, 0.1)",
-    borderRadius: 16,
+  container: { flex: 1, backgroundColor: C.background },
+  content: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 24 },
+  loading: { flex: 1, backgroundColor: C.background, alignItems: 'center', justifyContent: 'center' },
+  pageTitle: { fontSize: 32, fontWeight: '800', color: C.foreground, letterSpacing: -0.64, marginBottom: 24 },
+  errorState: { padding: 24, alignItems: 'center', justifyContent: 'center' },
+  errorIcon: { fontSize: 40, marginBottom: 12 },
+  errorText: { color: C.destructive, fontSize: 15, textAlign: 'center' },
+  
+  profileHeaderCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: C.card,
     borderWidth: 1,
-    borderColor: "rgba(255, 77, 77, 0.3)",
-    marginTop: 20,
-  },
-  errorText: {
-    color: "#ff8080",
-    fontSize: 14,
-    textAlign: "center",
-  },
-  content: {
-    marginTop: 16,
-  },
-  avatarGlassContainer: {
-    borderRadius: 32,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "rgba(242, 196, 109, 0.2)",
+    borderColor: C.border,
+    borderRadius: 20,
+    padding: 20,
     marginBottom: 32,
-  },
-  avatarBlur: {
-    padding: 32,
-    alignItems: "center",
+    gap: 16,
   },
   avatarWrapper: {
-    shadowColor: "#f2c46d",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 10,
-    marginBottom: 20,
-  },
-  avatarGradient: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  userEmail: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#ffffff",
-    marginBottom: 12,
-    letterSpacing: 0.5,
-  },
-  badge: {
-    backgroundColor: "rgba(242, 196, 109, 0.15)",
-    paddingHorizontal: 16,
-    paddingVertical: 6,
+    width: 64,
+    height: 64,
     borderRadius: 20,
+    backgroundColor: 'rgba(143,111,255,0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarEmoji: { fontSize: 32 },
+  headerInfo: { flex: 1, alignItems: 'flex-start' },
+  userEmail: { fontSize: 17, fontWeight: '700', color: C.foreground, marginBottom: 8 },
+  statusBadge: {
+    backgroundColor: 'rgba(0,237,208,0.12)',
     borderWidth: 1,
-    borderColor: "rgba(242, 196, 109, 0.4)",
-  },
-  badgeText: {
-    color: "#f2c46d",
-    fontSize: 12,
-    fontWeight: "600",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  sectionContainer: {
-    paddingHorizontal: 4,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "rgba(255, 255, 255, 0.6)",
-    textTransform: "uppercase",
-    letterSpacing: 1.5,
-    marginBottom: 12,
-    paddingLeft: 4,
-  },
-  glassCard: {
-    borderRadius: 24,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)",
-  },
-  glassInner: {
-    paddingHorizontal: 20,
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 18,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
-  },
-  noBorder: {
-    borderBottomWidth: 0,
-  },
-  rowLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-  },
-  iconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: "rgba(242, 196, 109, 0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  label: {
-    fontSize: 15,
-    color: "rgba(255, 255, 255, 0.8)",
-    fontWeight: "500",
-  },
-  value: {
-    fontSize: 15,
-    color: "#ffffff",
-    fontWeight: "600",
-    textAlign: "right",
-    flex: 1,
-    paddingLeft: 16,
-  },
-  badgeContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
-    justifyContent: "flex-end",
-    flex: 1,
-    paddingLeft: 16,
-  },
-  valueBadge: {
-    backgroundColor: "rgba(242, 196, 109, 0.15)",
+    borderColor: 'rgba(0,237,208,0.25)',
+    borderRadius: 9999,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(242, 196, 109, 0.3)",
   },
-  valueBadgeText: {
-    color: "#f2c46d",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  emptyText: {
-    color: "rgba(255, 255, 255, 0.4)",
+  statusBadgeText: { fontSize: 11, fontWeight: '700', color: C.health, letterSpacing: 0.5, textTransform: 'uppercase' },
+
+  sectionTitle: {
     fontSize: 14,
-    fontStyle: "italic",
-    textAlign: "center",
-    paddingVertical: 24,
-  },
-  signOutButton: {
-    marginTop: 40,
-    borderRadius: 20,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "rgba(255, 77, 77, 0.3)",
-  },
-  signOutGradient: {
-    flexDirection: "row",
-    paddingVertical: 18,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 10,
-  },
-  signOutButtonPressed: {
-    opacity: 0.7,
-  },
-  signOutButtonText: {
-    color: "#ff4d4d",
-    fontSize: 16,
-    fontWeight: "700",
+    fontWeight: '700',
+    color: C.textTertiary,
+    textTransform: 'uppercase',
     letterSpacing: 0.5,
+    marginBottom: 10,
+    marginLeft: 4,
   },
+  card: {
+    backgroundColor: C.card,
+    borderWidth: 1,
+    borderColor: C.border,
+    borderRadius: 20,
+    marginBottom: 24,
+    overflow: 'hidden',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    gap: 16,
+  },
+  rowLabel: { fontSize: 15, fontWeight: '500', color: C.textSecondary, flexShrink: 0 },
+  rowValue: { fontSize: 15, fontWeight: '600', color: C.foreground },
+  divider: { height: 1, backgroundColor: C.border, marginHorizontal: 16 },
+
+  signOutButton: {
+    backgroundColor: 'rgba(255,107,107,0.10)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,107,107,0.20)',
+    borderRadius: 16,
+    paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+  },
+  signOutText: { fontSize: 16, fontWeight: '700', color: C.destructive },
+  pressed: { opacity: 0.8, transform: [{ scale: 0.98 }] },
 });

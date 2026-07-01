@@ -1,5 +1,5 @@
-import { useAuth } from "@clerk/clerk-expo";
-import { Redirect, Slot } from "expo-router";
+import { useAuth } from '@clerk/clerk-expo';
+import { Redirect, Stack } from 'expo-router';
 
 export default function AuthLayout(): React.JSX.Element | null {
   const { isLoaded, isSignedIn } = useAuth();
@@ -12,5 +12,12 @@ export default function AuthLayout(): React.JSX.Element | null {
     return <Redirect href="/(app)/dashboard" />;
   }
 
-  return <Slot />;
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="welcome" />
+      <Stack.Screen name="sign-in" />
+      <Stack.Screen name="sign-up" />
+      <Stack.Screen name="forgot-password" />
+    </Stack>
+  );
 }

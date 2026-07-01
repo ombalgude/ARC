@@ -1,12 +1,6 @@
-import { Redirect } from "expo-router";
-import { useAuth } from "@clerk/clerk-expo";
+import { Redirect } from 'expo-router';
 
-export default function Index() {
-  const { isLoaded, isSignedIn } = useAuth();
-
-  if (!isLoaded) {
-    return null;
-  }
-
-  return <Redirect href={isSignedIn ? "/(app)/dashboard" : "/(auth)/sign-in"} />;
+// Root index redirects to the welcome screen (entry point of auth flow)
+export default function IndexRoute(): React.JSX.Element {
+  return <Redirect href={"/(auth)/welcome" as any} />;
 }

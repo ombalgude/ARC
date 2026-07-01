@@ -1,7 +1,8 @@
-import { useAuth } from "@clerk/clerk-expo";
-import { onboardingSchema, type OnboardingInput } from "@arc/validations";
-import { Redirect, router } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useAuth } from '@clerk/clerk-expo';
+import { onboardingSchema, type OnboardingInput } from '@arc/validations';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Redirect, router } from 'expo-router';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -13,62 +14,453 @@ import {
   Text,
   TextInput,
   View,
-} from "react-native";
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { createApiClient } from "../../lib/api";
-import { useOnboardingStore } from "../../lib/store/onboardingStore";
+import { createApiClient } from '../../lib/api';
+import { useOnboardingStore } from '../../lib/store/onboardingStore';
 
-const steps = ["Profile", "Metrics", "Goals", "Setup"] as const;
+// ── ARC Design Tokens ─────────────────────────────────────────────────────────
+const C = {
+  background: '#0A0912',
+  card: '#12102A',
+  cardRaised: '#1B1840',
+  foreground: '#EAE8FF',
+  brand: '#8F6FFF',
+  brandDark: '#7C5CFC',
+  health: '#00EDD0',
+  energy: '#FF8585',
+  energyDark: '#FF6B6B',
+  amber: '#FFC333',
+  textSecondary: '#9890BC',
+  textTertiary: '#5E5880',
+  border: 'rgba(143, 111, 255, 0.12)',
+  inputBg: 'rgba(255, 255, 255, 0.06)',
+  muted: 'rgba(255, 255, 255, 0.06)',
+  destructive: '#FF6B6B',
+} as const;
 
-const genderOptions = [
-  { label: "Male", value: "male" },
-  { label: "Female", value: "female" },
-  { label: "Other", value: "other" },
-] satisfies Array<{ label: string; value: OnboardingInput["gender"] }>;
+// ── Step Definitions ──────────────────────────────────────────────────────────
+const STEP_TITLES = ['Profile', 'Metrics', 'Goals', 'Setup'] as const;
 
-const goalOptions = [
-  { label: "Lose fat", value: "lose_fat", detail: "Lean down while keeping strength" },
-  { label: "Maintain", value: "maintain", detail: "Hold weight and improve consistency" },
-  { label: "Build muscle", value: "build_muscle", detail: "Progressive strength and size" },
-] satisfies Array<{ label: string; value: OnboardingInput["goal"]; detail: string }>;
+const GENDER_OPTIONS = [
+  { label: 'Male', value: 'male' },
+  { label: 'Female', value: 'female' },
+  { label: 'Other', value: 'other' },
+] satisfies Array<{ label: string; value: OnboardingInput['gender'] }>;
 
-const experienceOptions = [
-  { label: "Beginner", value: "beginner" },
-  { label: "Intermediate", value: "intermediate" },
-  { label: "Advanced", value: "advanced" },
-] satisfies Array<{ label: string; value: OnboardingInput["experienceLevel"] }>;
+const GOAL_OPTIONS = [
+  {
+    label: 'Lose Fat',
+    value: 'lose_fat',
+    detail: 'Burn calories, build lean muscle, and achieve sustainable body recomposition',
+    emoji: '🔥',
+    color: C.energyDark,
+  },
+  {
+    label: 'Build Muscle',
+    value: 'build_muscle',
+    detail: 'Maximize hypertrophy with science-backed progressive overload protocols',
+    emoji: '💪',
+    color: C.brand,
+  },
+  {
+    label: 'Maintain',
+    value: 'maintain',
+    detail: 'Hold your weight and improve consistency and performance',
+    emoji: '⚡',
+    color: C.health,
+  },
+] satisfies Array<{ label: string; value: OnboardingInput['goal']; detail: string; emoji: string; color: string }>;
 
-const activityOptions = [
-  { label: "Sedentary", value: "sedentary" },
-  { label: "Light", value: "light" },
-  { label: "Moderate", value: "moderate" },
-  { label: "Active", value: "active" },
-  { label: "Very active", value: "very_active" },
-] satisfies Array<{ label: string; value: OnboardingInput["activityLevel"] }>;
+const EXPERIENCE_OPTIONS = [
+  { label: 'Beginner', value: 'beginner', subtitle: '< 1 year', emoji: '🌱', color: C.health },
+  { label: 'Intermediate', value: 'intermediate', subtitle: '1–3 years', emoji: '📈', color: C.brand },
+  { label: 'Advanced', value: 'advanced', subtitle: '3+ years', emoji: '🏆', color: C.amber },
+] satisfies Array<{ label: string; value: OnboardingInput['experienceLevel']; subtitle: string; emoji: string; color: string }>;
 
-const environmentOptions = [
-  { label: "Home", value: "home", detail: "Minimal setup, flexible sessions" },
-  { label: "Gym", value: "gym", detail: "Machines, cables, and full weights" },
-] satisfies Array<{ label: string; value: OnboardingInput["environment"]; detail: string }>;
+const ACTIVITY_OPTIONS = [
+  { label: 'Sedentary', value: 'sedentary' },
+  { label: 'Light', value: 'light' },
+  { label: 'Moderate', value: 'moderate' },
+  { label: 'Active', value: 'active' },
+  { label: 'Very active', value: 'very_active' },
+] satisfies Array<{ label: string; value: OnboardingInput['activityLevel'] }>;
 
-const equipmentOptions = ["dumbbells", "barbell", "bench", "cables", "machines", "bands", "kettlebell"];
+const ENVIRONMENT_OPTIONS = [
+  { label: 'Home', value: 'home', detail: 'Minimal setup, flexible sessions', emoji: '🏠' },
+  { label: 'Gym', value: 'gym', detail: 'Machines, cables, and full weights', emoji: '🏋️' },
+] satisfies Array<{ label: string; value: OnboardingInput['environment']; detail: string; emoji: string }>;
+
+const EQUIPMENT_OPTIONS = ['dumbbells', 'barbell', 'bench', 'cables', 'machines', 'bands', 'kettlebell'];
+
+// ── Utility ───────────────────────────────────────────────────────────────────
 
 function parseNumber(value: string): number | undefined {
-  if (!value.trim()) {
-    return undefined;
-  }
-
+  if (!value.trim()) return undefined;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
 function getValidationMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Something went wrong. Please try again.";
+  if (error instanceof Error) return error.message;
+  return 'Something went wrong. Please try again.';
 }
+
+function getStepError(step: number, form: Partial<OnboardingInput>): string | null {
+  if (step === 0 && (!form.age || !form.gender)) return 'Add your age and gender to continue.';
+  if (step === 1 && (!form.weightKg || !form.heightCm)) return 'Add your body metrics to continue.';
+  if (step === 2 && (!form.goal || !form.experienceLevel || !form.activityLevel || !form.workoutDaysPerWeek)) {
+    return 'Choose your goal, experience, activity, and weekly training days.';
+  }
+  if (step === 3 && (!form.dietaryPreference || !form.environment)) {
+    return 'Complete your dietary and environment preferences.';
+  }
+  return null;
+}
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function StepProgressBar({ current, total }: { current: number; total: number }) {
+  return (
+    <View style={progressStyles.container}>
+      {Array.from({ length: total }).map((_, i) => (
+        <View
+          key={i}
+          style={[
+            progressStyles.bar,
+            i <= current ? progressStyles.barActive : progressStyles.barInactive,
+          ]}
+        />
+      ))}
+    </View>
+  );
+}
+
+const progressStyles = StyleSheet.create({
+  container: { flexDirection: 'row', gap: 6 },
+  bar: { flex: 1, height: 3, borderRadius: 99 },
+  barActive: { backgroundColor: C.brand },
+  barInactive: { backgroundColor: 'rgba(255,255,255,0.10)' },
+});
+
+function StepHeader({
+  step,
+  title,
+  subtitle,
+}: {
+  step: number;
+  title: string;
+  subtitle: string;
+}) {
+  return (
+    <View style={stepHeaderStyles.container}>
+      <Text style={stepHeaderStyles.stepLabel}>STEP {step} OF {STEP_TITLES.length}</Text>
+      <Text style={stepHeaderStyles.title}>{title}</Text>
+      <Text style={stepHeaderStyles.subtitle}>{subtitle}</Text>
+    </View>
+  );
+}
+
+const stepHeaderStyles = StyleSheet.create({
+  container: { marginBottom: 24 },
+  stepLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: C.textTertiary,
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: C.foreground,
+    letterSpacing: -0.52,
+    lineHeight: 32,
+    marginBottom: 6,
+  },
+  subtitle: { fontSize: 14, color: C.textSecondary, lineHeight: 22 },
+});
+
+function SectionLabel({ label }: { label: string }) {
+  return <Text style={sectionLabelStyles.label}>{label}</Text>;
+}
+
+const sectionLabelStyles = StyleSheet.create({
+  label: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: C.textTertiary,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    marginBottom: 10,
+    marginTop: 16,
+  },
+});
+
+function OptionChip<Value extends string | number>({
+  label,
+  value,
+  selected,
+  onPress,
+}: {
+  label: string;
+  value: Value;
+  selected: boolean;
+  onPress: (v: Value) => void;
+}) {
+  return (
+    <Pressable
+      id={`onboarding-option-${String(value)}`}
+      onPress={() => onPress(value)}
+      style={({ pressed }) => [
+        chipStyles.chip,
+        selected && chipStyles.chipSelected,
+        pressed && chipStyles.chipPressed,
+      ]}
+    >
+      <Text style={[chipStyles.chipText, selected && chipStyles.chipTextSelected]}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+const chipStyles = StyleSheet.create({
+  chip: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: C.card,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chipSelected: {
+    backgroundColor: 'rgba(143, 111, 255, 0.12)',
+    borderColor: C.brand,
+  },
+  chipPressed: { opacity: 0.85 },
+  chipText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: C.textSecondary,
+    textTransform: 'capitalize',
+  },
+  chipTextSelected: { color: C.brand, fontWeight: '700' },
+});
+
+function DetailCard<Value extends string>({
+  label,
+  value,
+  detail,
+  emoji,
+  color,
+  selected,
+  onPress,
+}: {
+  label: string;
+  value: Value;
+  detail: string;
+  emoji: string;
+  color: string;
+  selected: boolean;
+  onPress: (v: Value) => void;
+}) {
+  return (
+    <Pressable
+      id={`onboarding-detail-${value}`}
+      onPress={() => onPress(value)}
+      style={({ pressed }) => [
+        detailCardStyles.card,
+        selected && { borderColor: color, backgroundColor: `${color}10` },
+        pressed && detailCardStyles.pressed,
+      ]}
+    >
+      <View style={[detailCardStyles.iconWrapper, { backgroundColor: selected ? `${color}20` : C.muted }]}>
+        <Text style={detailCardStyles.emoji}>{emoji}</Text>
+      </View>
+      <View style={detailCardStyles.textWrapper}>
+        <Text style={[detailCardStyles.label, selected && { color }]}>{label}</Text>
+        <Text style={detailCardStyles.detail}>{detail}</Text>
+      </View>
+      <View style={[detailCardStyles.radio, selected && { backgroundColor: color, borderColor: color }]}>
+        {selected && <Text style={detailCardStyles.radioCheck}>✓</Text>}
+      </View>
+    </Pressable>
+  );
+}
+
+const detailCardStyles = StyleSheet.create({
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    padding: 18,
+    backgroundColor: C.card,
+    borderWidth: 2,
+    borderColor: C.border,
+    borderRadius: 20,
+  },
+  pressed: { opacity: 0.9, transform: [{ scale: 0.99 }] },
+  iconWrapper: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  emoji: { fontSize: 24 },
+  textWrapper: { flex: 1 },
+  label: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: C.foreground,
+    letterSpacing: -0.34,
+    marginBottom: 4,
+  },
+  detail: { fontSize: 12, color: C.textSecondary, lineHeight: 18 },
+  radio: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: C.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  radioCheck: { fontSize: 11, color: '#FFF', fontWeight: '800' },
+});
+
+function ExperienceCard({
+  label,
+  value,
+  subtitle,
+  emoji,
+  color,
+  selected,
+  onPress,
+}: {
+  label: string;
+  value: OnboardingInput['experienceLevel'];
+  subtitle: string;
+  emoji: string;
+  color: string;
+  selected: boolean;
+  onPress: (v: OnboardingInput['experienceLevel']) => void;
+}) {
+  return (
+    <Pressable
+      id={`onboarding-experience-${value}`}
+      onPress={() => onPress(value)}
+      style={({ pressed }) => [
+        expStyles.card,
+        selected && { borderColor: color, backgroundColor: `${color}10` },
+        pressed && expStyles.pressed,
+      ]}
+    >
+      <View style={[expStyles.iconWrapper, { backgroundColor: selected ? `${color}25` : C.muted }]}>
+        <Text style={expStyles.emoji}>{emoji}</Text>
+      </View>
+      <View style={expStyles.textWrapper}>
+        <Text style={[expStyles.label, selected && { color }]}>{label}</Text>
+        <Text style={expStyles.subtitle}>{subtitle}</Text>
+      </View>
+      <View style={[expStyles.radio, selected && { backgroundColor: color, borderColor: color }]}>
+        {selected && <Text style={expStyles.radioCheck}>✓</Text>}
+      </View>
+    </Pressable>
+  );
+}
+
+const expStyles = StyleSheet.create({
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    padding: 16,
+    backgroundColor: C.card,
+    borderWidth: 2,
+    borderColor: C.border,
+    borderRadius: 18,
+  },
+  pressed: { opacity: 0.9 },
+  iconWrapper: {
+    width: 44,
+    height: 44,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  emoji: { fontSize: 22 },
+  textWrapper: { flex: 1 },
+  label: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: C.foreground,
+    letterSpacing: -0.32,
+    marginBottom: 2,
+  },
+  subtitle: { fontSize: 12, color: C.textTertiary, fontWeight: '500' },
+  radio: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: C.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  radioCheck: { fontSize: 10, color: '#FFF', fontWeight: '800' },
+});
+
+function StyledInput({
+  value,
+  onChangeText,
+  placeholder,
+  keyboardType = 'default',
+  id,
+}: {
+  value: string;
+  onChangeText: (text: string) => void;
+  placeholder: string;
+  keyboardType?: 'default' | 'decimal-pad' | 'number-pad';
+  id: string;
+}) {
+  return (
+    <TextInput
+      id={id}
+      autoCapitalize="none"
+      keyboardType={keyboardType}
+      onChangeText={onChangeText}
+      placeholder={placeholder}
+      placeholderTextColor={C.textTertiary}
+      style={styledInputStyles.input}
+      value={value}
+    />
+  );
+}
+
+const styledInputStyles = StyleSheet.create({
+  input: {
+    backgroundColor: C.inputBg,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 17,
+    fontWeight: '600',
+    color: C.foreground,
+  },
+});
+
+// ── Main Onboarding Screen ────────────────────────────────────────────────────
 
 export default function OnboardingScreen(): React.JSX.Element | null {
   const { getToken, isLoaded, isSignedIn } = useAuth();
@@ -88,33 +480,25 @@ export default function OnboardingScreen(): React.JSX.Element | null {
 
       try {
         const result = await api.getMe();
-
         if (isMounted && result.profileComplete) {
-          router.replace("/(app)/dashboard");
+          router.replace('/(app)/dashboard');
         }
       } catch {
-        if (isMounted) {
-          setIsCheckingProfile(false);
-        }
+        if (isMounted) setIsCheckingProfile(false);
         return;
       }
 
-      if (isMounted) {
-        setIsCheckingProfile(false);
-      }
+      if (isMounted) setIsCheckingProfile(false);
     }
 
     void checkProfile();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [api, isLoaded, isSignedIn]);
 
   if (!isLoaded || isCheckingProfile) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator color="#f2c46d" />
+        <ActivityIndicator color={C.brand} size="large" />
       </View>
     );
   }
@@ -125,486 +509,340 @@ export default function OnboardingScreen(): React.JSX.Element | null {
 
   function handleNext(): void {
     const message = getStepError(currentStep, form);
-
     if (message) {
-      Alert.alert("Almost there", message);
+      Alert.alert('Almost there', message);
       return;
     }
-
     nextStep();
   }
 
   async function handleSubmit(): Promise<void> {
-    if (isSubmitting) {
-      return;
-    }
+    if (isSubmitting) return;
 
     const parsed = onboardingSchema.safeParse(form);
-
     if (!parsed.success) {
-      Alert.alert("Check your details", parsed.error.issues[0]?.message ?? "Please complete every field.");
+      Alert.alert('Check your details', parsed.error.issues[0]?.message ?? 'Please complete every field.');
       return;
     }
 
     setIsSubmitting(true);
-
     try {
       await api.submitOnboarding(parsed.data);
       reset();
-      router.replace("/(app)/dashboard");
+      router.replace('/(app)/dashboard');
     } catch (error) {
-      Alert.alert("Onboarding failed", getValidationMessage(error));
+      Alert.alert('Onboarding failed', getValidationMessage(error));
     } finally {
       setIsSubmitting(false);
     }
   }
 
+  const isLastStep = currentStep === STEP_TITLES.length - 1;
+  const equipment = form.equipment ?? [];
+
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.eyebrow}>ARC Fitness</Text>
-        <Text style={styles.title}>Build your training profile</Text>
-        <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, { width: `${((currentStep + 1) / steps.length) * 100}%` }]} />
-        </View>
-        <View style={styles.stepLabels}>
-          {steps.map((step, index) => (
-            <Text key={step} style={[styles.stepLabel, index === currentStep && styles.stepLabelActive]}>
-              {step}
-            </Text>
-          ))}
-        </View>
-      </View>
-
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {currentStep === 0 ? (
-          <View>
-            <SectionTitle title="Demographics" subtitle="Used only to calculate accurate calorie targets." />
-            <Text style={styles.label}>Age</Text>
-            <TextInput
-              keyboardType="number-pad"
-              onChangeText={(value) => setField("age", parseNumber(value) as OnboardingInput["age"])}
-              placeholder="28"
-              placeholderTextColor="#68707d"
-              style={styles.input}
-              value={form.age ? String(form.age) : ""}
-            />
-            <Text style={styles.label}>Gender</Text>
-            <OptionGrid
-              options={genderOptions}
-              selectedValue={form.gender}
-              onSelect={(value) => setField("gender", value)}
-            />
-          </View>
-        ) : null}
-
-        {currentStep === 1 ? (
-          <View>
-            <SectionTitle title="Body metrics" subtitle="Your baseline for nutrition and workout volume." />
-            <Text style={styles.label}>Weight in kg</Text>
-            <TextInput
-              keyboardType="decimal-pad"
-              onChangeText={(value) => setField("weightKg", parseNumber(value) as OnboardingInput["weightKg"])}
-              placeholder="75"
-              placeholderTextColor="#68707d"
-              style={styles.input}
-              value={form.weightKg ? String(form.weightKg) : ""}
-            />
-            <Text style={styles.label}>Height in cm</Text>
-            <TextInput
-              keyboardType="decimal-pad"
-              onChangeText={(value) => setField("heightCm", parseNumber(value) as OnboardingInput["heightCm"])}
-              placeholder="178"
-              placeholderTextColor="#68707d"
-              style={styles.input}
-              value={form.heightCm ? String(form.heightCm) : ""}
-            />
-          </View>
-        ) : null}
-
-        {currentStep === 2 ? (
-          <View>
-            <SectionTitle title="Training intent" subtitle="ARC will generate the first plan from this signal." />
-            <Text style={styles.label}>Primary goal</Text>
-            <DetailGrid
-              options={goalOptions}
-              selectedValue={form.goal}
-              onSelect={(value) => setField("goal", value)}
-            />
-            <Text style={styles.label}>Experience</Text>
-            <OptionGrid
-              options={experienceOptions}
-              selectedValue={form.experienceLevel}
-              onSelect={(value) => setField("experienceLevel", value)}
-            />
-            <Text style={styles.label}>Activity level</Text>
-            <OptionGrid
-              options={activityOptions}
-              selectedValue={form.activityLevel}
-              onSelect={(value) => setField("activityLevel", value)}
-            />
-            <Text style={styles.label}>Workout days per week</Text>
-            <OptionGrid
-              options={[1, 2, 3, 4, 5, 6, 7].map((value) => ({ label: String(value), value }))}
-              selectedValue={form.workoutDaysPerWeek}
-              onSelect={(value) => setField("workoutDaysPerWeek", value)}
-            />
-          </View>
-        ) : null}
-
-        {currentStep === 3 ? (
-          <View>
-            <SectionTitle title="Training setup" subtitle="Choose where you train and what ARC can program." />
-            <Text style={styles.label}>Dietary preference</Text>
-            <TextInput
-              onChangeText={(value) => setField("dietaryPreference", value)}
-              placeholder="High protein, vegetarian, no preference"
-              placeholderTextColor="#68707d"
-              style={styles.input}
-              value={form.dietaryPreference ?? ""}
-            />
-            <Text style={styles.label}>Environment</Text>
-            <DetailGrid
-              options={environmentOptions}
-              selectedValue={form.environment}
-              onSelect={(value) => setField("environment", value)}
-            />
-            <Text style={styles.label}>Equipment</Text>
-            <View style={styles.equipmentGrid}>
-              {equipmentOptions.map((equipment) => {
-                const selected = form.equipment?.includes(equipment) ?? false;
-
-                return (
-                  <Pressable
-                    key={equipment}
-                    onPress={() => {
-                      const currentEquipment = form.equipment ?? [];
-                      setField(
-                        "equipment",
-                        selected
-                          ? currentEquipment.filter((item) => item !== equipment)
-                          : [...currentEquipment, equipment],
-                      );
-                    }}
-                    style={[styles.equipmentPill, selected && styles.cardSelected]}
-                  >
-                    <Text style={[styles.optionText, selected && styles.optionTextSelected]}>
-                      {equipment}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </View>
-        ) : null}
-        </ScrollView>
-      </KeyboardAvoidingView>
-
-      <View style={styles.footer}>
-        <Pressable
-          disabled={currentStep === 0 || isSubmitting}
-          onPress={previousStep}
-          style={[styles.secondaryButton, currentStep === 0 && styles.buttonDisabled]}
-        >
-          <Text style={styles.secondaryButtonText}>Back</Text>
-        </Pressable>
-        <Pressable
-          disabled={isSubmitting}
-          onPress={currentStep === steps.length - 1 ? handleSubmit : handleNext}
-          style={[styles.primaryButton, isSubmitting && styles.buttonDisabled]}
-        >
-          {isSubmitting ? (
-            <ActivityIndicator color="#171717" />
-          ) : (
-            <Text style={styles.primaryButtonText}>
-              {currentStep === steps.length - 1 ? "Generate plan" : "Continue"}
-            </Text>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.flex}
+      >
+        {/* Progress + Header */}
+        <View style={styles.header}>
+          <StepProgressBar current={currentStep} total={STEP_TITLES.length} />
+          <View style={{ height: 20 }} />
+          {currentStep === 0 && (
+            <StepHeader step={1} title="What's your primary goal?" subtitle="We'll build your entire training and nutrition plan around this" />
           )}
-        </Pressable>
-      </View>
-    </View>
-  );
-}
+          {currentStep === 1 && (
+            <StepHeader step={2} title="Your experience level?" subtitle="This determines the complexity of your workout structure" />
+          )}
+          {currentStep === 2 && (
+            <StepHeader step={3} title="Your body metrics" subtitle="Used to calculate your personalized nutrition targets" />
+          )}
+          {currentStep === 3 && (
+            <StepHeader step={4} title="Training setup" subtitle="Choose where you train and what ARC can program" />
+          )}
+        </View>
 
-function SectionTitle({ subtitle, title }: { subtitle: string; title: string }): React.JSX.Element {
-  return (
-    <View style={styles.sectionTitle}>
-      <Text style={styles.sectionHeading}>{title}</Text>
-      <Text style={styles.sectionSubtitle}>{subtitle}</Text>
-    </View>
-  );
-}
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* ── Step 0: Goal Selection ── */}
+          {currentStep === 0 && (
+            <View style={styles.stepContainer}>
+              <View style={styles.cardList}>
+                {GOAL_OPTIONS.map(({ label, value, detail, emoji, color }) => (
+                  <DetailCard
+                    key={value}
+                    label={label}
+                    value={value}
+                    detail={detail}
+                    emoji={emoji}
+                    color={color}
+                    selected={form.goal === value}
+                    onPress={(v) => setField('goal', v)}
+                  />
+                ))}
+              </View>
+            </View>
+          )}
 
-function OptionGrid<Value extends string | number>({
-  onSelect,
-  options,
-  selectedValue,
-}: {
-  onSelect: (value: Value) => void;
-  options: Array<{ label: string; value: Value }>;
-  selectedValue: Value | undefined;
-}): React.JSX.Element {
-  return (
-    <View style={styles.optionGrid}>
-      {options.map((option) => {
-        const selected = option.value === selectedValue;
+          {/* ── Step 1: Experience Level ── */}
+          {currentStep === 1 && (
+            <View style={styles.stepContainer}>
+              <View style={styles.cardList}>
+                {EXPERIENCE_OPTIONS.map(({ label, value, subtitle, emoji, color }) => (
+                  <ExperienceCard
+                    key={value}
+                    label={label}
+                    value={value}
+                    subtitle={subtitle}
+                    emoji={emoji}
+                    color={color}
+                    selected={form.experienceLevel === value}
+                    onPress={(v) => setField('experienceLevel', v)}
+                  />
+                ))}
+              </View>
 
-        return (
+              <SectionLabel label="Activity Level" />
+              <View style={styles.chipGrid}>
+                {ACTIVITY_OPTIONS.map(({ label, value }) => (
+                  <OptionChip
+                    key={value}
+                    label={label}
+                    value={value}
+                    selected={form.activityLevel === value}
+                    onPress={(v) => setField('activityLevel', v)}
+                  />
+                ))}
+              </View>
+
+              <SectionLabel label="Workouts Per Week" />
+              <View style={styles.chipGrid}>
+                {[1, 2, 3, 4, 5, 6, 7].map((days) => (
+                  <OptionChip
+                    key={days}
+                    label={String(days)}
+                    value={days}
+                    selected={form.workoutDaysPerWeek === days}
+                    onPress={(v) => setField('workoutDaysPerWeek', v)}
+                  />
+                ))}
+              </View>
+            </View>
+          )}
+
+          {/* ── Step 2: Body Metrics ── */}
+          {currentStep === 2 && (
+            <View style={styles.stepContainer}>
+              <SectionLabel label="Age" />
+              <StyledInput
+                id="onboarding-age-input"
+                keyboardType="number-pad"
+                onChangeText={(v) => setField('age', parseNumber(v) as OnboardingInput['age'])}
+                placeholder="25"
+                value={form.age ? String(form.age) : ''}
+              />
+
+              <SectionLabel label="Gender" />
+              <View style={styles.chipGrid}>
+                {GENDER_OPTIONS.map(({ label, value }) => (
+                  <OptionChip
+                    key={value}
+                    label={label}
+                    value={value}
+                    selected={form.gender === value}
+                    onPress={(v) => setField('gender', v)}
+                  />
+                ))}
+              </View>
+
+              <SectionLabel label="Weight (kg)" />
+              <StyledInput
+                id="onboarding-weight-input"
+                keyboardType="decimal-pad"
+                onChangeText={(v) => setField('weightKg', parseNumber(v) as OnboardingInput['weightKg'])}
+                placeholder="75"
+                value={form.weightKg ? String(form.weightKg) : ''}
+              />
+
+              <SectionLabel label="Height (cm)" />
+              <StyledInput
+                id="onboarding-height-input"
+                keyboardType="decimal-pad"
+                onChangeText={(v) => setField('heightCm', parseNumber(v) as OnboardingInput['heightCm'])}
+                placeholder="175"
+                value={form.heightCm ? String(form.heightCm) : ''}
+              />
+            </View>
+          )}
+
+          {/* ── Step 3: Training Setup ── */}
+          {currentStep === 3 && (
+            <View style={styles.stepContainer}>
+              <SectionLabel label="Dietary Preference" />
+              <StyledInput
+                id="onboarding-dietary-input"
+                onChangeText={(v) => setField('dietaryPreference', v)}
+                placeholder="High protein, vegetarian, no preference…"
+                value={form.dietaryPreference ?? ''}
+              />
+
+              <SectionLabel label="Training Environment" />
+              <View style={styles.cardList}>
+                {ENVIRONMENT_OPTIONS.map(({ label, value, detail, emoji }) => (
+                  <DetailCard
+                    key={value}
+                    label={label}
+                    value={value}
+                    detail={detail}
+                    emoji={emoji}
+                    color={C.brand}
+                    selected={form.environment === value}
+                    onPress={(v) => setField('environment', v)}
+                  />
+                ))}
+              </View>
+
+              <SectionLabel label="Available Equipment" />
+              <View style={styles.chipGrid}>
+                {EQUIPMENT_OPTIONS.map((item) => {
+                  const isSelected = equipment.includes(item);
+                  return (
+                    <Pressable
+                      key={item}
+                      id={`onboarding-equipment-${item}`}
+                      onPress={() => {
+                        setField(
+                          'equipment',
+                          isSelected
+                            ? equipment.filter((e) => e !== item)
+                            : [...equipment, item],
+                        );
+                      }}
+                      style={({ pressed }) => [
+                        chipStyles.chip,
+                        isSelected && chipStyles.chipSelected,
+                        pressed && chipStyles.chipPressed,
+                      ]}
+                    >
+                      <Text style={[chipStyles.chipText, isSelected && chipStyles.chipTextSelected]}>
+                        {item}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+          )}
+
+          <View style={{ height: 20 }} />
+        </ScrollView>
+
+        {/* Footer Navigation */}
+        <View style={styles.footer}>
           <Pressable
-            key={String(option.value)}
-            onPress={() => onSelect(option.value)}
-            style={[styles.optionCard, selected && styles.cardSelected]}
+            id="onboarding-back-btn"
+            disabled={currentStep === 0 || isSubmitting}
+            onPress={previousStep}
+            style={({ pressed }) => [
+              styles.backButton,
+              (currentStep === 0 || isSubmitting) && styles.buttonDisabled,
+              pressed && styles.pressed,
+            ]}
           >
-            <Text style={[styles.optionText, selected && styles.optionTextSelected]}>{option.label}</Text>
+            <Text style={styles.backButtonText}>←</Text>
           </Pressable>
-        );
-      })}
-    </View>
-  );
-}
 
-function DetailGrid<Value extends string>({
-  onSelect,
-  options,
-  selectedValue,
-}: {
-  onSelect: (value: Value) => void;
-  options: Array<{ detail: string; label: string; value: Value }>;
-  selectedValue: Value | undefined;
-}): React.JSX.Element {
-  return (
-    <View style={styles.detailGrid}>
-      {options.map((option) => {
-        const selected = option.value === selectedValue;
-
-        return (
           <Pressable
-            key={option.value}
-            onPress={() => onSelect(option.value)}
-            style={[styles.detailCard, selected && styles.cardSelected]}
+            id={isLastStep ? 'onboarding-submit-btn' : 'onboarding-continue-btn'}
+            disabled={isSubmitting}
+            onPress={isLastStep ? handleSubmit : handleNext}
+            style={({ pressed }) => [
+              styles.continueButton,
+              isSubmitting && styles.buttonDisabled,
+              pressed && styles.pressed,
+            ]}
           >
-            <Text style={[styles.detailTitle, selected && styles.optionTextSelected]}>{option.label}</Text>
-            <Text style={styles.detailText}>{option.detail}</Text>
+            <LinearGradient
+              colors={['#8F6FFF', '#A07AF8']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.continueButtonGradient}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <Text style={styles.continueButtonText}>
+                  {isLastStep ? 'Generate My Plan ✨' : 'Continue →'}
+                </Text>
+              )}
+            </LinearGradient>
           </Pressable>
-        );
-      })}
-    </View>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
-}
-
-function getStepError(step: number, form: Partial<OnboardingInput>): string | null {
-  if (step === 0 && (!form.age || !form.gender)) {
-    return "Add your age and gender to continue.";
-  }
-
-  if (step === 1 && (!form.weightKg || !form.heightCm)) {
-    return "Add your body metrics to continue.";
-  }
-
-  if (
-    step === 2 &&
-    (!form.goal || !form.experienceLevel || !form.activityLevel || !form.workoutDaysPerWeek)
-  ) {
-    return "Choose your goal, experience, activity, and weekly training days.";
-  }
-
-  if (
-    step === 3 &&
-    (!form.dietaryPreference || !form.environment)
-  ) {
-    return "Complete your dietary and environment preferences.";
-  }
-
-  return null;
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#111318",
-  },
+  container: { flex: 1, backgroundColor: C.background },
+  flex: { flex: 1 },
   loading: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#111318",
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: C.background,
   },
   header: {
     paddingHorizontal: 24,
-    paddingBottom: 18,
-    paddingTop: 64,
-  },
-  eyebrow: {
-    color: "#f2c46d",
-    fontSize: 13,
-    fontWeight: "700",
-    letterSpacing: 0,
-    marginBottom: 10,
-    textTransform: "uppercase",
-  },
-  title: {
-    color: "#ffffff",
-    fontSize: 30,
-    fontWeight: "800",
-    lineHeight: 36,
-    marginBottom: 22,
-  },
-  progressTrack: {
-    backgroundColor: "#252b35",
-    borderRadius: 999,
-    height: 6,
-    overflow: "hidden",
-  },
-  progressFill: {
-    backgroundColor: "#f2c46d",
-    height: 6,
-  },
-  stepLabels: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
-  stepLabel: {
-    color: "#68707d",
-    fontSize: 12,
-    fontWeight: "700",
-  },
-  stepLabelActive: {
-    color: "#ffffff",
+    paddingTop: 20,
+    paddingBottom: 4,
   },
   content: {
-    paddingBottom: 20,
     paddingHorizontal: 24,
+    paddingBottom: 20,
   },
-  sectionTitle: {
-    marginBottom: 24,
+  stepContainer: {
+    gap: 0,
   },
-  sectionHeading: {
-    color: "#ffffff",
-    fontSize: 22,
-    fontWeight: "800",
-    marginBottom: 8,
-  },
-  sectionSubtitle: {
-    color: "#aeb4bf",
-    fontSize: 15,
-    lineHeight: 22,
-  },
-  label: {
-    color: "#d7dce4",
-    fontSize: 14,
-    fontWeight: "700",
-    marginBottom: 10,
-    marginTop: 16,
-  },
-  input: {
-    backgroundColor: "#1a1f28",
-    borderColor: "#303642",
-    borderRadius: 8,
-    borderWidth: 1,
-    color: "#ffffff",
-    fontSize: 17,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  optionGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-  },
-  optionCard: {
-    alignItems: "center",
-    backgroundColor: "#1a1f28",
-    borderColor: "#303642",
-    borderRadius: 8,
-    borderWidth: 1,
-    minWidth: "30%",
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-  },
-  detailGrid: {
-    gap: 12,
-  },
-  detailCard: {
-    backgroundColor: "#1a1f28",
-    borderColor: "#303642",
-    borderRadius: 8,
-    borderWidth: 1,
-    padding: 16,
-  },
-  cardSelected: {
-    backgroundColor: "#2a2418",
-    borderColor: "#f2c46d",
-  },
-  optionText: {
-    color: "#d7dce4",
-    fontSize: 14,
-    fontWeight: "700",
-    textTransform: "capitalize",
-  },
-  optionTextSelected: {
-    color: "#f2c46d",
-  },
-  detailTitle: {
-    color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "800",
-    marginBottom: 6,
-  },
-  detailText: {
-    color: "#aeb4bf",
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  equipmentGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-  },
-  equipmentPill: {
-    backgroundColor: "#1a1f28",
-    borderColor: "#303642",
-    borderRadius: 8,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+  cardList: { gap: 10 },
+  chipGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
   },
   footer: {
-    borderColor: "#252b35",
-    borderTopWidth: 1,
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 12,
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+    borderTopWidth: 1,
+    borderTopColor: C.border,
+    backgroundColor: C.background,
   },
-  primaryButton: {
-    alignItems: "center",
-    backgroundColor: "#f2c46d",
-    borderRadius: 8,
-    flex: 1,
-    justifyContent: "center",
-    minHeight: 52,
-  },
-  primaryButtonText: {
-    color: "#171717",
-    fontSize: 16,
-    fontWeight: "800",
-  },
-  secondaryButton: {
-    alignItems: "center",
-    borderColor: "#303642",
-    borderRadius: 8,
+  backButton: {
+    width: 52,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: C.muted,
     borderWidth: 1,
-    justifyContent: "center",
-    minHeight: 52,
-    paddingHorizontal: 18,
+    borderColor: C.border,
+    borderRadius: 16,
+    flexShrink: 0,
   },
-  secondaryButtonText: {
-    color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "700",
+  backButtonText: { fontSize: 22, color: C.foreground },
+  continueButton: { flex: 1, borderRadius: 16, overflow: 'hidden' },
+  continueButtonGradient: {
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  buttonDisabled: {
-    opacity: 0.45,
-  },
+  continueButtonText: { fontSize: 16, fontWeight: '700', color: '#FFFFFF', letterSpacing: -0.16 },
+  buttonDisabled: { opacity: 0.4 },
+  pressed: { opacity: 0.9 },
 });

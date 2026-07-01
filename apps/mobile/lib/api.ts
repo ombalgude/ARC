@@ -101,6 +101,17 @@ export interface LogHabitInput {
   completed?: boolean;
 }
 
+export interface SessionLog {
+  id: string;
+  startedAt: string;
+  completedAt: string;
+  workoutDay?: { name?: string | null } | null;
+  exerciseLogs?: Array<{
+    completedSets?: number | null;
+    exercise?: { name?: string | null } | null;
+  }> | null;
+}
+
 export function getApiUrl(): string {
   const configuredUrl = process.env.EXPO_PUBLIC_API_URL;
 
@@ -236,6 +247,9 @@ export function createApiClient(getToken: GetToken) {
         method: "POST",
         body: JSON.stringify({ token }),
       });
+    },
+    getSessions() {
+      return request<SessionLog[]>('/api/v1/sessions');
     },
     submitOnboarding(input: OnboardingInput) {
       return request("/api/v1/onboarding", {
