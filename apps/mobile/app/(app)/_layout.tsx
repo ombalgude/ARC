@@ -5,18 +5,15 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { createApiClient } from '../../lib/api';
 import { registerForPushNotificationsAsync } from '../../lib/notifications';
+import { Home, Dumbbell, CheckCircle2, Apple, User } from 'lucide-react-native';
 
 // ARC design tokens
-import { Appearance } from 'react-native';
-import { LightColors, DarkColors } from '../../../../packages/ui/src/tokens/theme';
+import { useAppTheme } from '../../lib/themeStore';
 
-const isDark = Appearance.getColorScheme() === 'dark';
-const C = isDark ? DarkColors : LightColors;
-
-function TabIcon({ emoji, focused }: { emoji: string; focused: boolean }) {
+function TabIcon({ Icon, focused, C }: { Icon: any; focused: boolean; C: any }) {
   return (
     <View style={[tabIconStyles.container, focused && tabIconStyles.focused]}>
-      <Text style={tabIconStyles.emoji}>{emoji}</Text>
+      <Icon size={22} color={focused ? C.brand : C.textTertiary} strokeWidth={focused ? 2.5 : 2} />
     </View>
   );
 }
@@ -32,12 +29,10 @@ const tabIconStyles = StyleSheet.create({
   focused: {
     backgroundColor: 'rgba(143, 111, 255, 0.15)',
   },
-  emoji: {
-    fontSize: 20,
-  },
 });
 
 export default function AppLayout(): React.JSX.Element {
+  const C = useAppTheme();
   const { getToken, isLoaded, isSignedIn } = useAuth();
   const pathname = usePathname();
   const api = useMemo(() => createApiClient(getToken), [getToken]);
@@ -91,7 +86,7 @@ export default function AppLayout(): React.JSX.Element {
 
   if (!isLoaded) {
     return (
-      <View style={styles.loading}>
+      <View style={[styles.loading, { backgroundColor: C.background }]}>
         <ActivityIndicator color={C.brand} size="large" />
       </View>
     );
@@ -103,11 +98,11 @@ export default function AppLayout(): React.JSX.Element {
 
   if (profileComplete === null) {
     return (
-      <View style={styles.loading}>
+      <View style={[styles.loading, { backgroundColor: C.background }]}>
         <View style={styles.loadingCard}>
           <ActivityIndicator color={C.brand} size="large" />
-          <Text style={styles.loadingBrand}>ARC</Text>
-          <Text style={styles.loadingText}>Preparing your profile...</Text>
+          <Text style={[styles.loadingBrand, { color: C.foreground }]}>ARC</Text>
+          <Text style={[styles.loadingText, { color: C.textSecondary }]}>Preparing your profile...</Text>
           {errorMessage ? <Text style={styles.loadingError}>{errorMessage}</Text> : null}
         </View>
       </View>
@@ -130,9 +125,8 @@ export default function AppLayout(): React.JSX.Element {
           backgroundColor: C.card,
           borderTopColor: C.border,
           borderTopWidth: 1,
-          paddingBottom: 4,
           paddingTop: 8,
-          height: 64,
+          // Let React Navigation handle the bottom inset automatically, or we can use paddingBottom
         },
         tabBarActiveTintColor: C.brand,
         tabBarInactiveTintColor: C.textTertiary,
@@ -147,39 +141,87 @@ export default function AppLayout(): React.JSX.Element {
         name="dashboard"
         options={{
           title: 'Home',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="🏠" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon Icon={Home} focused={focused} C={C} />,
         }}
       />
       <Tabs.Screen
-        name="history"
+        name="workouts"
         options={{
-          title: 'History',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="📊" focused={focused} />,
+          title: 'Workouts',
+          tabBarIcon: ({ focused }) => <TabIcon Icon={Dumbbell} focused={focused} C={C} />,
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="habits"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="👤" focused={focused} />,
+          title: 'Habits',
+          tabBarIcon: ({ focused }) => <TabIcon Icon={CheckCircle2} focused={focused} C={C} />,
         }}
       />
       <Tabs.Screen
         name="nutrition"
         options={{
           title: 'Nutrition',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="🥗" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon Icon={Apple} focused={focused} C={C} />,
         }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ focused }) => <TabIcon Icon={User} focused={focused} C={C} />,
+        }}
+      />
+      <Tabs.Screen
+        name="history"
+        options={{ href: null }}
       />
       <Tabs.Screen
         name="chat"
-        options={{
-          title: 'Coach',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="✨" focused={focused} />,
-        }}
+        options={{ href: null }}
       />
       <Tabs.Screen
         name="workout/[dayId]"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="workout/active"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="workout/summary"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="habits/history"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="nutrition/targets"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="nutrition/guidance"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="profile/[slug]"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="profile/my-goals"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="profile/subscription"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="profile/weight-tracking"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="profile/settings"
         options={{ href: null }}
       />
     </Tabs>
@@ -191,7 +233,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: C.background,
   },
   loadingCard: {
     alignItems: 'center',
@@ -200,13 +241,11 @@ const styles = StyleSheet.create({
   loadingBrand: {
     fontSize: 32,
     fontWeight: '800',
-    color: C.foreground,
     letterSpacing: 6,
     marginTop: 8,
   },
   loadingText: {
     fontSize: 14,
-    color: C.textSecondary,
     fontWeight: '500',
   },
   loadingError: {

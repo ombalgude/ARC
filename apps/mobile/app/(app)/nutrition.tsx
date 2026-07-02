@@ -1,5 +1,6 @@
 import { useAuth } from '@clerk/clerk-expo';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -12,41 +13,83 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { createApiClient, type DashboardData } from '../../lib/api';
-
-import { Appearance } from 'react-native';
-import { LightColors, DarkColors } from '../../../../packages/ui/src/tokens/theme';
-
-const isDark = Appearance.getColorScheme() === 'dark';
-const C = isDark ? DarkColors : LightColors;
+import { useAppTheme } from '../../lib/themeStore';
+import { ProgressRing } from '../../../../packages/ui/src/ProgressRing';
 
 const TIPS = [
   'Prioritize protein at every meal — aim for 30–40g per sitting.',
   'Carbs around training = better performance + recovery.',
 ];
 
-function ProgressRingMock({ 
-  pct, 
-  color, 
-  size, 
-  children 
-}: { 
-  pct: number; 
-  color: string; 
-  size: number;
-  children: React.ReactNode;
-}) {
-  return (
-    <View style={[styles.ringContainer, { width: size, height: size }]}>
-      <View style={[styles.ringTrack, { borderColor: C.muted }]} />
-      {/* Note: Standard React Native doesn't have a simple SVG ring out-of-the-box without react-native-svg.
-          Using a CSS border mockup with a badge instead for now */}
-      <View style={[styles.ringFill, { borderColor: color, transform: [{ rotate: '45deg' }] }]} />
-      <View style={styles.ringInner}>{children}</View>
-    </View>
-  );
-}
-
 export default function NutritionScreen(): React.JSX.Element {
+  const C = useAppTheme();
+  
+  const styles = useMemo(() => StyleSheet.create({
+    container: { flex: 1, backgroundColor: C.background },
+    loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: C.background },
+    content: { padding: 20 },
+    header: { marginBottom: 16 },
+    title: { fontSize: 28, fontWeight: '800', color: C.foreground, letterSpacing: -0.5 },
+    subtitle: { fontSize: 13, color: C.textTertiary, marginTop: 4 },
+    errorBanner: { padding: 12, backgroundColor: 'rgba(255,107,107,0.1)', borderRadius: 12, marginBottom: 16 },
+    errorText: { color: C.energy, fontSize: 13, textAlign: 'center' },
+    
+    card: {
+      backgroundColor: C.card,
+      borderRadius: 22,
+      borderWidth: 1,
+      borderColor: C.border,
+      padding: 18,
+      marginBottom: 16,
+    },
+    calRow: { flexDirection: 'row', alignItems: 'center', gap: 20 },
+    calDetails: { flex: 1 },
+    calDetailRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
+    calDetailLabel: { fontSize: 13, color: C.textSecondary },
+    calDetailValue: { fontSize: 13, fontWeight: '700', color: C.foreground },
+    divider: { height: 1, backgroundColor: C.border, marginVertical: 8 },
+    
+    sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, marginTop: 8 },
+    sectionTitle: { fontSize: 16, fontWeight: '700', color: C.foreground },
+    
+    macroGrid: { flexDirection: 'row', gap: 10, marginBottom: 16 },
+    macroTile: {
+      flex: 1,
+      backgroundColor: C.card,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: C.border,
+      paddingVertical: 14,
+      alignItems: 'center',
+    },
+    macroTileValue: { fontSize: 16, fontWeight: '700', color: C.foreground, marginTop: 8 },
+    macroTileLabel: { fontSize: 11, color: C.textTertiary, fontWeight: '600', marginTop: 2 },
+    macroTilePct: { fontSize: 11, fontWeight: '700', marginTop: 2 },
+    
+    macroBarHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+    macroBarTitle: { fontSize: 14, fontWeight: '600', color: C.foreground },
+    macroBarNumbers: { fontSize: 14, fontWeight: '700', color: C.foreground },
+    progressBarBg: { height: 6, backgroundColor: C.muted, borderRadius: 99 },
+    progressBarFill: { height: '100%', borderRadius: 99 },
+    
+    tipsContainer: { gap: 8 },
+    tipCard: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 10,
+      backgroundColor: C.card,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: C.border,
+      padding: 14,
+    },
+    tipDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.brand, marginTop: 6 },
+    tipText: { fontSize: 14, color: C.textSecondary, lineHeight: 20, flex: 1 },
+    
+    ringValue: { fontSize: 20, fontWeight: '700', color: C.foreground },
+    ringLabel: { fontSize: 9, fontWeight: '700', color: C.textTertiary, letterSpacing: 1 },
+  }), [C]);
+
   const { getToken } = useAuth();
   const api = useMemo(() => createApiClient(getToken), [getToken]);
   
@@ -81,7 +124,7 @@ export default function NutritionScreen(): React.JSX.Element {
   }
 
   const nutrition = dashboard?.nutrition;
-  const cals = { now: 1840, target: nutrition?.caloriesTarget ?? 2500 }; // Mocked 'now' for MVP visual
+  const cals = { now: 1840, target: nutrition?.caloriesTarget ?? 2500 };
   const calsPct = Math.min(100, Math.round((cals.now / cals.target) * 100));
   const calsRemaining = Math.max(0, cals.target - cals.now);
 
@@ -96,7 +139,12 @@ export default function NutritionScreen(): React.JSX.Element {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Nutrition</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={styles.title}>Nutrition</Text>
+            <Pressable hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }} onPress={() => router.push('/nutrition/targets' as any)}>
+              <Text style={{ fontSize: 13, fontWeight: '600', color: C.brand }}>Targets</Text>
+            </Pressable>
+          </View>
           <Text style={styles.subtitle}>Goal: {nutrition?.goal ?? 'Build Muscle'} · {cals.target} kcal target</Text>
         </View>
 
@@ -109,10 +157,10 @@ export default function NutritionScreen(): React.JSX.Element {
         {/* Calorie Card */}
         <View style={styles.card}>
           <View style={styles.calRow}>
-            <ProgressRingMock size={96} pct={calsPct} color={C.health}>
+            <ProgressRing size={96} strokeWidth={8} progress={calsPct} color={C.health} trackColor={C.muted}>
               <Text style={styles.ringValue}>{cals.now}</Text>
               <Text style={styles.ringLabel}>KCAL</Text>
-            </ProgressRingMock>
+            </ProgressRing>
             <View style={styles.calDetails}>
               <View style={styles.calDetailRow}>
                 <Text style={styles.calDetailLabel}>Consumed</Text>
@@ -141,9 +189,9 @@ export default function NutritionScreen(): React.JSX.Element {
             const pct = Math.round((m.current / m.target) * 100);
             return (
               <View key={m.label} style={styles.macroTile}>
-                <ProgressRingMock size={64} pct={pct} color={m.color}>
+                <ProgressRing size={64} strokeWidth={6} progress={pct} color={m.color} trackColor={C.muted}>
                   <Text style={{ fontSize: 18 }}>{m.icon}</Text>
-                </ProgressRingMock>
+                </ProgressRing>
                 <Text style={styles.macroTileValue}>{m.current}{m.unit}</Text>
                 <Text style={styles.macroTileLabel}>{m.label}</Text>
                 <Text style={[styles.macroTilePct, { color: m.color }]}>{pct}%</Text>
@@ -172,110 +220,48 @@ export default function NutritionScreen(): React.JSX.Element {
         {/* Tips */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Today's Tips</Text>
+          <Pressable hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }} onPress={() => router.push('/nutrition/guidance' as any)}>
+            <Text style={{ fontSize: 13, fontWeight: '600', color: C.brand }}>All →</Text>
+          </Pressable>
         </View>
         <View style={styles.tipsContainer}>
           {TIPS.map((tip, i) => (
-            <View key={i} style={styles.tipCard}>
+            <Pressable key={i} style={styles.tipCard} onPress={() => router.push('/nutrition/guidance' as any)}>
               <View style={styles.tipDot} />
               <Text style={styles.tipText}>{tip}</Text>
-            </View>
+            </Pressable>
           ))}
         </View>
         
-        <View style={{ height: 40 }} />
+        {/* CTA */}
+        <View style={{ marginTop: 24, marginBottom: 40 }}>
+          <Pressable
+            onPress={() => router.push('/nutrition/guidance' as any)}
+            style={({ pressed }) => [
+              {
+                width: '100%',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: 16,
+                backgroundColor: `${C.brand}15`,
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor: `${C.brand}25`,
+              },
+              pressed && { opacity: 0.8 }
+            ]}
+          >
+            <View>
+              <Text style={{ fontSize: 15, fontWeight: '700', color: C.brand }}>Full Nutrition Guidance</Text>
+              <Text style={{ fontSize: 13, color: C.textSecondary, marginTop: 2 }}>Protein sources, meal timing & more</Text>
+            </View>
+            <View>
+               <Text style={{ fontSize: 18, color: C.brand, fontWeight: '700' }}>→</Text>
+            </View>
+          </Pressable>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.background },
-  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: C.background },
-  content: { padding: 20 },
-  header: { marginBottom: 16 },
-  title: { fontSize: 28, fontWeight: '800', color: C.foreground, letterSpacing: -0.5 },
-  subtitle: { fontSize: 13, color: C.textTertiary, marginTop: 4 },
-  errorBanner: { padding: 12, backgroundColor: 'rgba(255,107,107,0.1)', borderRadius: 12, marginBottom: 16 },
-  errorText: { color: C.energy, fontSize: 13, textAlign: 'center' },
-  
-  card: {
-    backgroundColor: C.card,
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: C.border,
-    padding: 18,
-    marginBottom: 16,
-  },
-  calRow: { flexDirection: 'row', alignItems: 'center', gap: 20 },
-  calDetails: { flex: 1 },
-  calDetailRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  calDetailLabel: { fontSize: 13, color: C.textSecondary },
-  calDetailValue: { fontSize: 13, fontWeight: '700', color: C.foreground },
-  divider: { height: 1, backgroundColor: C.border, marginVertical: 8 },
-  
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, marginTop: 8 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: C.foreground },
-  
-  macroGrid: { flexDirection: 'row', gap: 10, marginBottom: 16 },
-  macroTile: {
-    flex: 1,
-    backgroundColor: C.card,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: C.border,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  macroTileValue: { fontSize: 16, fontWeight: '700', color: C.foreground, marginTop: 8 },
-  macroTileLabel: { fontSize: 11, color: C.textTertiary, fontWeight: '600', marginTop: 2 },
-  macroTilePct: { fontSize: 11, fontWeight: '700', marginTop: 2 },
-  
-  macroBarHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  macroBarTitle: { fontSize: 14, fontWeight: '600', color: C.foreground },
-  macroBarNumbers: { fontSize: 14, fontWeight: '700', color: C.foreground },
-  progressBarBg: { height: 6, backgroundColor: C.muted, borderRadius: 99 },
-  progressBarFill: { height: '100%', borderRadius: 99 },
-  
-  tipsContainer: { gap: 8 },
-  tipCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-    backgroundColor: C.card,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: C.border,
-    padding: 14,
-  },
-  tipDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.brand, marginTop: 6 },
-  tipText: { fontSize: 14, color: C.textSecondary, lineHeight: 20, flex: 1 },
-  
-  ringContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  ringTrack: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    borderRadius: 999,
-    borderWidth: 6,
-  },
-  ringFill: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    borderRadius: 999,
-    borderWidth: 6,
-    borderBottomColor: 'transparent',
-    borderLeftColor: 'transparent',
-  },
-  ringInner: {
-    position: 'absolute',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  ringValue: { fontSize: 20, fontWeight: '700', color: C.foreground },
-  ringLabel: { fontSize: 9, fontWeight: '700', color: C.textTertiary, letterSpacing: 1 },
-});
