@@ -1,35 +1,15 @@
 import { useAuth } from '@clerk/clerk-expo';
-import { Redirect, Tabs, usePathname } from 'expo-router';
+import { Redirect, Stack, usePathname } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { createApiClient } from '../../lib/api';
 import { registerForPushNotificationsAsync } from '../../lib/notifications';
-import { Home, Dumbbell, CheckCircle2, Apple, User } from 'lucide-react-native';
 
 // ARC design tokens
 import { useAppTheme } from '../../lib/themeStore';
 
-function TabIcon({ Icon, focused, C }: { Icon: any; focused: boolean; C: any }) {
-  return (
-    <View style={[tabIconStyles.container, focused && tabIconStyles.focused]}>
-      <Icon size={22} color={focused ? C.brand : C.textTertiary} strokeWidth={focused ? 2.5 : 2} />
-    </View>
-  );
-}
 
-const tabIconStyles = StyleSheet.create({
-  container: {
-    width: 44,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 10,
-  },
-  focused: {
-    backgroundColor: 'rgba(143, 111, 255, 0.15)',
-  },
-});
 
 export default function AppLayout(): React.JSX.Element {
   const C = useAppTheme();
@@ -50,7 +30,16 @@ export default function AppLayout(): React.JSX.Element {
         const result = await api.getMe();
         if (isMounted) setProfileComplete(result.profileComplete);
       } catch (error) {
-        if (isMounted) {
+        if (!isMounted) return;
+        // Bug fix: A 404 means the user record does not exist in our DB yet
+        // (fresh sign-up before onboarding completes). Treat it as an incomplete
+        // profile so the onboarding redirect fires, rather than showing an error.
+        const isNotFound =
+          (error instanceof Error && error.message.includes('404')) ||
+          (typeof error === 'object' && error !== null && 'status' in error && (error as { status: number }).status === 404);
+        if (isNotFound) {
+          setProfileComplete(false);
+        } else {
           setErrorMessage(error instanceof Error ? error.message : 'Unable to load your profile.');
           setProfileComplete(false);
         }
@@ -114,117 +103,13 @@ export default function AppLayout(): React.JSX.Element {
   }
 
   if (profileComplete && pathname === '/onboarding') {
-    return <Redirect href="/(app)/dashboard" />;
+    return <Redirect href="/(app)/(tabs)/dashboard" />;
   }
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: C.card,
-          borderTopColor: C.border,
-          borderTopWidth: 1,
-          paddingTop: 8,
-          // Let React Navigation handle the bottom inset automatically, or we can use paddingBottom
-        },
-        tabBarActiveTintColor: C.brand,
-        tabBarInactiveTintColor: C.textTertiary,
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '600',
-          marginTop: -2,
-        },
-      }}
-    >
-      <Tabs.Screen
-        name="dashboard"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ focused }) => <TabIcon Icon={Home} focused={focused} C={C} />,
-        }}
-      />
-      <Tabs.Screen
-        name="workouts"
-        options={{
-          title: 'Workouts',
-          tabBarIcon: ({ focused }) => <TabIcon Icon={Dumbbell} focused={focused} C={C} />,
-        }}
-      />
-      <Tabs.Screen
-        name="habits"
-        options={{
-          title: 'Habits',
-          tabBarIcon: ({ focused }) => <TabIcon Icon={CheckCircle2} focused={focused} C={C} />,
-        }}
-      />
-      <Tabs.Screen
-        name="nutrition"
-        options={{
-          title: 'Nutrition',
-          tabBarIcon: ({ focused }) => <TabIcon Icon={Apple} focused={focused} C={C} />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ focused }) => <TabIcon Icon={User} focused={focused} C={C} />,
-        }}
-      />
-      <Tabs.Screen
-        name="history"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="chat"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="workout/[dayId]"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="workout/active"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="workout/summary"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="habits/history"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="nutrition/targets"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="nutrition/guidance"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="profile/[slug]"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="profile/my-goals"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="profile/subscription"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="profile/weight-tracking"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="profile/settings"
-        options={{ href: null }}
-      />
-    </Tabs>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" />
+    </Stack>
   );
 }
 

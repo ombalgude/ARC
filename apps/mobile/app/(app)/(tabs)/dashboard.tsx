@@ -12,10 +12,10 @@ import {
   SafeAreaView
 } from 'react-native';
 import { Bell, Droplets, Moon, Footprints, Dumbbell, ChevronRight, Flame, Sparkles, Clock, Activity, Check } from 'lucide-react-native';
-import { ProgressRing } from '../../../../packages/ui/src/ProgressRing';
-import { useAppTheme } from '../../lib/themeStore';
-import { useMutation } from '@tanstack/react-query';
-import { createApiClient } from '../../lib/api';
+import { ProgressRing } from '../../../../../packages/ui/src/ProgressRing';
+import { useAppTheme } from '../../../lib/themeStore';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { createApiClient } from '../../../lib/api';
 
 const INITIAL_HABITS = [
   { id: 1, name: "Water", icon: Droplets, done: true, color: "#06B6D4", streak: 8 },
@@ -35,26 +35,38 @@ export default function DashboardScreen() {
   const { user } = useUser();
   const { getToken } = useAuth();
   const api = useMemo(() => createApiClient(getToken), [getToken]);
+  const queryClient = useQueryClient();
   
   const firstName = user?.firstName ?? 'Alex'; // Fallback for prototyping
 
-  const [habits, setHabits] = useState(INITIAL_HABITS);
+  const { data: habits = INITIAL_HABITS } = useQuery({
+    queryKey: ['dashboard-habits'],
+    queryFn: () => Promise.resolve(INITIAL_HABITS), // Mocking fetch for UI prototype
+    staleTime: Infinity,
+  });
 
   const { mutate: toggleHabit } = useMutation({
     mutationFn: async (habitId: number) => {
       const isDone = !habits.find(h => h.id === habitId)?.done;
-      return api.logHabit({ habitId: String(habitId), completed: isDone });
-    }
+      return api.logHabit({ habitId: String(habitId), completed: isDone }).catch(() => null); // Silently fail for demo
+    },
+    onMutate: async (habitId: number) => {
+      await queryClient.cancelQueries({ queryKey: ['dashboard-habits'] });
+      const previousHabits = queryClient.getQueryData<typeof INITIAL_HABITS>(['dashboard-habits']);
+      queryClient.setQueryData(['dashboard-habits'], (old: typeof INITIAL_HABITS = INITIAL_HABITS) =>
+        old.map((h) => (h.id === habitId ? { ...h, done: !h.done } : h))
+      );
+      return { previousHabits };
+    },
+    onError: (err, newHabit, context) => {
+      if (context?.previousHabits) {
+        queryClient.setQueryData(['dashboard-habits'], context.previousHabits);
+      }
+    },
   });
 
   const handleToggleHabit = (id: number) => {
-    setHabits(prev => prev.map(h => h.id === id ? { ...h, done: !h.done } : h));
-    toggleHabit(id, {
-      onError: () => {
-        // Silently fail for frontend demo if backend isn't reachable, so checkmark doesn't revert
-        console.warn('Backend not reachable, maintaining optimistic state.');
-      }
-    });
+    toggleHabit(id);
   };
 
   const done = habits.filter((h) => h.done).length;
@@ -76,10 +88,10 @@ export default function DashboardScreen() {
             </Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 }}>
-            <Pressable style={({ pressed }) => [{
+            <Pressable hitSlop={12} style={({ pressed }) => [{
               width: 40, height: 40, alignItems: 'center', justifyContent: 'center', borderRadius: 16,
               backgroundColor: C.muted, borderWidth: 1, borderColor: C.border,
-            }, pressed && { transform: [{ scale: 0.9 }] }]}>
+            }, pressed && { transform: [{ scale: 0.95 }] }]}>
               <Bell size={17} color={C.foreground} strokeWidth={2} />
               <View style={{ position: 'absolute', top: 9, right: 10, width: 6, height: 6, borderRadius: 3, backgroundColor: C.energy, borderWidth: 1.5, borderColor: C.background }} />
             </Pressable>
@@ -138,6 +150,7 @@ export default function DashboardScreen() {
                   </View>
                 </View>
                 <Pressable
+                  hitSlop={12}
                   onPress={() => router.push({ pathname: '/workout/[dayId]', params: { dayId: '1' } } as any)}
                   style={({ pressed }) => [{
                     backgroundColor: '#FFFFFF', borderRadius: 12, paddingHorizontal: 18, paddingVertical: 9,
@@ -175,7 +188,7 @@ export default function DashboardScreen() {
                     backgroundColor: isDone ? `${color}18` : C.card,
                     borderWidth: 2, borderColor: isDone ? color : C.border,
                     shadowColor: isDone ? color : '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: isDone ? 0.3 : 0.05, shadowRadius: 16, elevation: isDone ? 8 : 2
-                  }, pressed && { transform: [{ scale: 0.9 }] }]}
+                  }, pressed && { transform: [{ scale: 0.85 }] }]}
                 >
                   <Icon size={22} color={isDone ? color : C.textTertiary} strokeWidth={isDone ? 2.5 : 1.8} />
                   {isDone && (
@@ -184,7 +197,7 @@ export default function DashboardScreen() {
                       backgroundColor: color, borderWidth: 2, borderColor: C.background,
                       alignItems: 'center', justifyContent: 'center'
                     }}>
-                      <Check size={10} color="#FFF" strokeWidth={3.5} />
+                      <Check size={10} color="#FFF" strokeWidth={3} />
                     </View>
                   )}
                 </Pressable>
@@ -240,6 +253,7 @@ export default function DashboardScreen() {
         {/* Arc AI Entry */}
         <View style={{ paddingHorizontal: 20 }}>
           <Pressable
+            hitSlop={8}
             onPress={() => router.push('/chat' as any)}
             style={({ pressed }) => [{
               borderRadius: 18, borderWidth: 1, borderColor: 'rgba(124,92,252,0.15)', overflow: 'hidden'

@@ -468,7 +468,7 @@ export default function OnboardingScreen(): React.JSX.Element | null {
       try {
         const result = await api.getMe();
         if (isMounted && result.profileComplete) {
-          router.replace('/(app)/dashboard');
+          router.replace('/(app)/(tabs)/dashboard');
         }
       } catch {
         if (isMounted) setIsCheckingProfile(false);
@@ -516,7 +516,7 @@ export default function OnboardingScreen(): React.JSX.Element | null {
     try {
       await api.submitOnboarding(parsed.data);
       reset();
-      router.replace('/(app)/dashboard');
+      router.replace('/(app)/(tabs)/dashboard');
     } catch (error) {
       Alert.alert('Onboarding failed', getValidationMessage(error));
     } finally {

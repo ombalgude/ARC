@@ -30,6 +30,20 @@ const isDark = Appearance.getColorScheme() === 'dark';
 const C = isDark ? DarkColors : LightColors;
 
 function getErrorMessage(error: unknown): string {
+  // Clerk throws a ClerkAPIResponseError with an errors[] array.
+  // The raw error.message is often unhelpful (e.g. "clerk_error").
+  // We extract the first human-readable message from the array.
+  if (
+    error !== null &&
+    typeof error === 'object' &&
+    'errors' in error &&
+    Array.isArray((error as { errors: unknown[] }).errors)
+  ) {
+    const clerkError = (error as { errors: { longMessage?: string; message?: string }[] }).errors.at(0);
+    if (clerkError !== undefined) {
+      return clerkError.longMessage ?? clerkError.message ?? 'Unable to create account. Please try again.';
+    }
+  }
   if (error instanceof Error) return error.message;
   return 'Unable to create account. Please try again.';
 }
@@ -337,7 +351,7 @@ export default function SignUpScreen(): React.JSX.Element {
       });
       if (createdSessionId && setOAuthActive) {
         await setOAuthActive({ session: createdSessionId });
-        router.replace('/(app)/dashboard');
+        router.replace('/(app)/(tabs)/dashboard');
       }
     } catch (err) {
       setErrorMessage(getErrorMessage(err));
@@ -377,6 +391,12 @@ export default function SignUpScreen(): React.JSX.Element {
       const result = await signUp.attemptEmailAddressVerification({ code });
 
       if (result.status === 'complete') {
+        // Bug fix: createdSessionId can be null; guard before calling setActive.
+        if (!result.createdSessionId) {
+          setErrorMessage('Account verified but session could not be started. Please sign in.');
+          router.replace('/(auth)/sign-in');
+          return;
+        }
         await setActive({ session: result.createdSessionId });
         router.replace('/onboarding');
       } else {

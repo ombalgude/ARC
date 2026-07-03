@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { useAuth } from '@clerk/clerk-expo';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { createApiClient } from '../../../lib/api';
 import { Droplets, Moon, Footprints, Dumbbell, Flame, ChevronRight, Check } from 'lucide-react-native';
-import { ProgressRing } from '../../../../packages/ui/src/ProgressRing';
+import { ProgressRing } from '../../../../../packages/ui/src/ProgressRing';
 
-import { useAppTheme } from '../../lib/themeStore';
+import { useAppTheme } from '../../../lib/themeStore';
 
 const INITIAL_HABITS = [
   { id: 1, name: "Drink Water", sub: "8 glasses / day", Icon: Droplets, color: "#06B6D4", done: true, streak: 8, target: "8 glasses", current: "8 glasses" },
@@ -17,13 +20,49 @@ const INITIAL_HABITS = [
 
 export default function HabitsScreen(): React.JSX.Element {
   const C = useAppTheme();
-  const [habits, setHabits] = useState(INITIAL_HABITS);
+  const { getToken } = useAuth();
+  const api = useMemo(() => createApiClient(getToken), [getToken]);
+  const queryClient = useQueryClient();
+
+  const { data: habits = INITIAL_HABITS } = useQuery({
+    queryKey: ['habits-detail'],
+    queryFn: () => Promise.resolve(INITIAL_HABITS), // Mocking fetch for UI prototype
+    staleTime: Infinity,
+  });
+
+  const { mutate: toggleHabit } = useMutation({
+    mutationFn: async (habitId: number) => {
+      const isDone = !habits.find(h => h.id === habitId)?.done;
+      return api.logHabit({ habitId: String(habitId), completed: isDone }).catch(() => null);
+    },
+    onMutate: async (habitId: number) => {
+      await queryClient.cancelQueries({ queryKey: ['habits-detail'] });
+      await queryClient.cancelQueries({ queryKey: ['dashboard-habits'] });
+      
+      const prevDetail = queryClient.getQueryData<typeof INITIAL_HABITS>(['habits-detail']);
+      const prevDashboard = queryClient.getQueryData<any[]>(['dashboard-habits']);
+
+      queryClient.setQueryData(['habits-detail'], (old: typeof INITIAL_HABITS = INITIAL_HABITS) =>
+        old.map((h) => (h.id === habitId ? { ...h, done: !h.done } : h))
+      );
+      
+      queryClient.setQueryData(['dashboard-habits'], (old: any[] = []) =>
+        old.map((h) => (h.id === habitId ? { ...h, done: !h.done } : h))
+      );
+
+      return { prevDetail, prevDashboard };
+    },
+    onError: (err, newHabit, context) => {
+      if (context?.prevDetail) queryClient.setQueryData(['habits-detail'], context.prevDetail);
+      if (context?.prevDashboard) queryClient.setQueryData(['dashboard-habits'], context.prevDashboard);
+    },
+  });
 
   const completed = habits.filter((h) => h.done).length;
   const pct = (completed / habits.length) * 100;
 
   const toggle = (id: number) => {
-    setHabits((prev) => prev.map((h) => (h.id === id ? { ...h, done: !h.done } : h)));
+    toggleHabit(id);
   };
 
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
@@ -41,7 +80,7 @@ export default function HabitsScreen(): React.JSX.Element {
             {today}
           </Text>
         </View>
-        <Pressable onPress={() => router.push('/habits/history' as any)}>
+        <Pressable hitSlop={12} onPress={() => router.push('/habits/history' as any)}>
           <Text style={{ fontSize: 13, fontWeight: '600', color: C.brand }}>History</Text>
         </Pressable>
       </View>
@@ -91,10 +130,9 @@ export default function HabitsScreen(): React.JSX.Element {
         {/* Habits list */}
         <View style={{ paddingHorizontal: 20, gap: 12, paddingBottom: 20 }}>
           {habits.map(({ id, name, Icon, color, done, streak, current, target }) => (
-            <Pressable
+            <View
               key={id}
-              onPress={() => toggle(id)}
-              style={({ pressed }) => [{
+              style={{
                 flexDirection: 'row',
                 alignItems: 'center',
                 gap: 16,
@@ -108,7 +146,7 @@ export default function HabitsScreen(): React.JSX.Element {
                 shadowOpacity: done ? 0.15 : 0.03,
                 shadowRadius: done ? 12 : 8,
                 elevation: done ? 2 : 1,
-              }, pressed && { transform: [{ scale: 0.98 }] }]}
+              }}
             >
               {/* Icon */}
               <View
@@ -139,8 +177,9 @@ export default function HabitsScreen(): React.JSX.Element {
               </View>
 
               {/* Toggle */}
-              <View
-                style={[
+              <Pressable
+                onPress={() => toggle(id)}
+                style={({ pressed }) => [
                   {
                     width: 36,
                     height: 36,
@@ -150,12 +189,17 @@ export default function HabitsScreen(): React.JSX.Element {
                     borderColor: done ? color : C.border,
                     alignItems: 'center',
                     justifyContent: 'center',
-                  }
+                  },
+                  pressed && { transform: [{ scale: 0.85 }] }
                 ]}
               >
-                <Check size={20} color={done ? "#FFFFFF" : C.textTertiary} strokeWidth={done ? 3 : 2.5} />
-              </View>
-            </Pressable>
+                {done ? (
+                  <Check size={20} color="#FFFFFF" strokeWidth={3} />
+                ) : (
+                  <Check size={20} color={C.textTertiary} strokeWidth={2.5} />
+                )}
+              </Pressable>
+            </View>
           ))}
         </View>
 

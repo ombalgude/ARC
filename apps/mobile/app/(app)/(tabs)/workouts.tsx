@@ -4,7 +4,7 @@ import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CheckCircle2, Circle, Clock, ChevronRight, TrendingUp, Calendar, Dumbbell, Flame, Timer } from 'lucide-react-native';
 
-import { useAppTheme } from '../../lib/themeStore';
+import { useAppTheme } from '../../../lib/themeStore';
 
 const WEEK_DAYS = [
   { day: "Mon", label: "Push A", status: "done", muscles: "Chest · Shoulders" },
@@ -34,7 +34,7 @@ export default function WorkoutsScreen() {
             <Text style={{ fontSize: 24, fontWeight: '800', color: C.foreground, letterSpacing: -0.7 }}>
               Workouts
             </Text>
-            <Pressable onPress={() => router.push('/history' as any)}>
+            <Pressable hitSlop={12} onPress={() => router.push('/history' as any)}>
               <Text style={{ fontSize: 13, fontWeight: '600', color: C.brand }}>History</Text>
             </Pressable>
           </View>
@@ -144,7 +144,7 @@ export default function WorkoutsScreen() {
               shadowOpacity: 0.35,
               shadowRadius: 28,
               elevation: 8,
-            }, pressed && { transform: [{ scale: 0.98 }] }]}
+            }, pressed && { transform: [{ scale: 0.95 }] }]}
           >
             <LinearGradient
               colors={['#4A39CC', '#7665F5']}
@@ -171,7 +171,7 @@ export default function WorkoutsScreen() {
         <View style={{ paddingHorizontal: 20 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <Text style={{ fontSize: 16, fontWeight: '700', color: C.foreground }}>Recent Sessions</Text>
-            <Pressable onPress={() => router.push('/history' as any)}>
+            <Pressable hitSlop={12} onPress={() => router.push('/history' as any)}>
               <Text style={{ fontSize: 13, color: C.brand, fontWeight: '600' }}>See all</Text>
             </Pressable>
           </View>

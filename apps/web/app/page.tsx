@@ -85,7 +85,15 @@ export default function Home(): React.JSX.Element {
       {/* FOOTER */}
       <footer className="arc-footer">
         <span className="arc-wordmark-sm">ARC</span>
-        <span className="arc-footer-copy">© {new Date().getFullYear()} ARC Fitness Platform</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+          <span className="arc-footer-copy">© {new Date().getFullYear()} ARC Fitness Platform</span>
+          <Link href="/legal/privacy" className="arc-btn-ghost" style={{ fontSize: "13px", padding: "6px 12px" }}>
+            Privacy Policy
+          </Link>
+          <Link href="/legal/terms" className="arc-btn-ghost" style={{ fontSize: "13px", padding: "6px 12px" }}>
+            Terms &amp; Conditions
+          </Link>
+        </div>
       </footer>
     </div>
   );

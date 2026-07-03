@@ -14,8 +14,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Weight, Target, CreditCard, Settings, ChevronRight, TrendingDown } from 'lucide-react-native';
 import Svg, { Defs, LinearGradient as SvgLinearGradient, Stop, Path, Circle } from 'react-native-svg';
 
-import { createApiClient, type CurrentUserProfile } from '../../lib/api';
-import { useAppTheme } from '../../lib/themeStore';
+import { createApiClient, type CurrentUserProfile } from '../../../lib/api';
+import { useAppTheme } from '../../../lib/themeStore';
 
 export default function ProfileScreen(): React.JSX.Element {
   const C = useAppTheme();

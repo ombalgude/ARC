@@ -112,7 +112,7 @@ export default function WorkoutSummaryScreen() {
         {/* CTAs */}
         <View style={{ paddingHorizontal: 20, marginTop: 32, gap: 12 }}>
           <Pressable
-            onPress={() => router.replace('/(app)/dashboard')}
+            onPress={() => router.replace('/(app)/(tabs)/dashboard')}
             style={({ pressed }) => [{
               borderRadius: 16,
               overflow: 'hidden',

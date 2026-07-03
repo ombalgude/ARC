@@ -9,7 +9,7 @@ export default function AuthLayout(): React.JSX.Element | null {
   }
 
   if (isSignedIn) {
-    return <Redirect href="/(app)/dashboard" />;
+    return <Redirect href="/(app)/(tabs)/dashboard" />;
   }
 
   return (

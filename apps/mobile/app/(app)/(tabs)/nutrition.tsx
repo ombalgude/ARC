@@ -12,9 +12,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { createApiClient, type DashboardData } from '../../lib/api';
-import { useAppTheme } from '../../lib/themeStore';
-import { ProgressRing } from '../../../../packages/ui/src/ProgressRing';
+import { createApiClient, type DashboardData } from '../../../lib/api';
+import { useAppTheme } from '../../../lib/themeStore';
+import { ProgressRing } from '../../../../../packages/ui/src/ProgressRing';
 
 const TIPS = [
   'Prioritize protein at every meal — aim for 30–40g per sitting.',

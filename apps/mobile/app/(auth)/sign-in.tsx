@@ -30,6 +30,20 @@ const isDark = Appearance.getColorScheme() === 'dark';
 const C = isDark ? DarkColors : LightColors;
 
 function getErrorMessage(error: unknown): string {
+  // Clerk throws a ClerkAPIResponseError with an errors[] array.
+  // The raw error.message is often unhelpful (e.g. "clerk_error").
+  // We extract the first human-readable message from the array.
+  if (
+    error !== null &&
+    typeof error === 'object' &&
+    'errors' in error &&
+    Array.isArray((error as { errors: unknown[] }).errors)
+  ) {
+    const clerkError = (error as { errors: { longMessage?: string; message?: string }[] }).errors.at(0);
+    if (clerkError !== undefined) {
+      return clerkError.longMessage ?? clerkError.message ?? 'Unable to sign in. Please try again.';
+    }
+  }
   if (error instanceof Error) return error.message;
   return 'Unable to sign in. Please try again.';
 }
@@ -117,7 +131,7 @@ export default function SignInScreen(): React.JSX.Element {
       });
       if (createdSessionId && setOAuthActive) {
         await setOAuthActive({ session: createdSessionId });
-        router.replace('/(app)/dashboard');
+        router.replace('/(app)/(tabs)/dashboard');
       }
     } catch (err) {
       setErrorMessage(getErrorMessage(err));
@@ -126,6 +140,11 @@ export default function SignInScreen(): React.JSX.Element {
 
   async function handleSignIn(): Promise<void> {
     if (!isLoaded || isSubmitting) return;
+    // Bug fix: signIn is undefined before Clerk loads; guard explicitly.
+    if (!signIn) {
+      setErrorMessage('Authentication service is not ready. Please try again.');
+      return;
+    }
     setIsSubmitting(true);
     setErrorMessage(null);
 
@@ -137,7 +156,7 @@ export default function SignInScreen(): React.JSX.Element {
 
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
-        router.replace('/(app)/dashboard');
+        router.replace('/(app)/(tabs)/dashboard');
       } else {
         setErrorMessage('Additional verification required to complete sign in.');
       }

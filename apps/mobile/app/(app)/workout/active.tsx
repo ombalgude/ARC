@@ -154,7 +154,7 @@ export default function WorkoutScreen(): React.JSX.Element {
         <Text style={styles.emptyText}>{errorMessage ?? 'Unable to load this workout.'}</Text>
         <Pressable
           id="workout-error-back-btn"
-          onPress={() => router.replace('/(app)/dashboard')}
+          onPress={() => router.replace('/(app)/(tabs)/dashboard')}
           style={({ pressed }) => [styles.backBtn, pressed && styles.pressed]}
         >
           <Text style={styles.backBtnText}>Back to Dashboard</Text>
@@ -175,6 +175,7 @@ export default function WorkoutScreen(): React.JSX.Element {
       {/* Top Bar */}
       <View style={styles.topBar}>
         <Pressable
+          hitSlop={12}
           id="workout-exit-btn"
           onPress={() => {
             Alert.alert('Exit Workout', 'Are you sure you want to end this session?', [
@@ -221,6 +222,7 @@ export default function WorkoutScreen(): React.JSX.Element {
             <Text style={styles.restTime}>{formatTime(rest)}</Text>
           </View>
           <Pressable
+            hitSlop={12}
             id="workout-skip-rest-btn"
             onPress={() => setRest(null)}
             style={({ pressed }) => [styles.restSkipBtn, pressed && styles.pressed]}
@@ -239,6 +241,7 @@ export default function WorkoutScreen(): React.JSX.Element {
             {/* Exercise Navigation */}
             <View style={styles.exNav}>
               <Pressable
+                hitSlop={12}
                 id="workout-prev-ex-btn"
                 onPress={() => setExIdx(Math.max(0, exIdx - 1))}
                 disabled={exIdx === 0}
@@ -259,6 +262,7 @@ export default function WorkoutScreen(): React.JSX.Element {
               </View>
 
               <Pressable
+                hitSlop={12}
                 id="workout-next-ex-btn"
                 onPress={() => setExIdx(Math.min(workoutDay.exercises.length - 1, exIdx + 1))}
                 disabled={exIdx === workoutDay.exercises.length - 1}
@@ -500,6 +504,6 @@ const styles = StyleSheet.create({
   finishBtnGradient: { paddingVertical: 18, alignItems: 'center', justifyContent: 'center' },
   finishBtnText: { fontSize: 16, fontWeight: '700', color: '#FFF' },
   
-  pressed: { opacity: 0.8, transform: [{ scale: 0.98 }] },
+  pressed: { opacity: 0.8, transform: [{ scale: 0.95 }] },
   disabled: { opacity: 0.4 },
 });
