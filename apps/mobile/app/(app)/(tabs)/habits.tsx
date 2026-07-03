@@ -1,22 +1,23 @@
 import { useMemo } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, Pressable, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useAuth } from '@clerk/clerk-expo';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { createApiClient } from '../../../lib/api';
-import { Droplets, Moon, Footprints, Dumbbell, Flame, ChevronRight, Check } from 'lucide-react-native';
+import { createApiClient, HabitSummary } from '../../../lib/api';
+import { Droplets, Moon, Footprints, Dumbbell, Utensils, Flame, ChevronRight, Check } from 'lucide-react-native';
 import { ProgressRing } from '../../../../../packages/ui/src/ProgressRing';
 
 import { useAppTheme } from '../../../lib/themeStore';
 
-const INITIAL_HABITS = [
-  { id: 1, name: "Drink Water", sub: "8 glasses / day", Icon: Droplets, color: "#06B6D4", done: true, streak: 8, target: "8 glasses", current: "8 glasses" },
-  { id: 2, name: "Quality Sleep", sub: "8 hours goal", Icon: Moon, color: "#7C5CFC", done: true, streak: 14, target: "8h", current: "7h 45m" },
-  { id: 3, name: "10k Steps", sub: "Daily movement", Icon: Footprints, color: "#FF6B6B", done: false, streak: 5, target: "10,000", current: "6,234" },
-  { id: 4, name: "Workout", sub: "Scheduled training", Icon: Dumbbell, color: "#00D9B8", done: false, streak: 14, target: "Done", current: "Not yet" },
-];
+const HABIT_CONFIG: Record<string, any> = {
+  water: { name: "Drink Water", Icon: Droplets, color: "#06B6D4" },
+  sleep: { name: "Quality Sleep", Icon: Moon, color: "#7C5CFC" },
+  steps: { name: "10k Steps", Icon: Footprints, color: "#FF6B6B" },
+  workout: { name: "Workout", Icon: Dumbbell, color: "#00D9B8" },
+  macros: { name: "Nutrition", Icon: Utensils, color: "#FFB300" },
+};
 
 export default function HabitsScreen(): React.JSX.Element {
   const C = useAppTheme();
@@ -24,48 +25,69 @@ export default function HabitsScreen(): React.JSX.Element {
   const api = useMemo(() => createApiClient(getToken), [getToken]);
   const queryClient = useQueryClient();
 
-  const { data: habits = INITIAL_HABITS } = useQuery({
-    queryKey: ['habits-detail'],
-    queryFn: () => Promise.resolve(INITIAL_HABITS), // Mocking fetch for UI prototype
-    staleTime: Infinity,
+  const now = new Date();
+  const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+  const { data: rawHabits, isLoading } = useQuery({
+    queryKey: ['habits-detail', localDate],
+    queryFn: () => api.getHabits(localDate).then(res => res.habits),
   });
 
+  const habits = useMemo(() => {
+    return (rawHabits || []).map(h => ({
+      ...h,
+      ...(HABIT_CONFIG[h.type] || { name: h.type, Icon: Check, color: C.brand }),
+      done: h.completedToday,
+      current: h.todayValue,
+      target: h.targetValue ? `${h.targetValue} ${h.unit || ''}` : 'Done',
+      streak: h.streak,
+    }));
+  }, [rawHabits, C.brand]);
+
   const { mutate: toggleHabit } = useMutation({
-    mutationFn: async (habitId: number) => {
+    mutationFn: async (habitId: string) => {
       const isDone = !habits.find(h => h.id === habitId)?.done;
-      return api.logHabit({ habitId: String(habitId), completed: isDone }).catch(() => null);
+      return api.logHabit({ habitId, localDate, completed: isDone }).catch(() => null);
     },
-    onMutate: async (habitId: number) => {
+    onMutate: async (habitId: string) => {
       await queryClient.cancelQueries({ queryKey: ['habits-detail'] });
       await queryClient.cancelQueries({ queryKey: ['dashboard-habits'] });
       
-      const prevDetail = queryClient.getQueryData<typeof INITIAL_HABITS>(['habits-detail']);
-      const prevDashboard = queryClient.getQueryData<any[]>(['dashboard-habits']);
+      const prevDetail = queryClient.getQueryData<HabitSummary[]>(['habits-detail']);
+      const prevDashboard = queryClient.getQueryData<HabitSummary[]>(['dashboard-habits']);
 
-      queryClient.setQueryData(['habits-detail'], (old: typeof INITIAL_HABITS = INITIAL_HABITS) =>
-        old.map((h) => (h.id === habitId ? { ...h, done: !h.done } : h))
-      );
+      if (prevDetail) {
+        queryClient.setQueryData<HabitSummary[]>(['habits-detail'], old =>
+          (old || []).map(h => h.id === habitId ? { ...h, completedToday: !h.completedToday } : h)
+        );
+      }
       
-      queryClient.setQueryData(['dashboard-habits'], (old: any[] = []) =>
-        old.map((h) => (h.id === habitId ? { ...h, done: !h.done } : h))
-      );
-
       return { prevDetail, prevDashboard };
     },
     onError: (err, newHabit, context) => {
       if (context?.prevDetail) queryClient.setQueryData(['habits-detail'], context.prevDetail);
       if (context?.prevDashboard) queryClient.setQueryData(['dashboard-habits'], context.prevDashboard);
     },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['habits-detail', localDate] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-habits', localDate] });
+    },
   });
 
   const completed = habits.filter((h) => h.done).length;
-  const pct = (completed / habits.length) * 100;
+  const pct = habits.length > 0 ? (completed / habits.length) * 100 : 0;
 
-  const toggle = (id: number) => {
-    toggleHabit(id);
-  };
+  const toggle = (id: string) => toggleHabit(id);
 
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: C.background, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator size="large" color={C.brand} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.background }} edges={['top']}>
@@ -113,16 +135,11 @@ export default function HabitsScreen(): React.JSX.Element {
             </ProgressRing>
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 18, fontWeight: '800', color: C.foreground, letterSpacing: -0.5 }}>
-                {completed === habits.length ? "All done! 🎉" : `${completed} of ${habits.length} done`}
+                {habits.length === 0 ? "No Habits Yet" : (completed === habits.length ? "All done! 🎉" : `${completed} of ${habits.length} done`)}
               </Text>
               <Text style={{ fontSize: 13, color: C.textSecondary, marginTop: 4, lineHeight: 18 }}>
-                {completed === habits.length ? "Consistency streak continuing" : `${habits.length - completed} habit${habits.length - completed > 1 ? "s" : ""} remaining today`}
+                {habits.length === 0 ? "Add a habit to get started" : (completed === habits.length ? "Consistency streak continuing" : `${habits.length - completed} habit${habits.length - completed > 1 ? "s" : ""} remaining today`)}
               </Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12 }}>
-                <Flame size={14} color="#FF6B6B" />
-                <Text style={{ fontSize: 13, fontWeight: '700', color: "#FF6B6B" }}>14-day streak</Text>
-                <Text style={{ fontSize: 12, color: C.textTertiary, fontWeight: '500' }}>· Personal best!</Text>
-              </View>
             </View>
           </View>
         </View>
@@ -168,12 +185,8 @@ export default function HabitsScreen(): React.JSX.Element {
                   {name}
                 </Text>
                 <Text style={{ fontSize: 13, color: done ? C.textSecondary : C.textTertiary, marginTop: 2 }}>
-                  {current} · target {target}
+                  {current} · target {target} {streak > 0 ? `· 🔥 ${streak} day${streak > 1 ? 's' : ''}` : ''}
                 </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6 }}>
-                  <Flame size={12} color="#FF6B6B" />
-                  <Text style={{ fontSize: 12, fontWeight: '700', color: "#FF6B6B" }}>{streak}d streak</Text>
-                </View>
               </View>
 
               {/* Toggle */}

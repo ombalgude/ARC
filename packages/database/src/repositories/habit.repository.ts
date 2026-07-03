@@ -1,4 +1,4 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, desc } from "drizzle-orm";
 
 import { db } from "../client.js";
 import { habitLogs, habits } from "../schema/index.js";
@@ -62,6 +62,7 @@ export async function seedDefaultHabits(
     { userId, type: "water", targetValue: "8", unit: "glasses", isActive: true },
     { userId, type: "steps", targetValue: "10000", unit: "steps", isActive: true },
     { userId, type: "sleep", targetValue: "8", unit: "hours", isActive: true },
+    { userId, type: "macros", targetValue: null, unit: null, isActive: true },
   ];
 
   const seededHabits = [];
@@ -88,4 +89,11 @@ export async function findLogsForDate(userId: string, loggedDate: string) {
     .select()
     .from(habitLogs)
     .where(and(eq(habitLogs.userId, userId), eq(habitLogs.loggedDate, loggedDate)));
+}
+export async function findHistoricalLogsByUser(userId: string) {
+  return db
+    .select()
+    .from(habitLogs)
+    .where(eq(habitLogs.userId, userId))
+    .orderBy(desc(habitLogs.loggedDate));
 }

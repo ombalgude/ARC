@@ -2,10 +2,14 @@ import { Router } from "express";
 
 import {
   handleGetWorkoutDay,
-  handleLogSession,
+  handleStartSession,
+  handleLogSet,
+  handleCompleteSession,
 } from "./sessions.controller.js";
 
 export const sessionsRouter: Router = Router();
 
-sessionsRouter.post("/", handleLogSession);
+sessionsRouter.post("/start", handleStartSession);
+sessionsRouter.post("/log-set", handleLogSet);
+sessionsRouter.post("/complete", handleCompleteSession);
 sessionsRouter.get("/days/:dayId", handleGetWorkoutDay);

@@ -48,9 +48,29 @@ export const logSessionSchema = z.object({
   ),
 });
 
+export const startSessionSchema = z.object({
+  workoutDayId: z.string().uuid(),
+  startedAt: z.string().datetime(),
+});
+
+export const logSetSchema = z.object({
+  sessionId: z.string().uuid(),
+  exerciseId: z.string().min(1),
+  setNumber: z.number().int().positive(),
+  repsCompleted: z.number().int().nonnegative().optional(),
+  weightKg: z.number().nonnegative().optional(),
+});
+
+export const completeSessionSchema = z.object({
+  sessionId: z.string().uuid(),
+  completedAt: z.string().datetime(),
+  notes: z.string().max(500).optional(),
+});
+
 export const logHabitSchema = z
   .object({
     habitId: z.string().uuid(),
+    localDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
     value: z.number().positive().optional(),
     completed: z.boolean().optional(),
   })
@@ -62,4 +82,7 @@ export type WorkoutInput = z.infer<typeof workoutInputSchema>;
 export type NutritionInput = z.infer<typeof nutritionInputSchema>;
 export type OnboardingInput = z.infer<typeof onboardingSchema>;
 export type LogSessionInput = z.infer<typeof logSessionSchema>;
+export type StartSessionInput = z.infer<typeof startSessionSchema>;
+export type LogSetInput = z.infer<typeof logSetSchema>;
+export type CompleteSessionInput = z.infer<typeof completeSessionSchema>;
 export type LogHabitInput = z.infer<typeof logHabitSchema>;

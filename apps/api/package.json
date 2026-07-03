@@ -17,6 +17,7 @@
     "@arc/validations": "workspace:*",
     "@clerk/express": "^2.1.30",
     "cors": "^2.8.5",
+    "date-fns": "^4.0.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2"
   },

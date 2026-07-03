@@ -1,5 +1,5 @@
 import type { ApiResponse } from "@arc/types";
-import { nutritionRepository, workoutRepository } from "@arc/database";
+import { nutritionRepository, workoutRepository, habitRepository } from "@arc/database";
 import type { Request, Response } from "express";
 
 type DashboardWorkoutPlan = NonNullable<
@@ -21,6 +21,8 @@ interface DashboardResult {
         >;
       })
     | null;
+  globalStreak: number;
+  activityHistory: number[];
 }
 
 export async function handleGetDashboardMe(
@@ -39,10 +41,46 @@ export async function handleGetDashboardMe(
   }
 
   try {
-    const [nutrition, workoutPlan] = await Promise.all([
+    const [nutrition, workoutPlan, habitLogs, workoutSessions] = await Promise.all([
       nutritionRepository.findByUser(req.dbUser.id),
       workoutRepository.findActivePlanWithDaysByUser(req.dbUser.id),
+      habitRepository.findHistoricalLogsByUser(req.dbUser.id),
+      workoutRepository.findSessionsByUser(req.dbUser.id),
     ]);
+
+    // Calculate activityHistory for the last 84 days (12 weeks)
+    const today = new Date();
+    const activityHistory: number[] = [];
+    
+    // Create a map for fast lookup: date string (yyyy-MM-dd) -> count
+    const activityMap = new Map<string, number>();
+    
+    // Add habit completions
+    for (const log of habitLogs) {
+      if (log.completed) {
+        const current = activityMap.get(log.loggedDate) || 0;
+        activityMap.set(log.loggedDate, current + 1);
+      }
+    }
+    
+    // Add workout sessions (using startedAt or createdAt)
+    for (const session of workoutSessions) {
+      const d = session.startedAt ? new Date(session.startedAt) : new Date(session.createdAt);
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const current = activityMap.get(dateStr) || 0;
+      activityMap.set(dateStr, current + 1); // Workouts carry strong weight
+    }
+
+    // Generate array from 84 days ago to today
+    for (let i = 83; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      let score = activityMap.get(dateStr) || 0;
+      // Normalize score to 0-4 range for heatmap
+      if (score > 4) score = 4;
+      activityHistory.push(score);
+    }
 
     res.status(200).json({
       success: true,
@@ -60,6 +98,8 @@ export async function handleGetDashboardMe(
               })),
             }
           : null,
+        globalStreak: 0, // Placeholder, can be calculated via habit and workout logs
+        activityHistory,
       },
     });
   } catch {

@@ -11,24 +11,20 @@ import {
   View,
   SafeAreaView
 } from 'react-native';
-import { Bell, Droplets, Moon, Footprints, Dumbbell, ChevronRight, Flame, Sparkles, Clock, Activity, Check } from 'lucide-react-native';
+import { Bell, Droplets, Moon, Footprints, Dumbbell, ChevronRight, Flame, Sparkles, Clock, Activity, Check, Utensils } from 'lucide-react-native';
 import { ProgressRing } from '../../../../../packages/ui/src/ProgressRing';
+import { StreakHeatmap } from '../../../components/dashboard/StreakHeatmap';
 import { useAppTheme } from '../../../lib/themeStore';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { createApiClient } from '../../../lib/api';
+import { createApiClient, DashboardData, HabitSummary } from '../../../lib/api';
 
-const INITIAL_HABITS = [
-  { id: 1, name: "Water", icon: Droplets, done: true, color: "#06B6D4", streak: 8 },
-  { id: 2, name: "Sleep", icon: Moon, done: true, color: "#7C5CFC", streak: 14 },
-  { id: 3, name: "Steps", icon: Footprints, done: false, color: "#FF6B6B", streak: 5 },
-  { id: 4, name: "Train", icon: Dumbbell, done: false, color: "#00D9B8", streak: 14 },
-];
-
-const MACROS = [
-  { label: "Protein", current: 142, target: 185, color: "#7C5CFC" },
-  { label: "Carbs", current: 198, target: 330, color: "#00D9B8" },
-  { label: "Fats", current: 51, target: 75, color: "#FF6B6B" },
-];
+const HABIT_CONFIG: Record<string, any> = {
+  water: { name: "Water", Icon: Droplets, color: "#06B6D4" },
+  sleep: { name: "Sleep", Icon: Moon, color: "#7C5CFC" },
+  steps: { name: "Steps", Icon: Footprints, color: "#FF6B6B" },
+  workout: { name: "Train", Icon: Dumbbell, color: "#00D9B8" },
+  macros: { name: "Nutrition", Icon: Utensils, color: "#FFB300" },
+};
 
 export default function DashboardScreen() {
   const C = useAppTheme();
@@ -37,51 +33,94 @@ export default function DashboardScreen() {
   const api = useMemo(() => createApiClient(getToken), [getToken]);
   const queryClient = useQueryClient();
   
-  const firstName = user?.firstName ?? 'Alex'; // Fallback for prototyping
+  const firstName = user?.firstName ?? 'Alex';
 
-  const { data: habits = INITIAL_HABITS } = useQuery({
-    queryKey: ['dashboard-habits'],
-    queryFn: () => Promise.resolve(INITIAL_HABITS), // Mocking fetch for UI prototype
-    staleTime: Infinity,
+  const { data: dashboardData, isLoading: isLoadingDashboard } = useQuery({
+    queryKey: ['dashboard'],
+    queryFn: () => api.getDashboard(),
   });
 
+  const now = new Date();
+  const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+  const { data: rawHabits, isLoading: isLoadingHabits } = useQuery({
+    queryKey: ['habits-detail', localDate],
+    queryFn: () => api.getHabits(localDate).then(res => res.habits),
+  });
+
+  const habits = useMemo(() => {
+    return (rawHabits || []).map(h => ({
+      id: h.id,
+      name: (HABIT_CONFIG[h.type] || {}).name || h.type,
+      icon: (HABIT_CONFIG[h.type] || {}).Icon || Check,
+      done: h.completedToday,
+      color: (HABIT_CONFIG[h.type] || {}).color || C.brand,
+      streak: h.streak,
+    }));
+  }, [rawHabits, C.brand]);
+
   const { mutate: toggleHabit } = useMutation({
-    mutationFn: async (habitId: number) => {
+    mutationFn: async (habitId: string) => {
       const isDone = !habits.find(h => h.id === habitId)?.done;
-      return api.logHabit({ habitId: String(habitId), completed: isDone }).catch(() => null); // Silently fail for demo
+      return api.logHabit({ habitId, localDate, completed: isDone }).catch(() => null);
     },
-    onMutate: async (habitId: number) => {
-      await queryClient.cancelQueries({ queryKey: ['dashboard-habits'] });
-      const previousHabits = queryClient.getQueryData<typeof INITIAL_HABITS>(['dashboard-habits']);
-      queryClient.setQueryData(['dashboard-habits'], (old: typeof INITIAL_HABITS = INITIAL_HABITS) =>
-        old.map((h) => (h.id === habitId ? { ...h, done: !h.done } : h))
-      );
+    onMutate: async (habitId: string) => {
+      await queryClient.cancelQueries({ queryKey: ['habits-detail'] });
+      const previousHabits = queryClient.getQueryData<HabitSummary[]>(['habits-detail']);
+      
+      if (previousHabits) {
+        queryClient.setQueryData<HabitSummary[]>(['habits-detail'], old => 
+          (old || []).map((h) => (h.id === habitId ? { ...h, completedToday: !h.completedToday } : h))
+        );
+      }
       return { previousHabits };
     },
     onError: (err, newHabit, context) => {
       if (context?.previousHabits) {
-        queryClient.setQueryData(['dashboard-habits'], context.previousHabits);
+        queryClient.setQueryData(['habits-detail'], context.previousHabits);
       }
     },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['habits-detail', localDate] });
+    }
   });
 
-  const handleToggleHabit = (id: number) => {
-    toggleHabit(id);
-  };
-
   const done = habits.filter((h) => h.done).length;
-  const habitPct = (done / habits.length) * 100;
-  const cal = { now: 1840, target: 2650 };
+  const habitPct = habits.length > 0 ? (done / habits.length) * 100 : 0;
+
+  const nutrition = dashboardData?.nutrition;
+  const cal = { now: 0, target: nutrition?.caloriesTarget || 2000 };
   const calPct = Math.round((cal.now / cal.target) * 100);
+
+  const macros = [
+    { label: "Protein", current: 0, target: nutrition?.proteinG || 150, color: "#7C5CFC" },
+    { label: "Carbs", current: 0, target: nutrition?.carbsG || 250, color: "#00D9B8" },
+    { label: "Fats", current: 0, target: nutrition?.fatG || 65, color: "#FF6B6B" },
+  ];
+
+  const workoutPlan = dashboardData?.workoutPlan;
+  const nextWorkoutDay = workoutPlan?.days[0]; 
+  const totalSets = nextWorkoutDay ? nextWorkoutDay.exercises.reduce((acc, ex) => acc + (ex.sets || 0), 0) : 0;
+  const estimatedTime = nextWorkoutDay ? Math.round(totalSets * 1.5 + nextWorkoutDay.exercises.reduce((a, e) => a + ((e.restSeconds || 60) * (e.sets || 0)) / 60, 0)) : 0;
+
+  const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
+  if (isLoadingDashboard || isLoadingHabits) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: C.background, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator size="large" color={C.brand} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.background }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 24, minHeight: '100%' }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 24, minHeight: '100%' }} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 20, paddingBottom: 12 }}>
           <View>
             <Text style={{ fontSize: 11, fontWeight: '700', color: C.textTertiary, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 3 }}>
-              Thursday · Jun 25
+              {todayStr}
             </Text>
             <Text style={{ fontSize: 23, fontWeight: '700', color: C.foreground, letterSpacing: -0.6, lineHeight: 28 }}>
               Morning, {firstName} 👋
@@ -106,11 +145,16 @@ export default function DashboardScreen() {
           </View>
         </View>
 
+        {/* Heatmap */}
+        {dashboardData?.activityHistory && (
+          <StreakHeatmap activityHistory={dashboardData.activityHistory} />
+        )}
+
         {/* Streak */}
         <View style={{ paddingHorizontal: 20, marginBottom: 16 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 16, backgroundColor: 'rgba(255,107,107,0.08)', borderWidth: 1, borderColor: 'rgba(255,107,107,0.18)' }}>
             <Flame size={16} color={C.energy} />
-            <Text style={{ fontSize: 13, fontWeight: '700', color: C.energy, marginLeft: 8 }}>14-day streak</Text>
+            <Text style={{ fontSize: 13, fontWeight: '700', color: C.energy, marginLeft: 8 }}>{dashboardData?.globalStreak || 0}-day streak</Text>
             <Text style={{ fontSize: 12, color: C.textSecondary, marginLeft: 6 }}>Keep it going — you're on fire!</Text>
           </View>
         </View>
@@ -132,34 +176,40 @@ export default function DashboardScreen() {
                   <View style={{ width: 7, height: 7, borderRadius: 3.5, backgroundColor: C.health, shadowColor: C.health, shadowOpacity: 1, shadowRadius: 8, elevation: 4 }} />
                   <Text style={{ fontSize: 10, fontWeight: '700', color: 'rgba(255,255,255,0.7)', letterSpacing: 1, textTransform: 'uppercase' }}>Today's Session</Text>
                 </View>
-                <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', fontWeight: '500' }}>Week 3 · Day 2</Text>
+                <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', fontWeight: '500' }}>Active Plan</Text>
               </View>
 
-              <Text style={{ fontSize: 24, fontWeight: '700', color: '#FFFFFF', letterSpacing: -0.7, marginBottom: 5 }}>Push Day A</Text>
-              <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', marginBottom: 18 }}>Chest · Shoulders · Triceps  ·  7 exercises</Text>
+              <Text style={{ fontSize: 24, fontWeight: '700', color: '#FFFFFF', letterSpacing: -0.7, marginBottom: 5 }}>
+                {nextWorkoutDay ? nextWorkoutDay.name || "Workout" : "Rest Day"}
+              </Text>
+              <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', marginBottom: 18 }}>
+                {nextWorkoutDay ? `${nextWorkoutDay.exercises.length} exercises` : "Take it easy and recover."}
+              </Text>
 
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Clock size={14} color="rgba(255,255,255,0.75)" />
-                    <Text style={{ fontSize: 12, fontWeight: '500', color: 'rgba(255,255,255,0.75)' }}>~55 min</Text>
+              {nextWorkoutDay && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Clock size={14} color="rgba(255,255,255,0.75)" />
+                      <Text style={{ fontSize: 12, fontWeight: '500', color: 'rgba(255,255,255,0.75)' }}>~{estimatedTime} min</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Activity size={14} color="rgba(255,255,255,0.75)" />
+                      <Text style={{ fontSize: 12, fontWeight: '500', color: 'rgba(255,255,255,0.75)' }}>{totalSets} sets</Text>
+                    </View>
                   </View>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Activity size={14} color="rgba(255,255,255,0.75)" />
-                    <Text style={{ fontSize: 12, fontWeight: '500', color: 'rgba(255,255,255,0.75)' }}>6 sets avg</Text>
-                  </View>
+                  <Pressable
+                    hitSlop={12}
+                    onPress={() => router.push({ pathname: '/workout/[dayId]', params: { dayId: nextWorkoutDay.id } } as any)}
+                    style={({ pressed }) => [{
+                      backgroundColor: '#FFFFFF', borderRadius: 12, paddingHorizontal: 18, paddingVertical: 9,
+                      shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 4
+                    }, pressed && { transform: [{ scale: 0.95 }] }]}
+                  >
+                    <Text style={{ color: C.brand, fontSize: 13, fontWeight: '700' }}>Start  →</Text>
+                  </Pressable>
                 </View>
-                <Pressable
-                  hitSlop={12}
-                  onPress={() => router.push({ pathname: '/workout/[dayId]', params: { dayId: '1' } } as any)}
-                  style={({ pressed }) => [{
-                    backgroundColor: '#FFFFFF', borderRadius: 12, paddingHorizontal: 18, paddingVertical: 9,
-                    shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 4
-                  }, pressed && { transform: [{ scale: 0.95 }] }]}
-                >
-                  <Text style={{ color: C.brand, fontSize: 13, fontWeight: '700' }}>Start  →</Text>
-                </Pressable>
-              </View>
+              )}
             </View>
           </View>
         </View>
@@ -179,10 +229,10 @@ export default function DashboardScreen() {
           </View>
 
           <View style={{ flexDirection: 'row', gap: 12 }}>
-            {habits.map(({ id, name, icon: Icon, done: isDone, color, streak }) => (
+            {habits.slice(0, 4).map(({ id, name, icon: Icon, done: isDone, color, streak }) => (
               <View key={id} style={{ flex: 1, alignItems: 'center', gap: 8 }}>
                 <Pressable
-                  onPress={() => handleToggleHabit(id)}
+                  onPress={() => toggleHabit(id)}
                   style={({ pressed }) => [{
                     width: 60, height: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center',
                     backgroundColor: isDone ? `${color}18` : C.card,
@@ -233,7 +283,7 @@ export default function DashboardScreen() {
             </View>
 
             <View style={{ gap: 8 }}>
-              {MACROS.map(({ label, current, target, color }) => (
+              {macros.map(({ label, current, target, color }) => (
                 <View key={label}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
                     <Text style={{ fontSize: 12, fontWeight: '500', color: C.textSecondary }}>{label}</Text>

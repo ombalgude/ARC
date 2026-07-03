@@ -205,3 +205,29 @@ export async function findSessionsByUser(userId: string) {
     .where(eq(workoutSessions.userId, userId))
     .orderBy(desc(workoutSessions.startedAt), desc(workoutSessions.createdAt));
 }
+
+export async function findSessionById(sessionId: string) {
+  const [session] = await db
+    .select()
+    .from(workoutSessions)
+    .where(eq(workoutSessions.id, sessionId))
+    .limit(1);
+  return session ?? null;
+}
+
+export async function updateSession(
+  sessionId: string,
+  input: Partial<CreateWorkoutSessionInput>,
+  executor: DatabaseExecutor = db,
+) {
+  const [session] = await executor
+    .update(workoutSessions)
+    .set(input)
+    .where(eq(workoutSessions.id, sessionId))
+    .returning();
+    
+  if (!session) {
+    throw new Error("Workout repository did not return a session on update");
+  }
+  return session;
+}

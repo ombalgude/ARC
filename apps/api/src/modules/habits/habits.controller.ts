@@ -2,6 +2,7 @@ import type { ApiResponse } from "@arc/types";
 import { db, habitRepository } from "@arc/database";
 import { logHabitSchema } from "@arc/validations";
 import type { Request, Response } from "express";
+import { format, subDays, parseISO } from "date-fns";
 
 type HabitRecord = Awaited<ReturnType<typeof habitRepository.findActiveByUser>>[number];
 type HabitLogRecord = Awaited<ReturnType<typeof habitRepository.logHabit>>;
@@ -9,6 +10,7 @@ type HabitLogRecord = Awaited<ReturnType<typeof habitRepository.logHabit>>;
 interface HabitSummary extends HabitRecord {
   todayValue: number;
   completedToday: boolean;
+  streak: number;
 }
 
 interface HabitLogResult {
@@ -44,11 +46,14 @@ export async function handleGetHabits(
     }
     const habits = Array.from(uniqueHabitsMap.values());
 
-    const today = getUtcDateString(new Date());
-    const todayLogs = await habitRepository.findLogsForDate(req.dbUser.id, today);
-    const logsByHabit = new Map<string, typeof todayLogs>();
-
-    for (const log of todayLogs) {
+    const today = (req.query.date as string) || getLocalDayString(new Date());
+    
+    // Get all historical logs
+    const allLogs = await habitRepository.findHistoricalLogsByUser(req.dbUser.id);
+    
+    // Group logs by habit
+    const logsByHabit = new Map<string, typeof allLogs>();
+    for (const log of allLogs) {
       const habitLogs = logsByHabit.get(log.habitId) ?? [];
       habitLogs.push(log);
       logsByHabit.set(log.habitId, habitLogs);
@@ -59,17 +64,68 @@ export async function handleGetHabits(
       data: {
         habits: habits.map((habit) => {
           const logs = logsByHabit.get(habit.id) ?? [];
-          const todayValue = logs.reduce(
+          
+          // Today's logs
+          const todayLogs = logs.filter(l => l.loggedDate === today);
+          const todayValue = todayLogs.reduce(
             (total, log) => total + Number(log.value ?? 0),
             0,
           );
 
+          const completedToday = todayLogs.some((log) => log.completed) ||
+              (habit.targetValue !== null && todayValue >= Number(habit.targetValue));
+
+          // Calculate streak
+          let streak = 0;
+          let currentDateObj = parseISO(today);
+          
+          // First check if completed today, if not, check if completed yesterday to keep streak alive
+          if (completedToday) {
+            streak = 1;
+            currentDateObj = subDays(currentDateObj, 1);
+          } else {
+            // Check if yesterday was completed
+            const yesterday = format(subDays(currentDateObj, 1), "yyyy-MM-dd");
+            const yesterdayLogs = logs.filter(l => l.loggedDate === yesterday);
+            const yValue = yesterdayLogs.reduce((t, l) => t + Number(l.value ?? 0), 0);
+            const completedYesterday = yesterdayLogs.some(l => l.completed) || 
+               (habit.targetValue !== null && yValue >= Number(habit.targetValue));
+               
+            if (!completedYesterday) {
+              // Streak is 0
+              streak = 0;
+            } else {
+              streak = 1;
+              currentDateObj = subDays(currentDateObj, 2); // look at day before yesterday
+            }
+          }
+          
+          // If we have a streak started, count backwards
+          if (streak > 0) {
+            while (true) {
+              const checkDate = format(currentDateObj, "yyyy-MM-dd");
+              const checkLogs = logs.filter(l => l.loggedDate === checkDate);
+              
+              if (checkLogs.length === 0) break; // no logs on this day, streak breaks
+              
+              const checkVal = checkLogs.reduce((t, l) => t + Number(l.value ?? 0), 0);
+              const isCompleted = checkLogs.some(l => l.completed) || 
+                 (habit.targetValue !== null && checkVal >= Number(habit.targetValue));
+                 
+              if (isCompleted) {
+                streak++;
+                currentDateObj = subDays(currentDateObj, 1);
+              } else {
+                break;
+              }
+            }
+          }
+
           return {
             ...habit,
             todayValue,
-            completedToday:
-              logs.some((log) => log.completed) ||
-              (habit.targetValue !== null && todayValue >= Number(habit.targetValue)),
+            completedToday,
+            streak,
           };
         }),
       },
@@ -125,7 +181,7 @@ export async function handleLogHabit(
     const log = await habitRepository.logHabit({
       habitId: habit.id,
       userId: req.dbUser.id,
-      loggedDate: getUtcDateString(new Date()),
+      loggedDate: parsedBody.data.localDate,
       value:
         parsedBody.data.value !== undefined
           ? parsedBody.data.value.toString()
@@ -143,6 +199,6 @@ export async function handleLogHabit(
   }
 }
 
-function getUtcDateString(date: Date): string {
-  return date.toISOString().slice(0, 10);
+function getLocalDayString(date: Date): string {
+  return format(date, "yyyy-MM-dd");
 }

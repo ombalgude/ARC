@@ -17,11 +17,11 @@ import { LightColors, DarkColors } from '../../../../packages/ui/src/tokens/them
 const isDark = Appearance.getColorScheme() === 'dark';
 const C = isDark ? DarkColors : LightColors;
 
-function getHabitLogPayload(habit: HabitSummary) {
-  if (habit.type === 'water') return { habitId: habit.id, value: 1 };
-  if (habit.type === 'steps') return { habitId: habit.id, value: 1000 };
-  if (habit.type === 'sleep') return { habitId: habit.id, value: 8, completed: true };
-  return { habitId: habit.id, completed: true };
+function getHabitLogPayload(habit: HabitSummary, localDate: string) {
+  if (habit.type === 'water') return { habitId: habit.id, localDate, value: 1 };
+  if (habit.type === 'steps') return { habitId: habit.id, localDate, value: 1000 };
+  if (habit.type === 'sleep') return { habitId: habit.id, localDate, value: 8, completed: true };
+  return { habitId: habit.id, localDate, completed: true };
 }
 
 function getHabitName(habit: HabitSummary): string {
@@ -69,7 +69,9 @@ export function HabitTracker(): React.JSX.Element {
 
   const loadHabits = async () => {
     try {
-      const result = await api.getHabits();
+      const now = new Date();
+      const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const result = await api.getHabits(localDate);
       setHabits(result.habits);
       setErrorMessage(null);
     } catch (error) {
@@ -83,7 +85,9 @@ export function HabitTracker(): React.JSX.Element {
     let isMounted = true;
     async function load() {
       try {
-        const result = await api.getHabits();
+        const now = new Date();
+        const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const result = await api.getHabits(localDate);
         if (isMounted) {
           setHabits(result.habits);
           setErrorMessage(null);
@@ -104,7 +108,9 @@ export function HabitTracker(): React.JSX.Element {
     }
     setPendingHabitId(habit.id);
     try {
-      await api.logHabit(getHabitLogPayload(habit));
+      const now = new Date();
+      const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      await api.logHabit(getHabitLogPayload(habit, localDate));
       await loadHabits();
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Unable to update habit.');

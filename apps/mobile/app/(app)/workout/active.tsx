@@ -15,7 +15,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { createApiClient, type WorkoutDayDetail } from '../../../lib/api';
-
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { Appearance } from 'react-native';
 import { LightColors, DarkColors } from '../../../../../packages/ui/src/tokens/theme';
 
@@ -31,51 +31,50 @@ function formatTime(s: number): string {
 }
 
 export default function WorkoutScreen(): React.JSX.Element {
-  const { dayId } = useLocalSearchParams<{ dayId: string }>();
+  const { dayId, sessionId } = useLocalSearchParams<{ dayId: string, sessionId: string }>();
   const { getToken } = useAuth();
   const api = useMemo(() => createApiClient(getToken), [getToken]);
   
-  const [workoutDay, setWorkoutDay] = useState<WorkoutDayDetail | null>(null);
   const [setCompletion, setSetCompletion] = useState<SetCompletionState>({});
   const [startedAt] = useState(() => new Date().toISOString());
   
-  const [isLoading, setIsLoading] = useState(true);
   const [isFinishing, setIsFinishing] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   const [elapsed, setElapsed] = useState(0);
   const [rest, setRest] = useState<number | null>(null);
   const [exIdx, setExIdx] = useState(0);
 
+  const { data: workoutDay, isLoading, error } = useQuery({
+    queryKey: ['workout-day-active', dayId],
+    queryFn: () => api.getWorkoutDay(dayId as string),
+    enabled: !!dayId,
+  });
+
+  const { mutate: logSetMutation } = useMutation({
+    mutationFn: (args: { exerciseId: string; setNumber: number }) => 
+      api.logSet({
+        sessionId: sessionId as string,
+        exerciseId: args.exerciseId,
+        setNumber: args.setNumber,
+      }),
+  });
+
+  const { mutateAsync: completeSessionMutation } = useMutation({
+    mutationFn: () => api.completeSession({
+      sessionId: sessionId as string,
+      completedAt: new Date().toISOString(),
+    })
+  });
+
   useEffect(() => {
-    let isMounted = true;
-
-    async function loadWorkoutDay(): Promise<void> {
-      if (!dayId) return;
-
-      try {
-        const result = await api.getWorkoutDay(dayId);
-        if (isMounted) {
-          setWorkoutDay(result);
-          const initialSets: SetCompletionState = {};
-          result.exercises.forEach((ex) => {
-            initialSets[ex.id] = Array(ex.sets ?? 0).fill(false);
-          });
-          setSetCompletion(initialSets);
-          setErrorMessage(null);
-        }
-      } catch (error) {
-        if (isMounted) {
-          setErrorMessage(error instanceof Error ? error.message : 'Unable to load this workout.');
-        }
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
+    if (workoutDay && Object.keys(setCompletion).length === 0) {
+      const initialSets: SetCompletionState = {};
+      workoutDay.exercises.forEach((ex) => {
+        initialSets[ex.id] = Array(ex.sets ?? 0).fill(false);
+      });
+      setSetCompletion(initialSets);
     }
-
-    void loadWorkoutDay();
-    return () => { isMounted = false; };
-  }, [api, dayId]);
+  }, [workoutDay]);
 
   // Elapsed Timer
   useEffect(() => {
@@ -105,6 +104,13 @@ export default function WorkoutScreen(): React.JSX.Element {
         setRest(restSeconds);
       }
       
+      if (wasOff && sessionId) {
+        logSetMutation({
+          exerciseId,
+          setNumber: setIndex + 1,
+        });
+      }
+      
       return { ...current, [exerciseId]: nextSets };
     });
   }
@@ -114,15 +120,9 @@ export default function WorkoutScreen(): React.JSX.Element {
     setIsFinishing(true);
 
     try {
-      await api.logSession({
-        workoutDayId: workoutDay.id,
-        startedAt,
-        completedAt: new Date().toISOString(),
-        exercises: workoutDay.exercises.map((exercise) => ({
-          exerciseId: exercise.exerciseId,
-          completedSets: (setCompletion[exercise.id] ?? []).filter(Boolean).length,
-        })),
-      });
+      if (sessionId) {
+        await completeSessionMutation();
+      }
 
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert('Workout logged', 'Your session has been saved.', [
@@ -146,12 +146,12 @@ export default function WorkoutScreen(): React.JSX.Element {
     );
   }
 
-  if (errorMessage || !workoutDay) {
+  if (error || !workoutDay) {
     return (
       <View style={styles.emptyState}>
         <Text style={styles.emptyIcon}>⚠️</Text>
         <Text style={styles.emptyTitle}>Session unavailable</Text>
-        <Text style={styles.emptyText}>{errorMessage ?? 'Unable to load this workout.'}</Text>
+        <Text style={styles.emptyText}>{error ? String(error) : 'Unable to load this workout.'}</Text>
         <Pressable
           id="workout-error-back-btn"
           onPress={() => router.replace('/(app)/(tabs)/dashboard')}

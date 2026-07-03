@@ -67,19 +67,29 @@ export interface DashboardWorkoutPlan {
 export interface DashboardData {
   nutrition: DashboardNutrition | null;
   workoutPlan: DashboardWorkoutPlan | null;
+  globalStreak: number;
+  activityHistory: number[];
 }
 
 export interface WorkoutDayDetail extends DashboardWorkoutDay {}
 
-export interface LogSessionInput {
+export interface StartSessionInput {
   workoutDayId: string;
   startedAt: string;
+}
+
+export interface LogSetInput {
+  sessionId: string;
+  exerciseId: string;
+  setNumber: number;
+  repsCompleted?: number;
+  weightKg?: number;
+}
+
+export interface CompleteSessionInput {
+  sessionId: string;
   completedAt: string;
-  exercises: Array<{
-    exerciseId: string;
-    completedSets: number;
-    notes?: string;
-  }>;
+  notes?: string;
 }
 
 export interface HabitSummary {
@@ -93,10 +103,12 @@ export interface HabitSummary {
   updatedAt: string;
   todayValue: number;
   completedToday: boolean;
+  streak: number;
 }
 
 export interface LogHabitInput {
   habitId: string;
+  localDate: string;
   value?: number;
   completed?: boolean;
 }
@@ -224,17 +236,26 @@ export function createApiClient(getToken: GetToken) {
     getWorkoutDay(dayId: string) {
       return request<WorkoutDayDetail>(`/api/v1/sessions/days/${dayId}`);
     },
-    logSession(input: LogSessionInput) {
-      return request<{ session: unknown; exerciseLogCount: number }>(
-        "/api/v1/sessions",
-        {
-          method: "POST",
-          body: JSON.stringify(input),
-        },
-      );
+    startSession(input: StartSessionInput) {
+      return request<{ session: { id: string } }>("/api/v1/sessions/start", {
+        method: "POST",
+        body: JSON.stringify(input),
+      });
     },
-    getHabits() {
-      return request<{ habits: HabitSummary[] }>("/api/v1/habits");
+    logSet(input: LogSetInput) {
+      return request<{ log: unknown }>("/api/v1/sessions/log-set", {
+        method: "POST",
+        body: JSON.stringify(input),
+      });
+    },
+    completeSession(input: CompleteSessionInput) {
+      return request<{ session: unknown }>("/api/v1/sessions/complete", {
+        method: "POST",
+        body: JSON.stringify(input),
+      });
+    },
+    getHabits(date: string) {
+      return request<{ habits: HabitSummary[] }>(`/api/v1/habits?date=${date}`);
     },
     logHabit(input: LogHabitInput) {
       return request<{ log: unknown }>("/api/v1/habits/log", {
