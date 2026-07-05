@@ -51,7 +51,7 @@ function AccordionSection({ section, isOpen, onToggle }: { section: typeof SECTI
   );
 }
 
-export default function NutritionGuidanceScreen() {
+export default function NutritionKnowledgeScreen() {
   const C = useAppTheme();
   const [expanded, setExpanded] = useState<number | null>(1);
 
@@ -62,7 +62,7 @@ export default function NutritionGuidanceScreen() {
         <Pressable onPress={() => router.back()} style={{ marginRight: 16 }}>
           <ChevronLeft size={24} color={C.foreground} />
         </Pressable>
-        <Text style={{ fontSize: 24, fontWeight: '800', color: C.foreground, letterSpacing: -0.5 }}>Nutrition Guidance</Text>
+        <Text style={{ fontSize: 24, fontWeight: '800', color: C.foreground, letterSpacing: -0.5 }}>Nutrition Knowledge</Text>
       </View>
 
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>

@@ -1,7 +1,7 @@
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -9,22 +9,60 @@ import {
   StyleSheet,
   Text,
   View,
-  SafeAreaView
+  Animated,
 } from 'react-native';
-import { Bell, Droplets, Moon, Footprints, Dumbbell, ChevronRight, Flame, Sparkles, Clock, Activity, Check, Utensils, CheckCircle2 } from 'lucide-react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Bell, Flame, ChevronRight, Activity, Check, CheckCircle2, Dumbbell, Calendar, Coffee, Utensils, Droplets, Moon, Footprints, Sparkles, Clock } from 'lucide-react-native';
 import { ProgressRing } from '../../../../../packages/ui/src/ProgressRing';
 import { StreakHeatmap } from '../../../components/dashboard/StreakHeatmap';
 import { useAppTheme } from '../../../lib/themeStore';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createApiClient, DashboardData, HabitSummary } from '../../../lib/api';
 
-const HABIT_CONFIG: Record<string, any> = {
-  water: { name: "Water", Icon: Droplets, color: "#06B6D4" },
-  sleep: { name: "Sleep", Icon: Moon, color: "#7C5CFC" },
-  steps: { name: "Steps", Icon: Footprints, color: "#FF6B6B" },
-  workout: { name: "Train", Icon: Dumbbell, color: "#00D9B8" },
-  macros: { name: "Nutrition", Icon: Utensils, color: "#FFB300" },
+const HABIT_CONFIG: Record<string, { name: string, Icon: any, color: string }> = {
+  workout: { name: "Workout", Icon: Dumbbell, color: "#7C5CFC" },
+  water: { name: "Water", Icon: Activity, color: "#00D9B8" },
+  sleep: { name: "Sleep", Icon: Flame, color: "#FFB300" },
+  macros: { name: "Macros", Icon: Activity, color: "#FF6B6B" },
 };
+
+function MacroBar({ label, current, target, color }: { label: string, current: number, target: number, color: string }) {
+  const C = useAppTheme();
+  const pct = target > 0 ? Math.min(1, current / target) : 0;
+  
+  const widthAnim = React.useRef(new Animated.Value(0)).current;
+  
+  useEffect(() => {
+    Animated.spring(widthAnim, {
+      toValue: pct * 100,
+      tension: 60,
+      friction: 10,
+      useNativeDriver: false
+    }).start();
+  }, [pct]);
+
+  const animatedWidth = widthAnim.interpolate({
+    inputRange: [0, 100],
+    outputRange: ['0%', '100%']
+  });
+
+  return (
+    <View>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Text style={{ fontSize: 13, fontWeight: '700', color: C.foreground }}>{label}</Text>
+          {current >= target && target > 0 && <Check size={14} color={color} strokeWidth={3} />}
+        </View>
+        <Text style={{ fontSize: 12, fontWeight: '600', color: C.textSecondary }}>
+          <Text style={{ color: C.foreground }}>{current}g</Text> / {target}g
+        </Text>
+      </View>
+      <View style={{ height: 6, backgroundColor: C.muted, borderRadius: 3, overflow: 'hidden' }}>
+        <Animated.View style={[{ position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: color, borderRadius: 3, width: animatedWidth }]} />
+      </View>
+    </View>
+  );
+}
 
 export default function DashboardScreen() {
   const C = useAppTheme();
@@ -54,7 +92,7 @@ export default function DashboardScreen() {
       : (rawHabits && typeof rawHabits === 'object' && 'habits' in rawHabits ? (rawHabits as any).habits : []);
       
     return safeHabitsArray
-      .filter((h: any) => h.type !== 'macros')
+      .filter((h: any) => !['macros', 'protein', 'carbs', 'fats', 'micros', 'meal_breakfast', 'meal_lunch', 'meal_preworkout', 'meal_postworkout'].includes(h.type))
       .map((h: any) => ({
         id: h.id,
         name: (HABIT_CONFIG[h.type] || {}).name || h.type,
@@ -67,7 +105,8 @@ export default function DashboardScreen() {
 
   const { mutate: toggleHabit } = useMutation({
     mutationFn: async (habitId: string) => {
-      const isDone = !habits.find(h => h.id === habitId)?.done;
+      const habit = rawHabitsArray.find((h: any) => h.id === habitId);
+      const isDone = !(habit?.completedToday ?? false);
       return api.logHabit({ habitId, localDate, completed: isDone }).catch(() => null);
     },
     onMutate: async (habitId: string) => {
@@ -91,29 +130,38 @@ export default function DashboardScreen() {
     }
   });
 
-  const done = habits.filter((h) => h.done).length;
+  const done = habits.filter((h: any) => h.done).length;
   const habitPct = habits.length > 0 ? (done / habits.length) * 100 : 0;
 
   const nutrition = dashboardData?.nutrition;
   const cal = { now: 0, target: nutrition?.caloriesTarget || 0 };
   const calPct = 0;
 
-  const macros = [
-    { label: "Protein", current: 0, target: nutrition?.proteinG || 0, color: "#7C5CFC" },
-    { label: "Carbs", current: 0, target: nutrition?.carbsG || 0, color: "#00D9B8" },
-    { label: "Fats", current: 0, target: nutrition?.fatG || 0, color: "#FF6B6B" },
-  ];
-
+  const rawHabitsArray = Array.isArray(rawHabits) ? rawHabits : (rawHabits as any)?.habits || [];
+  
   const workoutPlan = dashboardData?.workoutPlan;
   const currentDayOfWeek = new Date().getDay(); // 0 = Sunday, 1 = Monday...
   const nextWorkoutDay = workoutPlan?.days?.find(d => d.dayOfWeek === currentDayOfWeek || d.dayOfWeek === (currentDayOfWeek === 0 ? 7 : currentDayOfWeek));
   const totalSets = nextWorkoutDay ? nextWorkoutDay.exercises.reduce((acc, ex) => acc + (ex.sets || 0), 0) : 0;
   const estimatedTime = nextWorkoutDay ? Math.round(totalSets * 1.5 + nextWorkoutDay.exercises.reduce((a, e) => a + ((e.restSeconds || 60) * (e.sets || 0)) / 60, 0)) : 0;
 
-  const rawHabitsArray = Array.isArray(rawHabits) ? rawHabits : (rawHabits as any)?.habits || [];
-  const macroHabit = rawHabitsArray.find((h: any) => h.type === 'macros');
-  const macroHabitId = macroHabit?.id;
-  const isMacroDone = macroHabit?.completedToday;
+  const getMacroHabit = (type: string) => rawHabitsArray.find((h: any) => h.type === type);
+  const mealHabits = [
+    { type: 'meal_breakfast', pct: 0.25 },
+    { type: 'meal_lunch', pct: 0.25 },
+    { type: 'meal_preworkout', pct: 0.20 },
+    { type: 'meal_postworkout', pct: 0.30 }
+  ];
+  const completedPct = mealHabits.reduce((acc, meal) => {
+    const habit = getMacroHabit(meal.type);
+    return habit?.completedToday ? acc + meal.pct : acc;
+  }, 0);
+
+  const macrosList = [
+    { label: "Protein", current: Math.round((nutrition?.proteinG || 0) * completedPct), target: nutrition?.proteinG || 0, color: "#7C5CFC" },
+    { label: "Carbs", current: Math.round((nutrition?.carbsG || 0) * completedPct), target: nutrition?.carbsG || 0, color: "#00D9B8" },
+    { label: "Fats", current: Math.round((nutrition?.fatG || 0) * completedPct), target: nutrition?.fatG || 0, color: "#FF6B6B" },
+  ];
 
   const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
 
@@ -244,7 +292,7 @@ export default function DashboardScreen() {
           </View>
 
           <View style={{ flexDirection: 'row', gap: 12 }}>
-            {habits.slice(0, 5).map(({ id, name, icon: Icon, done: isDone, color, streak }) => (
+            {habits.slice(0, 5).map(({ id, name, icon: Icon, done: isDone, color, streak }: any) => (
               <View key={id} style={{ flex: 1, alignItems: 'center', gap: 8 }}>
                 <Pressable
                   onPress={() => toggleHabit(id)}
@@ -278,66 +326,65 @@ export default function DashboardScreen() {
 
         {/* Nutrition Snapshot */}
         <View style={{ paddingHorizontal: 20, marginBottom: 16 }}>
-          <Pressable
-            onPress={() => router.push('/nutrition' as any)}
-            style={({ pressed }) => [{
-              backgroundColor: C.card, borderRadius: 22, borderWidth: 1, borderColor: C.border, overflow: 'hidden',
-              shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.05, shadowRadius: 16, elevation: 3
-            }, pressed && { transform: [{ scale: 0.98 }] }]}
-          >
+          <View style={{ backgroundColor: C.card, borderRadius: 22, borderWidth: 1, borderColor: C.border, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.05, shadowRadius: 16, elevation: 3 }}>
+            <Pressable
+              onPress={() => router.push('/nutrition' as any)}
+              style={({ pressed }) => [pressed && { backgroundColor: 'rgba(0,0,0,0.02)' }]}
+            >
             <View style={{ padding: 18, borderBottomWidth: 1, borderBottomColor: C.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
               <View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                  <Text style={{ fontSize: 16, fontWeight: '800', color: C.foreground, letterSpacing: -0.2 }}>Nutrition</Text>
+                  <Text style={{ fontSize: 16, fontWeight: '800', color: C.foreground, letterSpacing: -0.2 }}>Diet</Text>
                   <View style={{ paddingHorizontal: 6, paddingVertical: 2, backgroundColor: 'rgba(0,217,184,0.1)', borderRadius: 6 }}>
-                    <Text style={{ fontSize: 9, fontWeight: '700', color: '#00D9B8' }}>{calPct}%</Text>
+                    <Text style={{ fontSize: 9, fontWeight: '700', color: '#00D9B8' }}>{nutrition?.caloriesTarget || 0} kcal</Text>
                   </View>
-                  {macroHabitId && (
-                    <Pressable 
-                      hitSlop={12}
-                      onPress={(e) => {
-                        toggleHabit(macroHabitId);
-                      }}
-                      style={{ marginLeft: 6, width: 26, height: 26, borderRadius: 13, backgroundColor: isMacroDone ? 'rgba(0,217,184,0.1)' : C.muted, alignItems: 'center', justifyContent: 'center' }}
-                    >
-                      <CheckCircle2 size={16} color={isMacroDone ? C.health : C.textTertiary} strokeWidth={isMacroDone ? 2.5 : 1.5} />
-                    </Pressable>
-                  )}
                 </View>
                 <Text style={{ fontSize: 13, color: C.textSecondary, fontWeight: '500' }}>
-                  <Text style={{ color: C.foreground, fontWeight: '700' }}>{cal.now.toLocaleString()}</Text> / {cal.target.toLocaleString()} kcal
+                  Track your daily nutrition goals
                 </Text>
               </View>
-              <ProgressRing size={44} strokeWidth={4.5} progress={calPct} color="#00D9B8" trackColor={C.muted}>
-                <Flame size={16} color="#00D9B8" />
-              </ProgressRing>
+              <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: `${C.brand}15`, alignItems: 'center', justifyContent: 'center' }}>
+                <Utensils size={20} color={C.brand} />
+              </View>
             </View>
 
             <View style={{ padding: 18, gap: 14 }}>
-              {macros.map(({ label, current, target, color }) => {
-                const pct = Math.min(100, target > 0 ? (current / target) * 100 : 0);
+              {macrosList.map((macro) => (
+                <MacroBar key={macro.label} {...macro} />
+              ))}
+            </View>
+          </Pressable>
+            
+            {/* Quick Actions for Meals */}
+            <View style={{ flexDirection: 'row', borderTopWidth: 1, borderTopColor: C.border, backgroundColor: 'rgba(0,0,0,0.01)' }}>
+              {[
+                { type: 'meal_breakfast', label: 'Breakfast', icon: Coffee },
+                { type: 'meal_lunch', label: 'Lunch', icon: Utensils },
+                { type: 'meal_preworkout', label: 'Pre-W', icon: Flame },
+                { type: 'meal_postworkout', label: 'Post-W', icon: Dumbbell }
+              ].map(({ type, label, icon: Icon }) => {
+                const habit = getMacroHabit(type);
+                const isDone = habit?.completedToday ?? false;
+                
                 return (
-                  <View key={label}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 6 }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        {current >= target && target > 0 && (
-                          <CheckCircle2 size={16} color={color} strokeWidth={2.5} />
-                        )}
-                        <Text style={{ fontSize: 13, fontWeight: '600', color: C.textSecondary }}>{label}</Text>
-                      </View>
-                      <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 2 }}>
-                        <Text style={{ fontSize: 14, fontWeight: '800', color: C.foreground }}>{current}</Text>
-                        <Text style={{ fontSize: 11, fontWeight: '600', color: C.textTertiary }}>/ {target}g</Text>
-                      </View>
-                    </View>
-                    <View style={{ height: 6, backgroundColor: C.muted, borderRadius: 3, overflow: 'hidden' }}>
-                      <View style={{ height: '100%', width: `${pct}%`, backgroundColor: color, borderRadius: 3 }} />
-                    </View>
-                  </View>
+                  <Pressable
+                    key={type}
+                    onPress={() => habit?.id && toggleHabit(habit.id)}
+                    style={({ pressed }) => [{
+                      flex: 1, paddingVertical: 14, alignItems: 'center', justifyContent: 'center',
+                      borderRightWidth: type !== 'meal_postworkout' ? 1 : 0, borderRightColor: C.border,
+                      backgroundColor: isDone ? 'rgba(0,217,184,0.1)' : 'transparent',
+                    }, pressed && { opacity: 0.7 }]}
+                  >
+                    <Icon size={16} color={isDone ? '#00D9B8' : C.textTertiary} style={{ marginBottom: 4 }} />
+                    <Text style={{ fontSize: 10, fontWeight: '700', color: isDone ? '#00D9B8' : C.textSecondary, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                      {label}
+                    </Text>
+                  </Pressable>
                 );
               })}
             </View>
-          </Pressable>
+          </View>
         </View>
 
         {/* Arc AI Entry */}

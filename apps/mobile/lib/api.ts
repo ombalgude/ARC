@@ -231,7 +231,12 @@ export function createApiClient(getToken: GetToken) {
 
   return {
     getMe() {
-      return request<CurrentUserProfile>("/api/v1/users/me");
+      return request<CurrentUserProfile>("/api/v1/users/me", {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+        },
+      });
     },
     getDashboard() {
       return request<DashboardData>("/api/v1/dashboard/me");

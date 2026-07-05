@@ -150,7 +150,7 @@ export function generateWorkoutPlan(input: WorkoutGeneratorInput): GeneratedWork
 
     return {
       dayNumber: index + 1,
-      dayOfWeek: targetDays[index],
+      dayOfWeek: targetDays[index] ?? 1,
       name: dayName,
       exercises: orderedExercises,
     };

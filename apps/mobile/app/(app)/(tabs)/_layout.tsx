@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
-import { Home, Dumbbell, CheckCircle2, Apple, User } from 'lucide-react-native';
+import { Home, Dumbbell, CheckCircle2, Apple, User, ListChecks } from 'lucide-react-native';
 import { useAppTheme } from '../../../lib/themeStore';
 
 function TabIcon({ Icon, focused, C }: { Icon: any; focused: boolean; C: any }) {
@@ -70,7 +70,7 @@ export default function TabsLayout(): React.JSX.Element {
       <Tabs.Screen
         name="nutrition"
         options={{
-          title: 'Nutrition',
+          title: 'Diet',
           tabBarIcon: ({ focused }) => <TabIcon Icon={Apple} focused={focused} C={C} />,
         }}
       />

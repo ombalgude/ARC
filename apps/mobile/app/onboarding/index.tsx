@@ -2,6 +2,7 @@ import { useAuth } from '@clerk/clerk-expo';
 import { onboardingSchema, type OnboardingInput } from '@arc/validations';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Redirect, router } from 'expo-router';
+import { useMutation } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -75,9 +76,27 @@ const ACTIVITY_OPTIONS = [
 ] satisfies Array<{ label: string; value: OnboardingInput['activityLevel'] }>;
 
 const ENVIRONMENT_OPTIONS = [
-  { label: 'Home', value: 'home', detail: 'Minimal setup, flexible sessions', emoji: '🏠' },
-  { label: 'Gym', value: 'gym', detail: 'Machines, cables, and full weights', emoji: '🏋️' },
-] satisfies Array<{ label: string; value: OnboardingInput['environment']; detail: string; emoji: string }>;
+  {
+    label: 'Home',
+    value: 'home',
+    detail: 'Bodyweight, bands, or minimal equipment',
+    emoji: '🏠',
+  },
+  {
+    label: 'Gym',
+    value: 'gym',
+    detail: 'Full access to machines and free weights',
+    emoji: '🏋️‍♂️',
+  },
+] as const;
+
+const DIETARY_OPTIONS = [
+  { label: 'Non-Veg', value: 'non-veg' },
+  { label: 'Vegetarian', value: 'vegetarian' },
+  { label: 'Vegan', value: 'vegan' },
+  { label: 'Eggetarian', value: 'eggetarian' },
+  { label: 'No Preference', value: 'no-preference' },
+] as const;
 
 const EQUIPMENT_OPTIONS = ['dumbbells', 'barbell', 'bench', 'cables', 'machines', 'bands', 'kettlebell'];
 
@@ -455,8 +474,18 @@ export default function OnboardingScreen(): React.JSX.Element | null {
   const { getToken, isLoaded, isSignedIn } = useAuth();
   const api = useMemo(() => createApiClient(getToken), [getToken]);
   const { currentStep, form, nextStep, previousStep, reset, setField } = useOnboardingStore();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingProfile, setIsCheckingProfile] = useState(true);
+
+  const submitMutation = useMutation({
+    mutationFn: (data: OnboardingInput) => api.submitOnboarding(data),
+    onSuccess: () => {
+      reset();
+      router.replace('/(app)/(tabs)/dashboard');
+    },
+    onError: (error: unknown) => {
+      Alert.alert('Onboarding failed', getValidationMessage(error));
+    }
+  });
 
   useEffect(() => {
     let isMounted = true;
@@ -505,8 +534,8 @@ export default function OnboardingScreen(): React.JSX.Element | null {
     nextStep();
   }
 
-  async function handleSubmit(): Promise<void> {
-    if (isSubmitting) return;
+  function handleSubmit(): void {
+    if (submitMutation.isPending) return;
 
     const parsed = onboardingSchema.safeParse(form);
     if (!parsed.success) {
@@ -514,16 +543,7 @@ export default function OnboardingScreen(): React.JSX.Element | null {
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      await api.submitOnboarding(parsed.data);
-      reset();
-      router.replace('/(app)/(tabs)/dashboard');
-    } catch (error) {
-      Alert.alert('Onboarding failed', getValidationMessage(error));
-    } finally {
-      setIsSubmitting(false);
-    }
+    submitMutation.mutate(parsed.data);
   }
 
   const isLastStep = currentStep === STEP_TITLES.length - 1;
@@ -673,12 +693,17 @@ export default function OnboardingScreen(): React.JSX.Element | null {
           {currentStep === 3 && (
             <View style={styles.stepContainer}>
               <SectionLabel label="Dietary Preference" />
-              <StyledInput
-                id="onboarding-dietary-input"
-                onChangeText={(v) => setField('dietaryPreference', v)}
-                placeholder="High protein, vegetarian, no preference…"
-                value={form.dietaryPreference ?? ''}
-              />
+              <View style={styles.chipGrid}>
+                {DIETARY_OPTIONS.map(({ label, value }) => (
+                  <OptionChip
+                    key={value}
+                    label={label}
+                    value={value}
+                    selected={form.dietaryPreference === value}
+                    onPress={(v) => setField('dietaryPreference', v)}
+                  />
+                ))}
+              </View>
 
               <SectionLabel label="Training Environment" />
               <View style={styles.cardList}>
@@ -735,11 +760,11 @@ export default function OnboardingScreen(): React.JSX.Element | null {
         <View style={styles.footer}>
           <Pressable
             id="onboarding-back-btn"
-            disabled={currentStep === 0 || isSubmitting}
+            disabled={currentStep === 0 || submitMutation.isPending}
             onPress={previousStep}
             style={({ pressed }) => [
               styles.backButton,
-              (currentStep === 0 || isSubmitting) && styles.buttonDisabled,
+              (currentStep === 0 || submitMutation.isPending) && styles.buttonDisabled,
               pressed && styles.pressed,
             ]}
           >
@@ -748,11 +773,11 @@ export default function OnboardingScreen(): React.JSX.Element | null {
 
           <Pressable
             id={isLastStep ? 'onboarding-submit-btn' : 'onboarding-continue-btn'}
-            disabled={isSubmitting}
+            disabled={submitMutation.isPending}
             onPress={isLastStep ? handleSubmit : handleNext}
             style={({ pressed }) => [
               styles.continueButton,
-              isSubmitting && styles.buttonDisabled,
+              submitMutation.isPending && styles.buttonDisabled,
               pressed && styles.pressed,
             ]}
           >
@@ -762,7 +787,7 @@ export default function OnboardingScreen(): React.JSX.Element | null {
               end={{ x: 1, y: 1 }}
               style={styles.continueButtonGradient}
             >
-              {isSubmitting ? (
+              {submitMutation.isPending ? (
                 <ActivityIndicator color="#FFFFFF" size="small" />
               ) : (
                 <Text style={styles.continueButtonText}>

@@ -38,7 +38,9 @@ export default function HabitsScreen(): React.JSX.Element {
       ? rawHabits 
       : (rawHabits && typeof rawHabits === 'object' && 'habits' in rawHabits ? (rawHabits as any).habits : []);
 
-    return safeHabitsArray.map((h: any) => ({
+    return safeHabitsArray
+      .filter((h: any) => !['macros', 'protein', 'carbs', 'fats', 'micros', 'meal_breakfast', 'meal_lunch', 'meal_preworkout', 'meal_postworkout'].includes(h.type))
+      .map((h: any) => ({
       ...h,
       ...(HABIT_CONFIG[h.type] || { name: h.type, Icon: Check, color: C.brand }),
       done: h.completedToday,

@@ -22,6 +22,6 @@ export const preferredEnvironmentEnum = pgEnum("preferred_environment", ["home",
 
 export const muscleRoleEnum = pgEnum("muscle_role", ["primary", "secondary", "stabilizer"]);
 
-export const habitTypeEnum = pgEnum("habit_type", ["workout", "water", "sleep", "steps", "macros"]);
+export const habitTypeEnum = pgEnum("habit_type", ["workout", "water", "sleep", "steps", "macros", "protein", "carbs", "fats", "micros", "meal_breakfast", "meal_lunch", "meal_preworkout", "meal_postworkout"]);
 
 export const aiMessageRoleEnum = pgEnum("ai_message_role", ["user", "assistant"]);

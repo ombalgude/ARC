@@ -32,10 +32,10 @@ export async function handleGetHabits(
   try {
     let rawHabits = await habitRepository.findActiveByUser(req.dbUser.id);
     const existingTypes = new Set(rawHabits.map(h => h.type));
-    const defaultTypes = ["water", "steps", "sleep", "macros"] as const;
+    const defaultTypes = ["water", "steps", "sleep", "meal_breakfast", "meal_lunch", "meal_preworkout", "meal_postworkout"] as const;
     
     let needsSeeding = false;
-    const habitsToCreate = [];
+    const habitsToCreate: Array<{ userId: string, type: any, targetValue: string | null, unit: string | null, isActive: boolean }> = [];
     for (const type of defaultTypes) {
       if (!existingTypes.has(type)) {
         needsSeeding = true;
@@ -92,7 +92,7 @@ export async function handleGetHabits(
             0,
           );
 
-          const completedToday = (todayLogs.length > 0 ? todayLogs[0].completed : false) ||
+          const completedToday = (todayLogs.length > 0 ? (todayLogs[0]?.completed ?? false) : false) ||
               (habit.targetValue !== null && todayValue >= Number(habit.targetValue));
 
           // Calculate streak
@@ -108,7 +108,7 @@ export async function handleGetHabits(
             const yesterday = format(subDays(currentDateObj, 1), "yyyy-MM-dd");
             const yesterdayLogs = logs.filter(l => l.loggedDate === yesterday);
             const yValue = yesterdayLogs.reduce((t, l) => t + Number(l.value ?? 0), 0);
-            const completedYesterday = (yesterdayLogs.length > 0 ? yesterdayLogs[0].completed : false) || 
+            const completedYesterday = (yesterdayLogs.length > 0 ? (yesterdayLogs[0]?.completed ?? false) : false) || 
                (habit.targetValue !== null && yValue >= Number(habit.targetValue));
                
             if (!completedYesterday) {
@@ -129,7 +129,7 @@ export async function handleGetHabits(
               if (checkLogs.length === 0) break; // no logs on this day, streak breaks
               
               const checkVal = checkLogs.reduce((t, l) => t + Number(l.value ?? 0), 0);
-              const isCompleted = (checkLogs.length > 0 ? checkLogs[0].completed : false) || 
+              const isCompleted = (checkLogs.length > 0 ? (checkLogs[0]?.completed ?? false) : false) || 
                  (habit.targetValue !== null && checkVal >= Number(habit.targetValue));
                  
               if (isCompleted) {

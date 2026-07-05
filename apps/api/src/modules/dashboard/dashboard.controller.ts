@@ -1,6 +1,33 @@
 import type { ApiResponse } from "@arc/types";
-import { nutritionRepository, workoutRepository, habitRepository } from "@arc/database";
+import { nutritionRepository, workoutRepository, habitRepository, userRepository } from "@arc/database";
 import type { Request, Response } from "express";
+
+const MEAL_SUGGESTIONS = {
+  vegan: [
+    { id: 'meal_breakfast', time: 'Breakfast', pct: 0.25, when: 'Within 1 hour of waking', focus: 'Complex Carbs + Plant Protein', example: 'Oatmeal with soy milk & berries' },
+    { id: 'meal_lunch', time: 'Lunch', pct: 0.25, when: 'Mid-day', focus: 'Balanced Meal', example: 'Quinoa salad with chickpeas & avocado' },
+    { id: 'meal_preworkout', time: 'Pre-Workout', pct: 0.20, when: '30–60 min before', focus: 'Quick Carbs + Light Protein', example: 'Banana & vegan protein shake' },
+    { id: 'meal_postworkout', time: 'Post-Workout', pct: 0.30, when: 'Within 60 min', focus: 'Protein + Carbs', example: 'Lentil pasta or tofu scramble' }
+  ],
+  vegetarian: [
+    { id: 'meal_breakfast', time: "Breakfast", when: "Morning", focus: "Carbs + Protein", example: "Oatmeal with whey or Greek yogurt", pct: 0.25 },
+    { id: 'meal_lunch', time: "Lunch", when: "Mid-day", focus: "Balanced Meal", example: "Paneer wrap with whole wheat roti", pct: 0.25 },
+    { id: 'meal_preworkout', time: "Pre-workout", when: "30–60 min before", focus: "Quick Carbs", example: "Apple and a handful of almonds", pct: 0.20 },
+    { id: 'meal_postworkout', time: "Post-workout", when: "Within 60 min", focus: "Protein + Carbs", example: "Cheese pasta or whey protein shake", pct: 0.30 },
+  ],
+  eggetarian: [
+    { id: 'meal_breakfast', time: "Breakfast", when: "Morning", focus: "Carbs + Protein", example: "Boiled eggs and whole wheat toast", pct: 0.25 },
+    { id: 'meal_lunch', time: "Lunch", when: "Mid-day", focus: "Balanced Meal", example: "Egg curry with brown rice", pct: 0.25 },
+    { id: 'meal_preworkout', time: "Pre-workout", when: "30–60 min before", focus: "Quick Carbs", example: "Banana and black coffee", pct: 0.20 },
+    { id: 'meal_postworkout', time: "Post-workout", when: "Within 60 min", focus: "Protein + Carbs", example: "Egg whites and sweet potato", pct: 0.30 },
+  ],
+  'non-veg': [
+    { id: 'meal_breakfast', time: "Breakfast", when: "Morning", focus: "Carbs + Protein", example: "Eggs & toast or yogurt bowl", pct: 0.25 },
+    { id: 'meal_lunch', time: "Lunch", when: "Mid-day", focus: "Balanced Meal", example: "Chicken salad or lean beef wrap", pct: 0.25 },
+    { id: 'meal_preworkout', time: "Pre-workout", when: "30–60 min before", focus: "Quick Carbs", example: "Oats + whey protein", pct: 0.20 },
+    { id: 'meal_postworkout', time: "Post-workout", when: "Within 60 min", focus: "Protein + Carbs", example: "Rice + chicken breast", pct: 0.30 },
+  ],
+};
 
 type DashboardWorkoutPlan = NonNullable<
   Awaited<ReturnType<typeof workoutRepository.findActivePlanWithDaysByUser>>
@@ -23,6 +50,8 @@ interface DashboardResult {
     | null;
   globalStreak: number;
   activityHistory: number[];
+  isWorkoutDoneToday?: boolean;
+  mealSuggestions: Array<{ id: string, time: string, pct: number, when: string, focus: string, example: string }>;
 }
 
 export async function handleGetDashboardMe(
@@ -41,12 +70,16 @@ export async function handleGetDashboardMe(
   }
 
   try {
-    const [nutrition, workoutPlan, habitLogs, workoutSessions] = await Promise.all([
+    const [nutrition, workoutPlan, habitLogs, workoutSessions, profile] = await Promise.all([
       nutritionRepository.findByUser(req.dbUser.id),
       workoutRepository.findActivePlanWithDaysByUser(req.dbUser.id),
       habitRepository.findHistoricalLogsByUser(req.dbUser.id),
       workoutRepository.findSessionsByUser(req.dbUser.id),
+      userRepository.findProfileByUserId(req.dbUser.id),
     ]);
+    
+    const pref = (profile?.dietaryPreference?.toLowerCase() as keyof typeof MEAL_SUGGESTIONS) || 'non-veg';
+    const mealSuggestions = MEAL_SUGGESTIONS[pref] || MEAL_SUGGESTIONS['non-veg'];
 
     // Calculate activityHistory for the last 84 days (12 weeks)
     const today = new Date();
@@ -138,6 +171,7 @@ export async function handleGetDashboardMe(
         globalStreak: currentStreak,
         activityHistory,
         isWorkoutDoneToday,
+        mealSuggestions,
       },
     });
   } catch {
