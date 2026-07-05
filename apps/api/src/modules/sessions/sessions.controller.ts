@@ -60,6 +60,30 @@ export async function handleGetWorkoutDay(
   }
 }
 
+export async function handleGetSessions(
+  req: Request,
+  res: Response<ApiResponse<any>>,
+): Promise<void> {
+  if (!req.dbUser?.id) {
+    res.status(401).json({
+      success: false,
+      error: { code: "UNAUTHORIZED", message: "Authentication required" },
+    });
+    return;
+  }
+
+  try {
+    const sessions = await workoutRepository.findSessionsWithDetailsByUser(req.dbUser.id);
+    res.status(200).json({ success: true, data: sessions });
+  } catch (error) {
+    console.error("Fetch sessions failed", error);
+    res.status(500).json({
+      success: false,
+      error: { code: "INTERNAL_ERROR", message: "Unable to fetch sessions" },
+    });
+  }
+}
+
 export async function handleStartSession(
   req: Request,
   res: Response<ApiResponse<{ session: any }>>,
@@ -200,6 +224,30 @@ export async function handleCompleteSession(
       res.status(404).json({
         success: false,
         error: { code: "NOT_FOUND", message: "Session not found" },
+      });
+      return;
+    }
+
+    const day = await workoutRepository.findDayWithExercisesByUser(
+      req.dbUser.id,
+      session.workoutDayId
+    );
+
+    if (!day) {
+      res.status(404).json({
+        success: false,
+        error: { code: "NOT_FOUND", message: "Workout day not found" },
+      });
+      return;
+    }
+
+    const totalSetsRequired = day.exercises.reduce((acc, ex) => acc + (ex.sets || 0), 0);
+    const logs = await workoutRepository.findLogsBySessionId(parsedBody.data.sessionId);
+    
+    if (!logs || logs.length < totalSetsRequired) {
+      res.status(400).json({
+        success: false,
+        error: { code: "VALIDATION_ERROR", message: "Cannot complete a workout without completing all sets" },
       });
       return;
     }

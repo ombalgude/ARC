@@ -69,6 +69,7 @@ export interface DashboardData {
   workoutPlan: DashboardWorkoutPlan | null;
   globalStreak: number;
   activityHistory: number[];
+  isWorkoutDoneToday?: boolean;
 }
 
 export interface WorkoutDayDetail extends DashboardWorkoutDay {}
@@ -119,7 +120,9 @@ export interface SessionLog {
   completedAt: string;
   workoutDay?: { name?: string | null } | null;
   exerciseLogs?: Array<{
-    completedSets?: number | null;
+    setNumber?: number | null;
+    repsCompleted?: number | null;
+    weightKg?: number | null;
     exercise?: { name?: string | null } | null;
   }> | null;
 }

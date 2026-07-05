@@ -1,19 +1,45 @@
-import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
-import { router } from 'expo-router';
+import { useMemo } from 'react';
+import { View, Text, Pressable, ScrollView, ActivityIndicator } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CheckCircle2, Share2 } from 'lucide-react-native';
 import { useAppTheme } from '../../../lib/themeStore';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useAuth } from '@clerk/clerk-expo';
+import { useQuery } from '@tanstack/react-query';
+import { createApiClient } from '../../../lib/api';
 
-const EXERCISES_LOG = [
-  { name: "Barbell Bench Press", sets: 4, volume: "2,240 kg", pr: true },
-  { name: "Incline DB Press", sets: 3, volume: "990 kg", pr: false },
-  { name: "Overhead Press", sets: 4, volume: "1,800 kg", pr: false },
-  { name: "Cable Lateral Raise", sets: 3, volume: "288 kg", pr: false },
-];
+
 
 export default function WorkoutSummaryScreen() {
   const C = useAppTheme();
+  const { dayId, elapsed } = useLocalSearchParams<{ dayId: string; elapsed: string }>();
+  const { getToken } = useAuth();
+  const api = useMemo(() => createApiClient(getToken), [getToken]);
+
+  const { data: dashboard, isLoading: isLoadingDashboard } = useQuery({
+    queryKey: ['dashboard'],
+    queryFn: () => api.getDashboard(),
+  });
+
+  const { data: day, isLoading: isLoadingDay } = useQuery({
+    queryKey: ['workout-day-active', dayId],
+    queryFn: () => api.getWorkoutDay(dayId as string),
+    enabled: !!dayId,
+  });
+
+  if (isLoadingDashboard || isLoadingDay) {
+    return (
+      <View style={{ flex: 1, backgroundColor: C.background, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator color={C.brand} size="large" />
+      </View>
+    );
+  }
+
+  const durationMin = elapsed ? Math.floor(parseInt(elapsed, 10) / 60) : 0;
+  const totalSets = day?.exercises?.reduce((sum, ex) => sum + (ex.sets ?? 0), 0) || 0;
+  const dayName = day?.name || 'Workout';
+  const streak = dashboard?.globalStreak || 0;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.background }} edges={['bottom']}>
@@ -32,7 +58,7 @@ export default function WorkoutSummaryScreen() {
             Workout Complete!
           </Text>
           <Text style={{ fontSize: 14, color: 'rgba(255,255,255,0.9)', textAlign: 'center', fontWeight: '500' }}>
-            Push Day A · 14-day streak maintained 🔥
+            {dayName} · {streak}-day streak maintained 🔥
           </Text>
         </LinearGradient>
 
@@ -40,9 +66,7 @@ export default function WorkoutSummaryScreen() {
         <View style={{ marginHorizontal: 20, marginTop: -24, backgroundColor: C.card, borderRadius: 22, borderWidth: 1, borderColor: C.border, padding: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 24, elevation: 8 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             {[
-              { label: "Duration", value: "54", unit: "min", icon: "⏱" },
-              { label: "Total Sets", value: "23", unit: "sets", icon: "📊" },
-              { label: "Volume", value: "9.1k", unit: "kg", icon: "💪" },
+              { label: "Total Sets", value: String(totalSets), unit: "sets", icon: "📊" },
             ].map(({ label, value, unit, icon }) => (
               <View key={label} style={{ alignItems: 'center', flex: 1 }}>
                 <Text style={{ fontSize: 20, marginBottom: 6 }}>{icon}</Text>
@@ -56,16 +80,7 @@ export default function WorkoutSummaryScreen() {
           </View>
         </View>
 
-        {/* PR alert */}
-        <View style={{ marginHorizontal: 20, marginTop: 20 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, backgroundColor: 'rgba(255, 179, 0, 0.12)', borderWidth: 1, borderColor: 'rgba(255,179,0,0.25)', borderRadius: 16 }}>
-            <Text style={{ fontSize: 24 }}>🏅</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 14, fontWeight: '800', color: '#F59E0B' }}>New Personal Record!</Text>
-              <Text style={{ fontSize: 13, color: C.textSecondary, marginTop: 2 }}>Barbell Bench Press — 80kg × 8 reps</Text>
-            </View>
-          </View>
-        </View>
+
 
         {/* Muscles trained */}
         <View style={{ marginHorizontal: 20, marginTop: 24 }}>
@@ -90,19 +105,14 @@ export default function WorkoutSummaryScreen() {
         <View style={{ marginHorizontal: 20, marginTop: 24 }}>
           <Text style={{ fontSize: 15, fontWeight: '800', color: C.foreground, marginBottom: 12 }}>Exercise Log</Text>
           <View style={{ gap: 10 }}>
-            {EXERCISES_LOG.map(({ name, sets, volume, pr }) => (
-              <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, backgroundColor: C.card, borderRadius: 14, borderWidth: 1, borderColor: C.border }}>
+            {day?.exercises?.map((ex) => (
+              <View key={ex.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, backgroundColor: C.card, borderRadius: 14, borderWidth: 1, borderColor: C.border }}>
                 <CheckCircle2 size={18} color={C.health} strokeWidth={2.5} />
                 <View style={{ flex: 1 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <Text style={{ fontSize: 14, fontWeight: '700', color: C.foreground }}>{name}</Text>
-                    {pr && (
-                      <View style={{ backgroundColor: '#F59E0B', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
-                        <Text style={{ fontSize: 9, fontWeight: '800', color: '#FFF', letterSpacing: 0.5 }}>PR</Text>
-                      </View>
-                    )}
+                    <Text style={{ fontSize: 14, fontWeight: '700', color: C.foreground }}>{ex.exerciseName}</Text>
                   </View>
-                  <Text style={{ fontSize: 12, color: C.textTertiary, marginTop: 2, fontWeight: '500' }}>{sets} sets · {volume}</Text>
+                  <Text style={{ fontSize: 12, color: C.textTertiary, marginTop: 2, fontWeight: '500' }}>{ex.sets} sets</Text>
                 </View>
               </View>
             ))}

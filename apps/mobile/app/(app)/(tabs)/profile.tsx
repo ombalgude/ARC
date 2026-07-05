@@ -24,14 +24,21 @@ export default function ProfileScreen(): React.JSX.Element {
   const api = useMemo(() => createApiClient(getToken), [getToken]);
   
   const [profileData, setProfileData] = useState<CurrentUserProfile | null>(null);
+  const [streak, setStreak] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
     async function loadProfile(): Promise<void> {
       try {
-        const result = await api.getMe();
-        if (isMounted) setProfileData(result);
+        const [profRes, dashRes] = await Promise.all([
+          api.getMe(),
+          api.getDashboard().catch(() => null)
+        ]);
+        if (isMounted) {
+          setProfileData(profRes);
+          if (dashRes) setStreak(dashRes.globalStreak);
+        }
       } catch (error) {
         // silently fail and use fallback
       } finally {
@@ -54,10 +61,14 @@ export default function ProfileScreen(): React.JSX.Element {
     );
   }
 
+  const weightStr = profileData?.profile?.weightKg ? `${profileData.profile.weightKg}kg` : '--';
+  const goalKey = profileData?.profile?.goal ? String(profileData.profile.goal).replace(/([A-Z])/g, ' $1').replace(/^./, (str: string) => str.toUpperCase()) : 'Manage goals';
+  const experienceKey = profileData?.profile?.experienceLevel ? String(profileData.profile.experienceLevel).replace(/^./, (str: string) => str.toUpperCase()) : 'Set up profile';
+
   const MENU = [
-    { label: "Weight Tracking", sub: "83.2kg → Goal: 80kg", Icon: Weight, color: "#00D9B8" },
-    { label: "My Goals", sub: "Build Muscle · 4-day split", Icon: Target, color: "#7C5CFC" },
-    { label: "Subscription", sub: "Free Plan — Upgrade to Pro", Icon: CreditCard, color: "#FFB300" },
+    { label: "Weight Tracking", sub: `${weightStr} current`, Icon: Weight, color: "#00D9B8" },
+    { label: "My Goals", sub: `${goalKey} · ${experienceKey}`, Icon: Target, color: "#7C5CFC" },
+    { label: "Subscription", sub: "Free Plan", Icon: CreditCard, color: "#FFB300" },
     { label: "Settings", sub: "Theme, units, notifications", Icon: Settings, color: "#9890BC" },
   ];
 
@@ -120,13 +131,13 @@ export default function ProfileScreen(): React.JSX.Element {
                     {name}
                   </Text>
                   <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>
-                    {profileData?.profile?.goal ? String(profileData.profile.goal).replace(/([A-Z])/g, ' $1').replace(/^./, (str: string) => str.toUpperCase()) : 'Build Muscle'} · Intermediate
+                    {goalKey} · {experienceKey}
                   </Text>
                   
                   <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 99, paddingHorizontal: 10, paddingVertical: 4 }}>
                       <Text style={{ fontSize: 12 }}>🔥</Text>
-                      <Text style={{ fontSize: 12, fontWeight: '700', color: '#FFF' }}>14-day streak</Text>
+                      <Text style={{ fontSize: 12, fontWeight: '700', color: '#FFF' }}>{streak}-day streak</Text>
                     </View>
                     <View style={{ backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 99, paddingHorizontal: 10, paddingVertical: 4 }}>
                       <Text style={{ fontSize: 12, fontWeight: '700', color: '#FFF' }}>Free Plan</Text>
@@ -141,9 +152,9 @@ export default function ProfileScreen(): React.JSX.Element {
         {/* Stats */}
         <View style={{ flexDirection: 'row', gap: 10, paddingHorizontal: 20, marginTop: 14 }}>
           {[
-            { v: "14", label: "Workouts" },
-            { v: "−1.8kg", label: "Lost" },
-            { v: "88%", label: "Completion" },
+            { v: "0", label: "Workouts" },
+            { v: weightStr, label: "Current" },
+            { v: "0%", label: "Completion" },
           ].map(({ v, label }) => (
             <View
               key={label}
@@ -192,12 +203,11 @@ export default function ProfileScreen(): React.JSX.Element {
               <View>
                 <Text style={{ fontSize: 14, fontWeight: '700', color: C.foreground }}>Weight Progress</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 6 }}>
-                  <TrendingDown size={14} color={C.health} strokeWidth={2.5} />
-                  <Text style={{ fontSize: 12, fontWeight: '700', color: C.health }}>−1.8 kg in 30 days</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: C.textTertiary }}>Not enough data yet</Text>
                 </View>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
-                <Text style={{ fontSize: 22, fontWeight: '800', color: C.foreground, letterSpacing: -0.5 }}>83.2</Text>
+                <Text style={{ fontSize: 22, fontWeight: '800', color: C.foreground, letterSpacing: -0.5 }}>{profileData?.profile?.weightKg || '--'}</Text>
                 <Text style={{ fontSize: 10, color: C.textTertiary, fontWeight: '600' }}>kg current</Text>
               </View>
             </View>

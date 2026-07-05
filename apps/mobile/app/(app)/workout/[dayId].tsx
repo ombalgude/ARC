@@ -23,13 +23,20 @@ export default function WorkoutDayScreen() {
     enabled: !!dayId,
   });
 
+  const { data: dashboard } = useQuery({
+    queryKey: ['dashboard'],
+    queryFn: () => api.getDashboard(),
+  });
+  
+  const isWorkoutDoneToday = dashboard?.isWorkoutDoneToday;
+
   const { mutate: startSession, isPending: isStarting } = useMutation({
     mutationFn: () => api.startSession({
       workoutDayId: dayId as string,
       startedAt: new Date().toISOString()
     }),
     onSuccess: (data) => {
-      router.push({ pathname: '/workout/active', params: { dayId: dayId as string, sessionId: data.session.id } } as any);
+      router.push(`/workout/active?dayId=${dayId}&sessionId=${data.session.id}` as any);
     },
   });
 
@@ -133,7 +140,7 @@ export default function WorkoutDayScreen() {
         {/* Start CTA */}
         <View style={{ paddingHorizontal: 20 }}>
           <Pressable
-            disabled={isStarting}
+            disabled={isStarting || isWorkoutDoneToday}
             onPress={() => startSession()}
             style={({ pressed }) => [{
               borderRadius: 16,
@@ -143,11 +150,11 @@ export default function WorkoutDayScreen() {
               shadowOpacity: 0.35,
               shadowRadius: 24,
               elevation: 8,
-              opacity: isStarting ? 0.7 : 1,
-            }, pressed && !isStarting && { transform: [{ scale: 0.98 }] }]}
+              opacity: (isStarting || isWorkoutDoneToday) ? 0.7 : 1,
+            }, pressed && !isStarting && !isWorkoutDoneToday && { transform: [{ scale: 0.98 }] }]}
           >
             <LinearGradient
-              colors={['#7C5CFC', '#A07AF8']}
+              colors={isWorkoutDoneToday ? ['#555', '#444'] : ['#7C5CFC', '#A07AF8']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={{ padding: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
@@ -156,8 +163,10 @@ export default function WorkoutDayScreen() {
                 <ActivityIndicator color="#FFF" />
               ) : (
                 <>
-                  <Text style={{ fontSize: 17, fontWeight: '800', color: '#FFF' }}>Start Workout</Text>
-                  <ChevronRight size={20} color="#FFF" strokeWidth={2.5} />
+                  <Text style={{ fontSize: 17, fontWeight: '800', color: '#FFF' }}>
+                    {isWorkoutDoneToday ? 'Workout Completed Today ✓' : 'Start Workout'}
+                  </Text>
+                  {!isWorkoutDoneToday && <ChevronRight size={20} color="#FFF" strokeWidth={2.5} />}
                 </>
               )}
             </LinearGradient>

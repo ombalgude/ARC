@@ -31,11 +31,31 @@ export async function handleGetHabits(
 
   try {
     let rawHabits = await habitRepository.findActiveByUser(req.dbUser.id);
+    const existingTypes = new Set(rawHabits.map(h => h.type));
+    const defaultTypes = ["water", "steps", "sleep", "macros"] as const;
+    
+    let needsSeeding = false;
+    const habitsToCreate = [];
+    for (const type of defaultTypes) {
+      if (!existingTypes.has(type)) {
+        needsSeeding = true;
+        let targetValue = null;
+        let unit = null;
+        if (type === "water") { targetValue = "8"; unit = "glasses"; }
+        if (type === "steps") { targetValue = "10000"; unit = "steps"; }
+        if (type === "sleep") { targetValue = "8"; unit = "hours"; }
+        habitsToCreate.push({ userId: req.dbUser.id, type, targetValue, unit, isActive: true });
+      }
+    }
 
-    if (rawHabits.length === 0) {
-      rawHabits = await db.transaction((tx) =>
-        habitRepository.seedDefaultHabits(req.dbUser!.id, tx),
-      );
+    if (needsSeeding && habitsToCreate.length > 0) {
+      await db.transaction(async (tx) => {
+        for (const habit of habitsToCreate) {
+          await habitRepository.createHabit(habit, tx);
+        }
+      });
+      // Refetch
+      rawHabits = await habitRepository.findActiveByUser(req.dbUser.id);
     }
 
     const uniqueHabitsMap = new Map<string, HabitRecord>();
@@ -72,7 +92,7 @@ export async function handleGetHabits(
             0,
           );
 
-          const completedToday = todayLogs.some((log) => log.completed) ||
+          const completedToday = (todayLogs.length > 0 ? todayLogs[0].completed : false) ||
               (habit.targetValue !== null && todayValue >= Number(habit.targetValue));
 
           // Calculate streak
@@ -88,7 +108,7 @@ export async function handleGetHabits(
             const yesterday = format(subDays(currentDateObj, 1), "yyyy-MM-dd");
             const yesterdayLogs = logs.filter(l => l.loggedDate === yesterday);
             const yValue = yesterdayLogs.reduce((t, l) => t + Number(l.value ?? 0), 0);
-            const completedYesterday = yesterdayLogs.some(l => l.completed) || 
+            const completedYesterday = (yesterdayLogs.length > 0 ? yesterdayLogs[0].completed : false) || 
                (habit.targetValue !== null && yValue >= Number(habit.targetValue));
                
             if (!completedYesterday) {
@@ -109,7 +129,7 @@ export async function handleGetHabits(
               if (checkLogs.length === 0) break; // no logs on this day, streak breaks
               
               const checkVal = checkLogs.reduce((t, l) => t + Number(l.value ?? 0), 0);
-              const isCompleted = checkLogs.some(l => l.completed) || 
+              const isCompleted = (checkLogs.length > 0 ? checkLogs[0].completed : false) || 
                  (habit.targetValue !== null && checkVal >= Number(habit.targetValue));
                  
               if (isCompleted) {

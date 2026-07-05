@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { View, Text, Pressable, ScrollView, Switch } from 'react-native';
+import { View, Text, Pressable, ScrollView, Switch, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { ChevronLeft, Sun, Moon, Monitor, Bell, ChevronRight, LogOut, Trash2 } from 'lucide-react-native';
-import { useAuth } from '@clerk/clerk-expo';
+import { useAuth, useUser } from '@clerk/clerk-expo';
 import { useAppTheme, useThemeStore } from '../../../lib/themeStore';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -40,6 +40,7 @@ function Row({ label, sub, left, right, divider = true }: { label: string; sub?:
 export default function SettingsScreen() {
   const C = useAppTheme();
   const { signOut } = useAuth();
+  const { user } = useUser();
   const themeMode = useThemeStore((s) => s.mode);
   const setThemeMode = useThemeStore((s) => s.setTheme);
   
@@ -55,6 +56,28 @@ export default function SettingsScreen() {
   ];
 
   const handleSignOut = () => void signOut();
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      "Delete Account",
+      "Are you absolutely sure you want to delete your account? This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Delete", 
+          style: "destructive", 
+          onPress: async () => {
+            try {
+              await user?.delete();
+            } catch (error) {
+              console.error(error);
+              Alert.alert("Error", "Failed to delete account. Please try again.");
+            }
+          }
+        }
+      ]
+    );
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.background }} edges={['top']}>
@@ -196,6 +219,7 @@ export default function SettingsScreen() {
           </Pressable>
 
           <Pressable
+            onPress={handleDeleteAccount}
             style={({ pressed }) => [
               {
                 flexDirection: 'row',

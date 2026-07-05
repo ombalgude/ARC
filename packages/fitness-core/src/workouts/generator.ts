@@ -114,6 +114,17 @@ export function generateWorkoutPlan(input: WorkoutGeneratorInput): GeneratedWork
   const splitDays = getSplitDays(input.workoutFrequency);
   const splitName = deriveSplitName(splitDays);
 
+  const dayDistribution: Record<number, number[]> = {
+    1: [3],
+    2: [2, 4],
+    3: [1, 3, 5],
+    4: [1, 2, 4, 5],
+    5: [1, 2, 3, 4, 5],
+    6: [1, 2, 3, 4, 5, 6],
+    7: [1, 2, 3, 4, 5, 6, 0]
+  };
+  const targetDays = dayDistribution[input.workoutFrequency] || [1];
+
   const days = splitDays.map((dayName, index) => {
     const selectedExercises = DAY_MOVEMENT_PATTERNS[dayName].map((movementPattern) =>
       buildGeneratedExercise(
@@ -126,7 +137,6 @@ export function generateWorkoutPlan(input: WorkoutGeneratorInput): GeneratedWork
         if (left.metadata.isCompound !== right.metadata.isCompound) {
           return left.metadata.isCompound ? -1 : 1;
         }
-
         return right.metadata.fatigueScore - left.metadata.fatigueScore;
       })
       .map((exercise, exerciseIndex) => ({
@@ -140,7 +150,7 @@ export function generateWorkoutPlan(input: WorkoutGeneratorInput): GeneratedWork
 
     return {
       dayNumber: index + 1,
-      dayOfWeek: index,
+      dayOfWeek: targetDays[index],
       name: dayName,
       exercises: orderedExercises,
     };

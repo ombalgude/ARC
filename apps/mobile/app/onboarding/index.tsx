@@ -95,13 +95,15 @@ function getValidationMessage(error: unknown): string {
 }
 
 function getStepError(step: number, form: Partial<OnboardingInput>): string | null {
-  if (step === 0 && (!form.age || !form.gender)) return 'Add your age and gender to continue.';
-  if (step === 1 && (!form.weightKg || !form.heightCm)) return 'Add your body metrics to continue.';
-  if (step === 2 && (!form.goal || !form.experienceLevel || !form.activityLevel || !form.workoutDaysPerWeek)) {
-    return 'Choose your goal, experience, activity, and weekly training days.';
+  if (step === 0 && !form.goal) return 'Choose your primary goal to continue.';
+  if (step === 1 && (!form.experienceLevel || !form.activityLevel || !form.workoutDaysPerWeek)) {
+    return 'Choose your experience, activity, and weekly training days.';
   }
-  if (step === 3 && (!form.dietaryPreference || !form.environment)) {
-    return 'Complete your dietary and environment preferences.';
+  if (step === 2 && (!form.age || !form.gender || !form.weightKg || !form.heightCm)) {
+    return 'Add your age, gender, and body metrics to continue.';
+  }
+  if (step === 3 && !form.environment) {
+    return 'Complete your training environment preference.';
   }
   return null;
 }

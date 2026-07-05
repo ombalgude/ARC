@@ -34,7 +34,11 @@ export default function HabitsScreen(): React.JSX.Element {
   });
 
   const habits = useMemo(() => {
-    return (rawHabits || []).map(h => ({
+    const safeHabitsArray = Array.isArray(rawHabits) 
+      ? rawHabits 
+      : (rawHabits && typeof rawHabits === 'object' && 'habits' in rawHabits ? (rawHabits as any).habits : []);
+
+    return safeHabitsArray.map((h: any) => ({
       ...h,
       ...(HABIT_CONFIG[h.type] || { name: h.type, Icon: Check, color: C.brand }),
       done: h.completedToday,
@@ -50,14 +54,14 @@ export default function HabitsScreen(): React.JSX.Element {
       return api.logHabit({ habitId, localDate, completed: isDone }).catch(() => null);
     },
     onMutate: async (habitId: string) => {
-      await queryClient.cancelQueries({ queryKey: ['habits-detail'] });
-      await queryClient.cancelQueries({ queryKey: ['dashboard-habits'] });
+      await queryClient.cancelQueries({ queryKey: ['habits-detail', localDate] });
+      await queryClient.cancelQueries({ queryKey: ['dashboard-habits', localDate] });
       
-      const prevDetail = queryClient.getQueryData<HabitSummary[]>(['habits-detail']);
-      const prevDashboard = queryClient.getQueryData<HabitSummary[]>(['dashboard-habits']);
+      const prevDetail = queryClient.getQueryData<HabitSummary[]>(['habits-detail', localDate]);
+      const prevDashboard = queryClient.getQueryData<HabitSummary[]>(['dashboard-habits', localDate]);
 
       if (prevDetail) {
-        queryClient.setQueryData<HabitSummary[]>(['habits-detail'], old =>
+        queryClient.setQueryData<HabitSummary[]>(['habits-detail', localDate], old =>
           (old || []).map(h => h.id === habitId ? { ...h, completedToday: !h.completedToday } : h)
         );
       }
@@ -65,8 +69,8 @@ export default function HabitsScreen(): React.JSX.Element {
       return { prevDetail, prevDashboard };
     },
     onError: (err, newHabit, context) => {
-      if (context?.prevDetail) queryClient.setQueryData(['habits-detail'], context.prevDetail);
-      if (context?.prevDashboard) queryClient.setQueryData(['dashboard-habits'], context.prevDashboard);
+      if (context?.prevDetail) queryClient.setQueryData(['habits-detail', localDate], context.prevDetail);
+      if (context?.prevDashboard) queryClient.setQueryData(['dashboard-habits', localDate], context.prevDashboard);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['habits-detail', localDate] });

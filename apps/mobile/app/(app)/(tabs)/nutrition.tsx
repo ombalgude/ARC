@@ -11,6 +11,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { CheckCircle2, Circle } from 'lucide-react-native';
 
 import { createApiClient, type DashboardData } from '../../../lib/api';
 import { useAppTheme } from '../../../lib/themeStore';
@@ -115,6 +117,34 @@ export default function NutritionScreen(): React.JSX.Element {
     return () => { isMounted = false; };
   }, [api]);
 
+  const queryClient = useQueryClient();
+  const now = new Date();
+  const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  
+  const { data: habitsArray } = useQuery({
+    queryKey: ['habits-detail', localDate],
+    queryFn: () => api.getHabits(localDate).then(res => res.habits),
+  });
+  
+  const macrosHabit = habitsArray?.find(h => h.type === 'macros');
+  const isCompleted = macrosHabit?.completedToday;
+
+  const toggleMutation = useMutation({
+    mutationFn: async (completed: boolean) => {
+      if (!macrosHabit) return;
+      await api.logHabit({
+        habitId: macrosHabit.id,
+        localDate: localDate,
+        completed
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['habits-detail', localDate] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+    }
+  });
+
   if (isLoading) {
     return (
       <View style={styles.loading}>
@@ -124,14 +154,17 @@ export default function NutritionScreen(): React.JSX.Element {
   }
 
   const nutrition = dashboard?.nutrition;
-  const cals = { now: 1840, target: nutrition?.caloriesTarget ?? 2500 };
-  const calsPct = Math.min(100, Math.round((cals.now / cals.target) * 100));
+  const cals = { 
+    now: isCompleted ? (nutrition?.caloriesTarget ?? 0) : 0, 
+    target: nutrition?.caloriesTarget ?? 0 
+  };
+  const calsPct = cals.target > 0 ? Math.min(100, Math.round((cals.now / cals.target) * 100)) : 0;
   const calsRemaining = Math.max(0, cals.target - cals.now);
 
   const macros = [
-    { label: 'Protein', current: 142, target: nutrition?.proteinG ?? 150, color: '#7C5CFC', unit: 'g', icon: '🥩' },
-    { label: 'Carbs', current: 198, target: nutrition?.carbsG ?? 200, color: '#00D9B8', unit: 'g', icon: '🌾' },
-    { label: 'Fats', current: 51, target: nutrition?.fatG ?? 70, color: '#FF6B6B', unit: 'g', icon: '🥑' },
+    { label: 'Protein', current: isCompleted ? (nutrition?.proteinG ?? 0) : 0, target: nutrition?.proteinG ?? 0, color: '#7C5CFC', unit: 'g', icon: '🥩' },
+    { label: 'Carbs', current: isCompleted ? (nutrition?.carbsG ?? 0) : 0, target: nutrition?.carbsG ?? 0, color: '#00D9B8', unit: 'g', icon: '🌾' },
+    { label: 'Fats', current: isCompleted ? (nutrition?.fatG ?? 0) : 0, target: nutrition?.fatG ?? 0, color: '#FF6B6B', unit: 'g', icon: '🥑' },
   ];
 
   return (
@@ -152,6 +185,46 @@ export default function NutritionScreen(): React.JSX.Element {
           <View style={styles.errorBanner}>
             <Text style={styles.errorText}>{errorMessage}</Text>
           </View>
+        )}
+
+        {/* Daily Completion Check */}
+        {macrosHabit && (
+          <Pressable
+            onPress={() => toggleMutation.mutate(!isCompleted)}
+            disabled={toggleMutation.isPending}
+            style={({ pressed }) => [
+              {
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                backgroundColor: isCompleted ? 'rgba(0, 217, 184, 0.1)' : C.card,
+                borderRadius: 18,
+                borderWidth: 1,
+                borderColor: isCompleted ? C.health : C.border,
+                padding: 16,
+                marginBottom: 16,
+              },
+              pressed && { opacity: 0.8 }
+            ]}
+          >
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 16, fontWeight: '700', color: isCompleted ? C.health : C.foreground }}>
+                {isCompleted ? "Macros completed today!" : "Hit your macros today?"}
+              </Text>
+              <Text style={{ fontSize: 13, color: isCompleted ? C.health : C.textSecondary, marginTop: 2, opacity: 0.8 }}>
+                {isCompleted ? "Great job sticking to your plan." : "Mark complete to maintain your streak."}
+              </Text>
+            </View>
+            <View>
+              {toggleMutation.isPending ? (
+                <ActivityIndicator color={C.health} size="small" />
+              ) : isCompleted ? (
+                <CheckCircle2 size={28} color={C.health} strokeWidth={2.5} />
+              ) : (
+                <Circle size={28} color={C.textTertiary} strokeWidth={1.5} />
+              )}
+            </View>
+          </Pressable>
         )}
 
         {/* Calorie Card */}
@@ -186,7 +259,7 @@ export default function NutritionScreen(): React.JSX.Element {
         
         <View style={styles.macroGrid}>
           {macros.map((m) => {
-            const pct = Math.round((m.current / m.target) * 100);
+            const pct = m.target > 0 ? Math.round((m.current / m.target) * 100) : 0;
             return (
               <View key={m.label} style={styles.macroTile}>
                 <ProgressRing size={64} strokeWidth={6} progress={pct} color={m.color} trackColor={C.muted}>
@@ -211,7 +284,7 @@ export default function NutritionScreen(): React.JSX.Element {
                 </Text>
               </View>
               <View style={styles.progressBarBg}>
-                <View style={[styles.progressBarFill, { backgroundColor: m.color, width: `${Math.min(100, (m.current / m.target) * 100)}%` }]} />
+                <View style={[styles.progressBarFill, { backgroundColor: m.color, width: `${m.target > 0 ? Math.min(100, (m.current / m.target) * 100) : 0}%` }]} />
               </View>
             </View>
           ))}

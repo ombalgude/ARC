@@ -95,5 +95,5 @@ export async function findHistoricalLogsByUser(userId: string) {
     .select()
     .from(habitLogs)
     .where(eq(habitLogs.userId, userId))
-    .orderBy(desc(habitLogs.loggedDate));
+    .orderBy(desc(habitLogs.loggedDate), desc(habitLogs.createdAt));
 }

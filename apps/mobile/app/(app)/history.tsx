@@ -15,17 +15,12 @@ import { CheckCircle2, ChevronLeft, Clock, X } from 'lucide-react-native';
 import { createApiClient, type SessionLog } from '../../lib/api';
 import { useAppTheme } from '../../lib/themeStore';
 
-function formatDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-function formatDuration(start: string, end: string): string {
-  const ms = new Date(end).getTime() - new Date(start).getTime();
-  const minutes = Math.round(ms / 60000);
-  if (minutes < 60) return `${minutes}m`;
-  return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
-}
+
 
 function getWeekLabel(dateStr: string): string {
   const date = new Date(dateStr);
@@ -44,16 +39,7 @@ function getWeekLabel(dateStr: string): string {
   return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 }
 
-// Fallback data if API returns empty to match design prototype
-const FALLBACK_HISTORY = [
-  { date: "Jun 25", name: "Push Day B", duration: "54m", sets: 23, status: "done", week: "This week" },
-  { date: "Jun 24", name: "Pull Day A", duration: "48m", sets: 22, status: "done", week: "This week" },
-  { date: "Jun 23", name: "Rest Day", duration: "—", sets: 0, status: "rest", week: "This week" },
-  { date: "Jun 22", name: "Push Day A", duration: "52m", sets: 24, status: "done", week: "This week" },
-  { date: "Jun 19", name: "Legs B", duration: "64m", sets: 26, status: "done", week: "Last week" },
-  { date: "Jun 18", name: "Pull Day B", duration: "51m", sets: 23, status: "done", week: "Last week" },
-  { date: "Jun 13", name: "Pull Day A", duration: "46m", sets: 21, status: "missed", week: "2 weeks ago" },
-];
+
 
 export default function HistoryScreen(): React.JSX.Element {
   const C = useAppTheme();
@@ -82,22 +68,20 @@ export default function HistoryScreen(): React.JSX.Element {
     return () => { isMounted = false; };
   }, [api]);
 
-  // Transform actual data or use fallback
+  // Transform actual data
   const historyItems = useMemo(() => {
-    if (sessions.length > 0) {
-      return sessions.map(session => {
-        const sets = session.exerciseLogs?.reduce((sum, log) => sum + (log.completedSets ?? 0), 0) ?? 0;
+    return sessions
+      .filter(session => session.completedAt != null)
+      .map(session => {
+        const sets = session.exerciseLogs?.length ?? 0;
         return {
-          date: formatDate(session.startedAt),
+          date: formatDate(session.completedAt!),
           name: session.workoutDay?.name ?? 'Workout',
-          duration: formatDuration(session.startedAt, session.completedAt),
           sets,
           status: "done",
-          week: getWeekLabel(session.startedAt)
+          week: getWeekLabel(session.completedAt!)
         };
       });
-    }
-    return FALLBACK_HISTORY;
   }, [sessions]);
 
   const completed = historyItems.filter((h) => h.status === "done").length;
@@ -145,7 +129,6 @@ export default function HistoryScreen(): React.JSX.Element {
           {[
             { label: "Completed", value: completed, color: "#14C9A4" },
             { label: "Completion Rate", value: `${completionRate}%`, color: "#7665F5" },
-            { label: "Avg Duration", value: "55m", color: "#F97316" },
           ].map(({ label, value, color }) => (
             <View
               key={label}
@@ -171,80 +154,86 @@ export default function HistoryScreen(): React.JSX.Element {
 
         {/* History list */}
         <View style={{ paddingHorizontal: 20 }}>
-          {Object.entries(grouped).map(([week, items]) => (
-            <View key={week} style={{ marginBottom: 20 }}>
-              <Text style={{ fontSize: 12, fontWeight: '700', color: C.textTertiary, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>
-                {week}
+          {historyItems.length === 0 ? (
+            <View style={{ padding: 40, alignItems: 'center' }}>
+              <Text style={{ fontSize: 48, marginBottom: 16 }}>🏃</Text>
+              <Text style={{ fontSize: 18, fontWeight: '700', color: C.foreground, marginBottom: 8 }}>No workouts yet!</Text>
+              <Text style={{ fontSize: 14, color: C.textSecondary, textAlign: 'center' }}>
+                Complete a workout to see it appear in your history.
               </Text>
-              <View style={{ gap: 8 }}>
-                {items.map(({ date, name, duration, sets, status }, idx) => (
-                  <View
-                    key={`${date}-${idx}`}
-                    style={{
-                      backgroundColor: status === "missed" ? 'rgba(239,68,68,0.04)' : C.card,
-                      borderRadius: 14,
-                      borderWidth: 1,
-                      borderColor: status === "missed" ? 'rgba(239,68,68,0.15)' : C.border,
-                      padding: 14,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 12,
-                      shadowColor: '#000',
-                      shadowOffset: { width: 0, height: 1 },
-                      shadowOpacity: 0.03,
-                      shadowRadius: 4,
-                      elevation: 1,
-                    }}
-                  >
-                    {/* Status Icon */}
+            </View>
+          ) : (
+            Object.entries(grouped).map(([week, items]) => (
+              <View key={week} style={{ marginBottom: 20 }}>
+                <Text style={{ fontSize: 12, fontWeight: '700', color: C.textTertiary, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>
+                  {week}
+                </Text>
+                <View style={{ gap: 8 }}>
+                  {items.map(({ date, name, sets, status }, idx) => (
                     <View
+                      key={`${date}-${idx}`}
                       style={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: 10,
-                        backgroundColor: status === "done" ? 'rgba(0, 217, 184, 0.12)' : status === "rest" ? C.muted : 'rgba(239,68,68,0.1)',
+                        backgroundColor: status === "missed" ? 'rgba(239,68,68,0.04)' : C.card,
+                        borderRadius: 14,
+                        borderWidth: 1,
+                        borderColor: status === "missed" ? 'rgba(239,68,68,0.15)' : C.border,
+                        padding: 14,
+                        flexDirection: 'row',
                         alignItems: 'center',
-                        justifyContent: 'center',
+                        gap: 12,
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.03,
+                        shadowRadius: 4,
+                        elevation: 1,
                       }}
                     >
-                      {status === "done" ? (
-                        <CheckCircle2 size={18} color={C.health} strokeWidth={2.5} />
-                      ) : status === "rest" ? (
-                        <Text style={{ fontSize: 14 }}>🌙</Text>
-                      ) : (
-                        <X size={18} color="#EF4444" strokeWidth={2.5} />
+                      {/* Status Icon */}
+                      <View
+                        style={{
+                          width: 36,
+                          height: 36,
+                          borderRadius: 10,
+                          backgroundColor: status === "done" ? 'rgba(0, 217, 184, 0.12)' : status === "rest" ? C.muted : 'rgba(239,68,68,0.1)',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        {status === "done" ? (
+                          <CheckCircle2 size={18} color={C.health} strokeWidth={2.5} />
+                        ) : status === "rest" ? (
+                          <Text style={{ fontSize: 14 }}>🌙</Text>
+                        ) : (
+                          <X size={18} color="#EF4444" strokeWidth={2.5} />
+                        )}
+                      </View>
+
+                      {/* Details */}
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 15, fontWeight: '700', color: C.foreground }}>{name}</Text>
+                        <Text style={{ fontSize: 12, color: C.textTertiary, marginTop: 2 }}>{date}</Text>
+                      </View>
+
+                      {/* Meta stats */}
+                      {status === "done" && (
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                          <View style={{ backgroundColor: C.muted, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 99 }}>
+                            <Text style={{ fontSize: 11, fontWeight: '600', color: C.textTertiary }}>{sets} sets</Text>
+                          </View>
+                        </View>
+                      )}
+
+                      {status === "missed" && (
+                        <View style={{ backgroundColor: 'rgba(239,68,68,0.1)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 99 }}>
+                          <Text style={{ fontSize: 11, fontWeight: '600', color: '#EF4444' }}>Missed</Text>
+                        </View>
                       )}
                     </View>
-
-                    {/* Details */}
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ fontSize: 15, fontWeight: '700', color: C.foreground }}>{name}</Text>
-                      <Text style={{ fontSize: 12, color: C.textTertiary, marginTop: 2 }}>{date}</Text>
-                    </View>
-
-                    {/* Meta stats */}
-                    {status === "done" && (
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                          <Clock size={12} color={C.textTertiary} />
-                          <Text style={{ fontSize: 12, color: C.textSecondary, fontWeight: '500' }}>{duration}</Text>
-                        </View>
-                        <View style={{ backgroundColor: C.muted, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 99 }}>
-                          <Text style={{ fontSize: 11, fontWeight: '600', color: C.textTertiary }}>{sets} sets</Text>
-                        </View>
-                      </View>
-                    )}
-
-                    {status === "missed" && (
-                      <View style={{ backgroundColor: 'rgba(239,68,68,0.1)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 99 }}>
-                        <Text style={{ fontSize: 11, fontWeight: '600', color: '#EF4444' }}>Missed</Text>
-                      </View>
-                    )}
-                  </View>
-                ))}
+                  ))}
+                </View>
               </View>
-            </View>
-          ))}
+            ))
+          )}
         </View>
 
       </ScrollView>

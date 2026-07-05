@@ -41,7 +41,6 @@ export default function WorkoutScreen(): React.JSX.Element {
   const [isFinishing, setIsFinishing] = useState(false);
   
   const [elapsed, setElapsed] = useState(0);
-  const [rest, setRest] = useState<number | null>(null);
   const [exIdx, setExIdx] = useState(0);
 
   const { data: workoutDay, isLoading, error } = useQuery({
@@ -82,15 +81,7 @@ export default function WorkoutScreen(): React.JSX.Element {
     return () => clearInterval(t);
   }, []);
 
-  // Rest Timer
-  useEffect(() => {
-    if (rest === null || rest <= 0) {
-      if (rest === 0) setRest(null);
-      return;
-    }
-    const t = setTimeout(() => setRest((r) => (r ?? 0) - 1), 1000);
-    return () => clearTimeout(t);
-  }, [rest]);
+
 
   function toggleSet(exerciseId: string, setIndex: number, restSeconds: number | null): void {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -99,10 +90,6 @@ export default function WorkoutScreen(): React.JSX.Element {
       const nextSets = [...currentSets];
       const wasOff = !nextSets[setIndex];
       nextSets[setIndex] = wasOff;
-      
-      if (wasOff && restSeconds) {
-        setRest(restSeconds);
-      }
       
       if (wasOff && sessionId) {
         logSetMutation({
@@ -126,7 +113,7 @@ export default function WorkoutScreen(): React.JSX.Element {
 
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert('Workout logged', 'Your session has been saved.', [
-        { text: 'View Summary', onPress: () => router.replace('/(app)/workout/summary') },
+        { text: 'View Summary', onPress: () => router.replace(`/(app)/workout/summary?dayId=${dayId}&elapsed=${elapsed}`) },
       ]);
     } catch (error) {
       Alert.alert(
@@ -169,6 +156,10 @@ export default function WorkoutScreen(): React.JSX.Element {
   const overallPct = totalSets > 0 ? Math.round((completedTotal / totalSets) * 100) : 0;
   
   const currentExercise = workoutDay.exercises[exIdx];
+  const isCurrentExerciseCompleted = currentExercise ? 
+    Array.from({ length: currentExercise.sets ?? 0 }).every(
+      (_, sIdx) => setCompletion[currentExercise.id]?.[sIdx]
+    ) : false;
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -178,9 +169,9 @@ export default function WorkoutScreen(): React.JSX.Element {
           hitSlop={12}
           id="workout-exit-btn"
           onPress={() => {
-            Alert.alert('Exit Workout', 'Are you sure you want to end this session?', [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Finish Workout', onPress: finishWorkout, style: 'default' },
+            Alert.alert('Cancel Workout', 'Are you sure you want to discard this session?', [
+              { text: 'No, stay', style: 'cancel' },
+              { text: 'Yes, discard', onPress: () => router.replace('/(app)/(tabs)/dashboard'), style: 'destructive' },
             ]);
           }}
           style={({ pressed }) => [styles.exitBtn, pressed && styles.pressed]}
@@ -211,26 +202,7 @@ export default function WorkoutScreen(): React.JSX.Element {
         </View>
       </View>
 
-      {/* Rest Timer */}
-      {rest !== null && (
-        <View style={styles.restBanner}>
-          <View style={styles.restIconBox}>
-            <Text style={styles.restIcon}>⏳</Text>
-          </View>
-          <View style={styles.restInfo}>
-            <Text style={styles.restLabel}>Rest Timer</Text>
-            <Text style={styles.restTime}>{formatTime(rest)}</Text>
-          </View>
-          <Pressable
-            hitSlop={12}
-            id="workout-skip-rest-btn"
-            onPress={() => setRest(null)}
-            style={({ pressed }) => [styles.restSkipBtn, pressed && styles.pressed]}
-          >
-            <Text style={styles.restSkipText}>Skip</Text>
-          </Pressable>
-        </View>
-      )}
+
 
       <ScrollView
         contentContainerStyle={styles.content}
@@ -255,7 +227,10 @@ export default function WorkoutScreen(): React.JSX.Element {
               </Pressable>
               
               <View style={styles.exTitleContainer}>
-                <Text style={styles.exTitle}>{currentExercise.exerciseName}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
+                  {isCurrentExerciseCompleted && <Text style={{ color: C.brand, fontSize: 18, fontWeight: '800' }}>✓</Text>}
+                  <Text style={styles.exTitle}>{currentExercise.exerciseName}</Text>
+                </View>
                 <Text style={styles.exMeta}>
                   {currentExercise.sets} Sets · {currentExercise.reps}
                 </Text>
@@ -316,19 +291,39 @@ export default function WorkoutScreen(): React.JSX.Element {
           </>
         ) : null}
 
-        {/* Finish Button at bottom */}
-        {exIdx === workoutDay.exercises.length - 1 && (
+        {/* Next Exercise or Finish Button at bottom */}
+        {exIdx < workoutDay.exercises.length - 1 && isCurrentExerciseCompleted && (
           <Pressable
-            id="workout-finish-btn"
-            onPress={finishWorkout}
+            id="workout-next-ex-bottom-btn"
+            onPress={() => setExIdx(exIdx + 1)}
             style={({ pressed }) => [
               styles.finishBtn,
-              isFinishing && styles.disabled,
               pressed && styles.pressed,
             ]}
           >
             <LinearGradient
-              colors={['#8F6FFF', '#A07AF8']}
+              colors={['#7C5CFC', '#A07AF8']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.finishBtnGradient}
+            >
+              <Text style={styles.finishBtnText}>Next Exercise →</Text>
+            </LinearGradient>
+          </Pressable>
+        )}
+        
+        {exIdx === workoutDay.exercises.length - 1 && (
+          <Pressable
+            id="workout-finish-btn"
+            onPress={completedTotal === totalSets ? finishWorkout : undefined}
+            style={({ pressed }) => [
+              styles.finishBtn,
+              (isFinishing || completedTotal !== totalSets) && styles.disabled,
+              pressed && completedTotal === totalSets && styles.pressed,
+            ]}
+          >
+            <LinearGradient
+              colors={completedTotal !== totalSets ? ['#888', '#666'] : ['#8F6FFF', '#A07AF8']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.finishBtnGradient}
@@ -336,7 +331,9 @@ export default function WorkoutScreen(): React.JSX.Element {
               {isFinishing ? (
                 <ActivityIndicator color="#FFF" size="small" />
               ) : (
-                <Text style={styles.finishBtnText}>Complete Workout ✨</Text>
+                <Text style={styles.finishBtnText}>
+                  {completedTotal === totalSets ? 'Complete Workout ✨' : 'Complete all sets to finish'}
+                </Text>
               )}
             </LinearGradient>
           </Pressable>
@@ -397,37 +394,7 @@ const styles = StyleSheet.create({
   timerIcon: { fontSize: 12 },
   timerText: { fontSize: 13, fontWeight: '700', color: C.foreground },
   
-  restBanner: {
-    marginHorizontal: 16,
-    marginTop: 12,
-    padding: 12,
-    backgroundColor: C.healthTint,
-    borderWidth: 1,
-    borderColor: 'rgba(0,237,208,0.25)',
-    borderRadius: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  restIconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: C.health,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  restIcon: { fontSize: 20 },
-  restInfo: { flex: 1 },
-  restLabel: { fontSize: 12, fontWeight: '600', color: C.health },
-  restTime: { fontSize: 22, fontWeight: '800', color: C.foreground },
-  restSkipBtn: {
-    backgroundColor: C.health,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 99,
-  },
-  restSkipText: { fontSize: 12, fontWeight: '700', color: '#111' },
+
 
   content: { padding: 16, paddingBottom: 40 },
   exNav: {

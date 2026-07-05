@@ -206,6 +206,38 @@ export async function findSessionsByUser(userId: string) {
     .orderBy(desc(workoutSessions.startedAt), desc(workoutSessions.createdAt));
 }
 
+export async function findSessionsWithDetailsByUser(userId: string) {
+  const sessions = await db
+    .select({
+      session: workoutSessions,
+      day: workoutDays,
+      log: exerciseLogs,
+    })
+    .from(workoutSessions)
+    .leftJoin(workoutDays, eq(workoutSessions.workoutDayId, workoutDays.id))
+    .leftJoin(exerciseLogs, eq(workoutSessions.id, exerciseLogs.sessionId))
+    .where(eq(workoutSessions.userId, userId))
+    .orderBy(desc(workoutSessions.startedAt));
+
+  const sessionMap = new Map<string, any>();
+  
+  for (const row of sessions) {
+    if (!sessionMap.has(row.session.id)) {
+      sessionMap.set(row.session.id, {
+        ...row.session,
+        workoutDay: row.day,
+        exerciseLogs: [],
+      });
+    }
+    
+    if (row.log) {
+      sessionMap.get(row.session.id).exerciseLogs.push(row.log);
+    }
+  }
+  
+  return Array.from(sessionMap.values());
+}
+
 export async function findSessionById(sessionId: string) {
   const [session] = await db
     .select()
@@ -231,3 +263,11 @@ export async function updateSession(
   }
   return session;
 }
+
+export async function findLogsBySessionId(sessionId: string) {
+  return db
+    .select()
+    .from(exerciseLogs)
+    .where(eq(exerciseLogs.sessionId, sessionId));
+}
+

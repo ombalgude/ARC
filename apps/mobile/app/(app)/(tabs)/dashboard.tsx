@@ -11,7 +11,7 @@ import {
   View,
   SafeAreaView
 } from 'react-native';
-import { Bell, Droplets, Moon, Footprints, Dumbbell, ChevronRight, Flame, Sparkles, Clock, Activity, Check, Utensils } from 'lucide-react-native';
+import { Bell, Droplets, Moon, Footprints, Dumbbell, ChevronRight, Flame, Sparkles, Clock, Activity, Check, Utensils, CheckCircle2 } from 'lucide-react-native';
 import { ProgressRing } from '../../../../../packages/ui/src/ProgressRing';
 import { StreakHeatmap } from '../../../components/dashboard/StreakHeatmap';
 import { useAppTheme } from '../../../lib/themeStore';
@@ -49,14 +49,20 @@ export default function DashboardScreen() {
   });
 
   const habits = useMemo(() => {
-    return (rawHabits || []).map(h => ({
-      id: h.id,
-      name: (HABIT_CONFIG[h.type] || {}).name || h.type,
-      icon: (HABIT_CONFIG[h.type] || {}).Icon || Check,
-      done: h.completedToday,
-      color: (HABIT_CONFIG[h.type] || {}).color || C.brand,
-      streak: h.streak,
-    }));
+    const safeHabitsArray = Array.isArray(rawHabits) 
+      ? rawHabits 
+      : (rawHabits && typeof rawHabits === 'object' && 'habits' in rawHabits ? (rawHabits as any).habits : []);
+      
+    return safeHabitsArray
+      .filter((h: any) => h.type !== 'macros')
+      .map((h: any) => ({
+        id: h.id,
+        name: (HABIT_CONFIG[h.type] || {}).name || h.type,
+        icon: (HABIT_CONFIG[h.type] || {}).Icon || Check,
+        done: h.completedToday,
+        color: (HABIT_CONFIG[h.type] || {}).color || C.brand,
+        streak: h.streak,
+      }));
   }, [rawHabits, C.brand]);
 
   const { mutate: toggleHabit } = useMutation({
@@ -65,11 +71,11 @@ export default function DashboardScreen() {
       return api.logHabit({ habitId, localDate, completed: isDone }).catch(() => null);
     },
     onMutate: async (habitId: string) => {
-      await queryClient.cancelQueries({ queryKey: ['habits-detail'] });
-      const previousHabits = queryClient.getQueryData<HabitSummary[]>(['habits-detail']);
+      await queryClient.cancelQueries({ queryKey: ['habits-detail', localDate] });
+      const previousHabits = queryClient.getQueryData<HabitSummary[]>(['habits-detail', localDate]);
       
       if (previousHabits) {
-        queryClient.setQueryData<HabitSummary[]>(['habits-detail'], old => 
+        queryClient.setQueryData<HabitSummary[]>(['habits-detail', localDate], old => 
           (old || []).map((h) => (h.id === habitId ? { ...h, completedToday: !h.completedToday } : h))
         );
       }
@@ -77,7 +83,7 @@ export default function DashboardScreen() {
     },
     onError: (err, newHabit, context) => {
       if (context?.previousHabits) {
-        queryClient.setQueryData(['habits-detail'], context.previousHabits);
+        queryClient.setQueryData(['habits-detail', localDate], context.previousHabits);
       }
     },
     onSettled: () => {
@@ -89,19 +95,25 @@ export default function DashboardScreen() {
   const habitPct = habits.length > 0 ? (done / habits.length) * 100 : 0;
 
   const nutrition = dashboardData?.nutrition;
-  const cal = { now: 0, target: nutrition?.caloriesTarget || 2000 };
-  const calPct = Math.round((cal.now / cal.target) * 100);
+  const cal = { now: 0, target: nutrition?.caloriesTarget || 0 };
+  const calPct = 0;
 
   const macros = [
-    { label: "Protein", current: 0, target: nutrition?.proteinG || 150, color: "#7C5CFC" },
-    { label: "Carbs", current: 0, target: nutrition?.carbsG || 250, color: "#00D9B8" },
-    { label: "Fats", current: 0, target: nutrition?.fatG || 65, color: "#FF6B6B" },
+    { label: "Protein", current: 0, target: nutrition?.proteinG || 0, color: "#7C5CFC" },
+    { label: "Carbs", current: 0, target: nutrition?.carbsG || 0, color: "#00D9B8" },
+    { label: "Fats", current: 0, target: nutrition?.fatG || 0, color: "#FF6B6B" },
   ];
 
   const workoutPlan = dashboardData?.workoutPlan;
-  const nextWorkoutDay = workoutPlan?.days[0]; 
+  const currentDayOfWeek = new Date().getDay(); // 0 = Sunday, 1 = Monday...
+  const nextWorkoutDay = workoutPlan?.days?.find(d => d.dayOfWeek === currentDayOfWeek || d.dayOfWeek === (currentDayOfWeek === 0 ? 7 : currentDayOfWeek));
   const totalSets = nextWorkoutDay ? nextWorkoutDay.exercises.reduce((acc, ex) => acc + (ex.sets || 0), 0) : 0;
   const estimatedTime = nextWorkoutDay ? Math.round(totalSets * 1.5 + nextWorkoutDay.exercises.reduce((a, e) => a + ((e.restSeconds || 60) * (e.sets || 0)) / 60, 0)) : 0;
+
+  const rawHabitsArray = Array.isArray(rawHabits) ? rawHabits : (rawHabits as any)?.habits || [];
+  const macroHabit = rawHabitsArray.find((h: any) => h.type === 'macros');
+  const macroHabitId = macroHabit?.id;
+  const isMacroDone = macroHabit?.completedToday;
 
   const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
 
@@ -151,11 +163,11 @@ export default function DashboardScreen() {
         )}
 
         {/* Streak */}
-        <View style={{ paddingHorizontal: 20, marginBottom: 16 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 16, backgroundColor: 'rgba(255,107,107,0.08)', borderWidth: 1, borderColor: 'rgba(255,107,107,0.18)' }}>
-            <Flame size={16} color={C.energy} />
-            <Text style={{ fontSize: 13, fontWeight: '700', color: C.energy, marginLeft: 8 }}>{dashboardData?.globalStreak || 0}-day streak</Text>
-            <Text style={{ fontSize: 12, color: C.textSecondary, marginLeft: 6 }}>Keep it going — you're on fire!</Text>
+        <View style={{ paddingHorizontal: 20, marginBottom: 12 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10, backgroundColor: 'rgba(255,107,107,0.1)', borderWidth: 1, borderColor: 'rgba(255,107,107,0.15)', alignSelf: 'flex-start' }}>
+            <Flame size={14} color={C.energy} />
+            <Text style={{ fontSize: 11, fontWeight: '700', color: C.energy, marginLeft: 6 }}>{dashboardData?.globalStreak || 0}-day streak</Text>
+            <Text style={{ fontSize: 10, color: C.textSecondary, marginLeft: 6 }}>Keep it going!</Text>
           </View>
         </View>
 
@@ -200,13 +212,16 @@ export default function DashboardScreen() {
                   </View>
                   <Pressable
                     hitSlop={12}
-                    onPress={() => router.push({ pathname: '/workout/[dayId]', params: { dayId: nextWorkoutDay.id } } as any)}
+                    disabled={dashboardData?.isWorkoutDoneToday}
+                    onPress={() => router.push(`/workout/${nextWorkoutDay.id}` as any)}
                     style={({ pressed }) => [{
-                      backgroundColor: '#FFFFFF', borderRadius: 12, paddingHorizontal: 18, paddingVertical: 9,
+                      backgroundColor: dashboardData?.isWorkoutDoneToday ? 'rgba(255,255,255,0.2)' : '#FFFFFF', borderRadius: 12, paddingHorizontal: 18, paddingVertical: 9,
                       shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 4
-                    }, pressed && { transform: [{ scale: 0.95 }] }]}
+                    }, pressed && !dashboardData?.isWorkoutDoneToday && { transform: [{ scale: 0.95 }] }]}
                   >
-                    <Text style={{ color: C.brand, fontSize: 13, fontWeight: '700' }}>Start  →</Text>
+                    <Text style={{ color: dashboardData?.isWorkoutDoneToday ? 'rgba(255,255,255,0.7)' : C.brand, fontSize: 13, fontWeight: '700' }}>
+                      {dashboardData?.isWorkoutDoneToday ? 'Completed ✓' : 'Start  →'}
+                    </Text>
                   </Pressable>
                 </View>
               )}
@@ -229,7 +244,7 @@ export default function DashboardScreen() {
           </View>
 
           <View style={{ flexDirection: 'row', gap: 12 }}>
-            {habits.slice(0, 4).map(({ id, name, icon: Icon, done: isDone, color, streak }) => (
+            {habits.slice(0, 5).map(({ id, name, icon: Icon, done: isDone, color, streak }) => (
               <View key={id} style={{ flex: 1, alignItems: 'center', gap: 8 }}>
                 <Pressable
                   onPress={() => toggleHabit(id)}
@@ -266,36 +281,61 @@ export default function DashboardScreen() {
           <Pressable
             onPress={() => router.push('/nutrition' as any)}
             style={({ pressed }) => [{
-              backgroundColor: C.card, borderRadius: 20, borderWidth: 1, borderColor: C.border, padding: 16,
-              shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 12, elevation: 2
+              backgroundColor: C.card, borderRadius: 22, borderWidth: 1, borderColor: C.border, overflow: 'hidden',
+              shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.05, shadowRadius: 16, elevation: 3
             }, pressed && { transform: [{ scale: 0.98 }] }]}
           >
-            <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+            <View style={{ padding: 18, borderBottomWidth: 1, borderBottomColor: C.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
               <View>
-                <Text style={{ fontSize: 15, fontWeight: '700', color: C.foreground, letterSpacing: -0.15 }}>Nutrition</Text>
-                <Text style={{ fontSize: 12, color: C.textTertiary, marginTop: 4 }}>
-                  {cal.now.toLocaleString()} / {cal.target.toLocaleString()} kcal  ·  {calPct}%
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                  <Text style={{ fontSize: 16, fontWeight: '800', color: C.foreground, letterSpacing: -0.2 }}>Nutrition</Text>
+                  <View style={{ paddingHorizontal: 6, paddingVertical: 2, backgroundColor: 'rgba(0,217,184,0.1)', borderRadius: 6 }}>
+                    <Text style={{ fontSize: 9, fontWeight: '700', color: '#00D9B8' }}>{calPct}%</Text>
+                  </View>
+                  {macroHabitId && (
+                    <Pressable 
+                      hitSlop={12}
+                      onPress={(e) => {
+                        toggleHabit(macroHabitId);
+                      }}
+                      style={{ marginLeft: 6, width: 26, height: 26, borderRadius: 13, backgroundColor: isMacroDone ? 'rgba(0,217,184,0.1)' : C.muted, alignItems: 'center', justifyContent: 'center' }}
+                    >
+                      <CheckCircle2 size={16} color={isMacroDone ? C.health : C.textTertiary} strokeWidth={isMacroDone ? 2.5 : 1.5} />
+                    </Pressable>
+                  )}
+                </View>
+                <Text style={{ fontSize: 13, color: C.textSecondary, fontWeight: '500' }}>
+                  <Text style={{ color: C.foreground, fontWeight: '700' }}>{cal.now.toLocaleString()}</Text> / {cal.target.toLocaleString()} kcal
                 </Text>
               </View>
-              <ProgressRing size={48} strokeWidth={5} progress={calPct} color={C.health} trackColor="rgba(255,255,255,0.06)">
-                <Text style={{ fontSize: 9, fontWeight: '700', color: C.foreground }}>{calPct}%</Text>
+              <ProgressRing size={44} strokeWidth={4.5} progress={calPct} color="#00D9B8" trackColor={C.muted}>
+                <Flame size={16} color="#00D9B8" />
               </ProgressRing>
             </View>
 
-            <View style={{ gap: 8 }}>
-              {macros.map(({ label, current, target, color }) => (
-                <View key={label}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <Text style={{ fontSize: 12, fontWeight: '500', color: C.textSecondary }}>{label}</Text>
-                    <Text style={{ fontSize: 12, fontWeight: '600', color: C.foreground }}>
-                      {current}g<Text style={{ color: C.textTertiary, fontWeight: '400' }}> / {target}g</Text>
-                    </Text>
+            <View style={{ padding: 18, gap: 14 }}>
+              {macros.map(({ label, current, target, color }) => {
+                const pct = Math.min(100, target > 0 ? (current / target) * 100 : 0);
+                return (
+                  <View key={label}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 6 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        {current >= target && target > 0 && (
+                          <CheckCircle2 size={16} color={color} strokeWidth={2.5} />
+                        )}
+                        <Text style={{ fontSize: 13, fontWeight: '600', color: C.textSecondary }}>{label}</Text>
+                      </View>
+                      <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 2 }}>
+                        <Text style={{ fontSize: 14, fontWeight: '800', color: C.foreground }}>{current}</Text>
+                        <Text style={{ fontSize: 11, fontWeight: '600', color: C.textTertiary }}>/ {target}g</Text>
+                      </View>
+                    </View>
+                    <View style={{ height: 6, backgroundColor: C.muted, borderRadius: 3, overflow: 'hidden' }}>
+                      <View style={{ height: '100%', width: `${pct}%`, backgroundColor: color, borderRadius: 3 }} />
+                    </View>
                   </View>
-                  <View style={{ height: 4, backgroundColor: C.muted, borderRadius: 2 }}>
-                    <View style={{ height: '100%', width: `${Math.min(100, (current / target) * 100)}%`, backgroundColor: color, borderRadius: 2 }} />
-                  </View>
-                </View>
-              ))}
+                );
+              })}
             </View>
           </Pressable>
         </View>

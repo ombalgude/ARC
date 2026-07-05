@@ -82,6 +82,43 @@ export async function handleGetDashboardMe(
       activityHistory.push(score);
     }
 
+    // Calculate streak
+    let currentStreak = 0;
+    const checkDate = new Date(today);
+    
+    // Check if today is active
+    const todayStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+    const isTodayActive = (activityMap.get(todayStr) || 0) > 0;
+    
+    if (isTodayActive) {
+      currentStreak++;
+    }
+    
+    // Check backwards from yesterday
+    checkDate.setDate(checkDate.getDate() - 1);
+    while (true) {
+      const dateStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+      if ((activityMap.get(dateStr) || 0) > 0) {
+        currentStreak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        break; // Streak broken
+      }
+    }
+
+    // Check if workout is done today
+    let isWorkoutDoneToday = false;
+    for (const session of workoutSessions) {
+      if (session.completedAt) {
+        const d = new Date(session.completedAt);
+        const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        if (dateStr === todayStr) {
+          isWorkoutDoneToday = true;
+          break;
+        }
+      }
+    }
+
     res.status(200).json({
       success: true,
       data: {
@@ -98,8 +135,9 @@ export async function handleGetDashboardMe(
               })),
             }
           : null,
-        globalStreak: 0, // Placeholder, can be calculated via habit and workout logs
+        globalStreak: currentStreak,
         activityHistory,
+        isWorkoutDoneToday,
       },
     });
   } catch {
