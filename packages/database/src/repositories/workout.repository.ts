@@ -271,3 +271,10 @@ export async function findLogsBySessionId(sessionId: string) {
     .where(eq(exerciseLogs.sessionId, sessionId));
 }
 
+export async function invalidatePlans(userId: string, executor: DatabaseExecutor = db) {
+  await executor
+    .update(workoutPlans)
+    .set({ isActive: false, updatedAt: new Date() })
+    .where(and(eq(workoutPlans.userId, userId), eq(workoutPlans.isActive, true)));
+}
+

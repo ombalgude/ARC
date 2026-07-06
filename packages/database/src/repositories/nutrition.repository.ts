@@ -1,7 +1,7 @@
-import { eq } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 
 import { db } from "../client.js";
-import { nutritionProfiles } from "../schema/index.js";
+import { nutritionProfiles, nutritionLogs, mealSuggestions } from "../schema/index.js";
 
 type NewNutritionProfile = typeof nutritionProfiles.$inferInsert;
 type TransactionCallback = Parameters<typeof db.transaction>[0];
@@ -39,4 +39,44 @@ export async function findByUser(userId: string) {
     .limit(1);
 
   return profile ?? null;
+}
+
+export async function getDailyNutritionSum(userId: string, dateStr: string) {
+  const [sum] = await db
+    .select({
+      calories: sql<number>`sum(${nutritionLogs.calories})`,
+      proteinG: sql<number>`sum(${nutritionLogs.proteinG})`,
+      carbsG: sql<number>`sum(${nutritionLogs.carbsG})`,
+      fatG: sql<number>`sum(${nutritionLogs.fatG})`,
+    })
+    .from(nutritionLogs)
+    .where(
+      and(
+        eq(nutritionLogs.userId, userId),
+        sql`date(${nutritionLogs.loggedDate}) = ${dateStr}::date`
+      )
+    );
+
+  return {
+    calories: Number(sum?.calories ?? 0),
+    proteinG: Number(sum?.proteinG ?? 0),
+    carbsG: Number(sum?.carbsG ?? 0),
+    fatG: Number(sum?.fatG ?? 0),
+  };
+}
+
+export async function getMealSuggestions(dietaryPreference: string) {
+  const suggestions = await db
+    .select()
+    .from(mealSuggestions)
+    .where(eq(mealSuggestions.dietaryPreference, dietaryPreference));
+
+  return suggestions;
+}
+
+export async function findHistoricalLogsByUser(userId: string) {
+  return db
+    .select()
+    .from(nutritionLogs)
+    .where(eq(nutritionLogs.userId, userId));
 }

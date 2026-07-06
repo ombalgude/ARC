@@ -1,32 +1,63 @@
-import { useState } from 'react';
-import { View, Text, Pressable, ScrollView, Modal, StyleSheet } from 'react-native';
+import { useState, useMemo } from 'react';
+import { View, Text, Pressable, ScrollView, Modal, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { ChevronLeft, Plus, TrendingDown } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Svg, { Path, Circle, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
+import { LineChart } from 'react-native-gifted-charts';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@clerk/clerk-expo';
 import { useAppTheme } from '../../../lib/themeStore';
-
-const LOGS = [
-  { date: "Jun 25", weight: "83.2 kg", tag: "Today" },
-  { date: "Jun 22", weight: "83.3 kg", tag: "" },
-  { date: "Jun 19", weight: "83.7 kg", tag: "" },
-  { date: "Jun 15", weight: "84.0 kg", tag: "" },
-  { date: "Jun 10", weight: "84.3 kg", tag: "" },
-  { date: "Jun 5", weight: "84.6 kg", tag: "" },
-  { date: "May 25", weight: "85.0 kg", tag: "Start" },
-];
+import { createApiClient } from '../../../lib/api';
 
 export default function WeightTrackingScreen() {
   const C = useAppTheme();
+  const { getToken } = useAuth();
+  const api = useMemo(() => createApiClient(async () => await getToken()), [getToken]);
+  const queryClient = useQueryClient();
+
   const [showLog, setShowLog] = useState(false);
   const [newWeight, setNewWeight] = useState(83.2);
   const [filter, setFilter] = useState('1M');
-  const [logs, setLogs] = useState(LOGS);
+
+  const { data: meResponse } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => api.getMe(),
+  });
+
+  const { data: logsResponse, isLoading } = useQuery({
+    queryKey: ['weightLogs'],
+    queryFn: () => api.getWeightLogs(),
+  });
+
+  const mutation = useMutation({
+    mutationFn: (weight: number) => api.addWeightLog(weight),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['weightLogs'] });
+      setShowLog(false);
+    },
+  });
+
+  const logs = logsResponse?.logs || [];
+  
+  const profileWeight = meResponse?.profile?.weightKg ? parseFloat(meResponse.profile.weightKg as string) : 0;
+  const startWeight = logs.length > 0 ? parseFloat(logs[logs.length - 1].weightKg) : profileWeight;
+  const currentWeight = logs.length > 0 ? parseFloat(logs[0].weightKg) : profileWeight;
+  
+  const goal = meResponse?.profile?.goal as string;
+  const targetWeight = goal === 'losefat' ? startWeight - 5 : (goal === 'buildmuscle' ? startWeight + 5 : startWeight);
+
+  const chartData = useMemo(() => {
+    if (!logs.length) return [];
+    // Sort ascending for chart (oldest first)
+    return [...logs].reverse().map((log) => ({
+      value: parseFloat(log.weightKg),
+      date: new Date(log.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+    }));
+  }, [logs]);
 
   const saveWeight = () => {
-    setLogs(prev => [{ date: "Today", weight: `${newWeight.toFixed(1)} kg`, tag: "Today" }, ...prev]);
-    setShowLog(false);
+    mutation.mutate(newWeight);
   };
 
   return (
@@ -48,7 +79,7 @@ export default function WeightTrackingScreen() {
         
         {/* Stats */}
         <View style={{ flexDirection: 'row', gap: 10, paddingHorizontal: 20, marginBottom: 16 }}>
-          {[{ l: "Start", v: "85.0 kg", c: C.foreground }, { l: "Current", v: "83.2 kg", c: C.health }, { l: "Goal", v: "80.0 kg", c: C.brand }].map(({ l, v, c }) => (
+          {[{ l: "Start", v: `${startWeight.toFixed(1)} kg`, c: C.foreground }, { l: "Current", v: `${currentWeight.toFixed(1)} kg`, c: C.health }, { l: "Goal", v: `${targetWeight.toFixed(1)} kg`, c: C.brand }].map(({ l, v, c }) => (
             <View key={l} style={{ flex: 1, alignItems: 'center', paddingVertical: 16, backgroundColor: C.card, borderRadius: 16, borderWidth: 1, borderColor: C.border }}>
               <Text style={{ fontSize: 16, fontWeight: '800', color: c }}>{v}</Text>
               <Text style={{ fontSize: 11, color: C.textTertiary, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 4 }}>{l}</Text>
@@ -59,8 +90,10 @@ export default function WeightTrackingScreen() {
         {/* Trend */}
         <View style={{ marginHorizontal: 20, marginBottom: 16, padding: 14, backgroundColor: `${C.health}10`, borderRadius: 14, borderWidth: 1, borderColor: `${C.health}30`, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <TrendingDown size={16} color={C.health} strokeWidth={2.5} />
-          <Text style={{ fontSize: 14, fontWeight: '800', color: C.health }}>−1.8 kg in 30 days</Text>
-          <Text style={{ fontSize: 13, color: C.textSecondary, fontWeight: '500' }}>· 3.2 kg to goal</Text>
+          <Text style={{ fontSize: 14, fontWeight: '800', color: C.health }}>
+            {currentWeight <= startWeight ? `−${(startWeight - currentWeight).toFixed(1)} kg` : `+${(currentWeight - startWeight).toFixed(1)} kg`} overall
+          </Text>
+          <Text style={{ fontSize: 13, color: C.textSecondary, fontWeight: '500' }}>· {(Math.abs(currentWeight - targetWeight)).toFixed(1)} kg to goal</Text>
         </View>
 
         {/* Filter */}
@@ -72,44 +105,83 @@ export default function WeightTrackingScreen() {
           ))}
         </View>
 
-        {/* Chart (Mock with simple SVG path for layout) */}
-        <View style={{ marginHorizontal: 20, marginBottom: 24, backgroundColor: C.card, borderRadius: 18, borderWidth: 1, borderColor: C.border, padding: 16, height: 200, alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ color: C.textTertiary, fontSize: 12, marginBottom: 10 }}>Interactive Chart Area</Text>
-          <View style={{ height: 120, width: '100%' }}>
-            <Svg width="100%" height="120" viewBox="0 0 300 120" preserveAspectRatio="none">
-              <Defs>
-                <SvgLinearGradient id="wgrad2" x1="0" y1="0" x2="0" y2="1">
-                  <Stop offset="0%" stopColor={C.health} stopOpacity="0.3" />
-                  <Stop offset="100%" stopColor={C.health} stopOpacity="0" />
-                </SvgLinearGradient>
-              </Defs>
-              <Path d="M0,20 Q50,30 100,50 T200,80 T300,100 L300,120 L0,120 Z" fill="url(#wgrad2)" />
-              <Path d="M0,20 Q50,30 100,50 T200,80 T300,100" stroke={C.health} strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-              <Circle cx="300" cy="100" r="5" fill={C.health} />
-              <Circle cx="200" cy="80" r="4" fill={C.card} stroke={C.health} strokeWidth="2" />
-              <Circle cx="100" cy="50" r="4" fill={C.card} stroke={C.health} strokeWidth="2" />
-              <Circle cx="0" cy="20" r="4" fill={C.card} stroke={C.health} strokeWidth="2" />
-            </Svg>
-          </View>
+        {/* Chart */}
+        <View style={{ marginHorizontal: 20, marginBottom: 24, backgroundColor: C.card, borderRadius: 18, borderWidth: 1, borderColor: C.border, padding: 16, height: 200, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+          {isLoading ? (
+            <ActivityIndicator color={C.brand} />
+          ) : chartData.length > 0 ? (
+            <LineChart
+              data={chartData}
+              width={300}
+              height={140}
+              thickness={3}
+              color={C.health}
+              hideDataPoints={false}
+              dataPointsColor={C.card}
+              dataPointsRadius={4}
+              customDataPoint={() => (
+                <View style={{ width: 8, height: 8, backgroundColor: C.card, borderRadius: 4, borderWidth: 2, borderColor: C.health }} />
+              )}
+              hideRules
+              hideYAxisText
+              hideAxesAndRules
+              yAxisLabelSuffix=" kg"
+              pointerConfig={{
+                pointerStripHeight: 140,
+                pointerStripColor: C.border,
+                pointerStripWidth: 2,
+                pointerColor: C.health,
+                radius: 4,
+                pointerLabelWidth: 80,
+                pointerLabelHeight: 30,
+                activatePointersOnLongPress: true,
+                autoAdjustPointerLabelPosition: true,
+                pointerLabelComponent: (items: any) => {
+                  return (
+                    <View style={{ backgroundColor: C.card, padding: 4, borderRadius: 8, borderWidth: 1, borderColor: C.border, alignItems: 'center' }}>
+                      <Text style={{ color: C.foreground, fontWeight: 'bold' }}>{items[0].value} kg</Text>
+                      <Text style={{ color: C.textTertiary, fontSize: 10 }}>{items[0].date}</Text>
+                    </View>
+                  );
+                },
+              }}
+              curved
+              startFillColor={C.health}
+              startOpacity={0.3}
+              endFillColor={C.health}
+              endOpacity={0}
+              areaChart
+            />
+          ) : (
+            <Text style={{ color: C.textTertiary, fontSize: 14 }}>No weight logs yet.</Text>
+          )}
         </View>
 
         {/* Log History */}
         <View style={{ paddingHorizontal: 20 }}>
           <Text style={{ fontSize: 18, fontWeight: '800', color: C.foreground, marginBottom: 16 }}>History</Text>
           <View style={{ gap: 10 }}>
-            {logs.map(({ date, weight, tag }, i) => (
-              <View key={i} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, backgroundColor: C.card, borderRadius: 16, borderWidth: 1, borderColor: C.border }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                  {tag ? (
-                    <View style={{ backgroundColor: tag === 'Today' ? C.brand : C.muted, borderRadius: 99, paddingHorizontal: 10, paddingVertical: 4 }}>
-                      <Text style={{ fontSize: 11, fontWeight: '800', color: tag === 'Today' ? '#FFF' : C.textTertiary }}>{tag}</Text>
-                    </View>
-                  ) : null}
-                  <Text style={{ fontSize: 14, color: C.textSecondary, fontWeight: '600' }}>{date}</Text>
+            {logs.map((log: any, i: number) => {
+              const logDate = new Date(log.date);
+              const isToday = new Date().toDateString() === logDate.toDateString();
+              const isStart = i === logs.length - 1;
+              const tag = isToday ? 'Today' : (isStart ? 'Start' : '');
+              return (
+                <View key={log.id} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, backgroundColor: C.card, borderRadius: 16, borderWidth: 1, borderColor: C.border }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    {tag ? (
+                      <View style={{ backgroundColor: tag === 'Today' ? C.brand : C.muted, borderRadius: 99, paddingHorizontal: 10, paddingVertical: 4 }}>
+                        <Text style={{ fontSize: 11, fontWeight: '800', color: tag === 'Today' ? '#FFF' : C.textTertiary }}>{tag}</Text>
+                      </View>
+                    ) : null}
+                    <Text style={{ fontSize: 14, color: C.textSecondary, fontWeight: '600' }}>
+                      {logDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    </Text>
+                  </View>
+                  <Text style={{ fontSize: 16, fontWeight: '800', color: C.foreground }}>{parseFloat(log.weightKg).toFixed(1)} kg</Text>
                 </View>
-                <Text style={{ fontSize: 16, fontWeight: '800', color: C.foreground }}>{weight}</Text>
-              </View>
-            ))}
+              );
+            })}
           </View>
         </View>
       </ScrollView>
@@ -144,9 +216,13 @@ export default function WeightTrackingScreen() {
               </Pressable>
             </View>
 
-            <Pressable onPress={saveWeight} style={{ overflow: 'hidden', borderRadius: 16 }}>
+            <Pressable onPress={saveWeight} style={{ overflow: 'hidden', borderRadius: 16 }} disabled={mutation.isPending}>
               <LinearGradient colors={['#7C5CFC', '#A07AF8']} style={{ padding: 18, alignItems: 'center' }} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-                <Text style={{ color: '#FFF', fontSize: 16, fontWeight: '800' }}>Save Weight</Text>
+                {mutation.isPending ? (
+                  <ActivityIndicator color="#FFF" />
+                ) : (
+                  <Text style={{ color: '#FFF', fontSize: 16, fontWeight: '800' }}>Save Weight</Text>
+                )}
               </LinearGradient>
             </Pressable>
           </View>

@@ -1,7 +1,8 @@
 import { and, eq, isNull } from "drizzle-orm";
 
 import { db } from "../client.js";
-import { userPreferences, userProfiles, users } from "../schema/index.js";
+import { userPreferences, userProfiles, users, weightLogs } from "../schema/index.js";
+import { desc } from "drizzle-orm";
 
 type NewUser = typeof users.$inferInsert;
 type NewUserProfile = typeof userProfiles.$inferInsert;
@@ -147,4 +148,20 @@ export async function softDelete(id: string) {
     .returning();
 
   return user ?? null;
+}
+
+export async function getWeightLogs(userId: string) {
+  return await db
+    .select()
+    .from(weightLogs)
+    .where(eq(weightLogs.userId, userId))
+    .orderBy(desc(weightLogs.date));
+}
+
+export async function addWeightLog(userId: string, weightKg: string) {
+  const [log] = await db
+    .insert(weightLogs)
+    .values({ userId, weightKg })
+    .returning();
+  return log ?? null;
 }

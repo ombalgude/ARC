@@ -146,21 +146,11 @@ export default function DashboardScreen() {
   const estimatedTime = nextWorkoutDay ? Math.round(totalSets * 1.5 + nextWorkoutDay.exercises.reduce((a, e) => a + ((e.restSeconds || 60) * (e.sets || 0)) / 60, 0)) : 0;
 
   const getMacroHabit = (type: string) => rawHabitsArray.find((h: any) => h.type === type);
-  const mealHabits = [
-    { type: 'meal_breakfast', pct: 0.25 },
-    { type: 'meal_lunch', pct: 0.25 },
-    { type: 'meal_preworkout', pct: 0.20 },
-    { type: 'meal_postworkout', pct: 0.30 }
-  ];
-  const completedPct = mealHabits.reduce((acc, meal) => {
-    const habit = getMacroHabit(meal.type);
-    return habit?.completedToday ? acc + meal.pct : acc;
-  }, 0);
 
   const macrosList = [
-    { label: "Protein", current: Math.round((nutrition?.proteinG || 0) * completedPct), target: nutrition?.proteinG || 0, color: "#7C5CFC" },
-    { label: "Carbs", current: Math.round((nutrition?.carbsG || 0) * completedPct), target: nutrition?.carbsG || 0, color: "#00D9B8" },
-    { label: "Fats", current: Math.round((nutrition?.fatG || 0) * completedPct), target: nutrition?.fatG || 0, color: "#FF6B6B" },
+    { label: "Protein", current: nutrition?.currentProtein || 0, target: nutrition?.proteinG || 0, color: "#7C5CFC" },
+    { label: "Carbs", current: nutrition?.currentCarbs || 0, target: nutrition?.carbsG || 0, color: "#00D9B8" },
+    { label: "Fats", current: nutrition?.currentFats || 0, target: nutrition?.fatG || 0, color: "#FF6B6B" },
   ];
 
   const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
@@ -183,7 +173,7 @@ export default function DashboardScreen() {
               {todayStr}
             </Text>
             <Text style={{ fontSize: 23, fontWeight: '700', color: C.foreground, letterSpacing: -0.6, lineHeight: 28 }}>
-              Morning, {firstName} 👋
+              Hey, {firstName} 👋
             </Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 }}>

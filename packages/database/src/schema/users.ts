@@ -66,3 +66,16 @@ export const userPreferences = pgTable(
   },
   (table) => [uniqueIndex("user_preferences_user_id_idx").on(table.userId)],
 );
+
+export const weightLogs = pgTable(
+  "weight_logs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    weightKg: numeric("weight_kg", { precision: 5, scale: 2 }).notNull(),
+    date: timestamp("date", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  }
+);

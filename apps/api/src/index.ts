@@ -14,6 +14,7 @@ import { habitsRouter } from "./modules/habits/habits.router.js";
 import { onboardingRouter } from "./modules/onboarding/onboarding.router.js";
 import { sessionsRouter } from "./modules/sessions/sessions.router.js";
 import { usersRouter } from "./modules/users/users.router.js";
+import { plansRouter } from "./modules/plans/plans.router.js";
 
 dotenv.config();
 
@@ -94,6 +95,7 @@ app.use("/api/v1/dashboard", requireAuth, requireUser, dashboardRouter);
 app.use("/api/v1/sessions", requireAuth, requireUser, sessionsRouter);
 app.use("/api/v1/habits", requireAuth, requireUser, habitsRouter);
 app.use("/api/v1/admin", requireAuth, requireAdmin, adminRouter);
+app.use("/api/v1/plans", requireAuth, requireUser, plansRouter);
 
 app.listen(port, () => {
   console.log(`[API] Server is running on port ${port}`);

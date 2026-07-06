@@ -1,10 +1,10 @@
-import { useState } from 'react';
 import { View, Text, Pressable, ScrollView, Switch, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { ChevronLeft, Sun, Moon, Monitor, Bell, ChevronRight, LogOut, Trash2 } from 'lucide-react-native';
+import { ChevronLeft, Sun, Moon, Bell, ChevronRight, LogOut, Trash2 } from 'lucide-react-native';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { useAppTheme, useThemeStore } from '../../../lib/themeStore';
+import { useSettingsStore, UnitSystem } from '../../../lib/settingsStore';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   const C = useAppTheme();
@@ -41,11 +41,11 @@ export default function SettingsScreen() {
   const C = useAppTheme();
   const { signOut } = useAuth();
   const { user } = useUser();
+  
   const themeMode = useThemeStore((s) => s.mode);
   const setThemeMode = useThemeStore((s) => s.setTheme);
   
-  const [units, setUnits] = useState<'metric' | 'imperial'>('metric');
-  const [notifs, setNotifs] = useState({ workout: true, habit: true, nutrition: false, streak: true, weekly: true });
+  const { units, setUnits, notifications, setNotification } = useSettingsStore();
 
   const NOTIF_ROWS = [
     { key: 'workout' as const, label: 'Workout Reminders', sub: 'Daily at 7:00 AM' },
@@ -169,8 +169,8 @@ export default function SettingsScreen() {
               left={<Bell size={16} color={C.textTertiary} strokeWidth={1.8} />}
               right={
                 <Switch
-                  value={notifs[key]}
-                  onValueChange={(val) => setNotifs(p => ({ ...p, [key]: val }))}
+                  value={notifications[key]}
+                  onValueChange={(val) => setNotification(key, val)}
                   trackColor={{ false: C.muted, true: C.brand }}
                   thumbColor="#FFFFFF"
                 />
@@ -187,13 +187,14 @@ export default function SettingsScreen() {
             { label: "Change Password", sub: "Update your credentials" },
             { label: "Data & Privacy", sub: "Manage your data" },
           ].map(({ label, sub }, i, arr) => (
-            <Row
-              key={label}
-              label={label}
-              sub={sub}
-              right={<ChevronRight size={16} color={C.textTertiary} />}
-              divider={i < arr.length - 1}
-            />
+            <Pressable key={label} onPress={() => Alert.alert("Coming Soon", "This feature is currently in development.")}>
+              <Row
+                label={label}
+                sub={sub}
+                right={<ChevronRight size={16} color={C.textTertiary} />}
+                divider={i < arr.length - 1}
+              />
+            </Pressable>
           ))}
         </Section>
 

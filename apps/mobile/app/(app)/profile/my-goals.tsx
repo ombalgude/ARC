@@ -1,30 +1,76 @@
-import { useState } from 'react';
-import { View, Text, Pressable, ScrollView, Modal, StyleSheet } from 'react-native';
+import { useState, useMemo, useEffect } from 'react';
+import { View, Text, Pressable, ScrollView, Modal, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { ChevronLeft, Flame, Dumbbell, Zap, Home, Building2, AlertTriangle } from 'lucide-react-native';
+import { ChevronLeft, Flame, Dumbbell, Zap, Home, Building2, AlertTriangle, Scale, UtensilsCrossed } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useAuth } from '@clerk/clerk-expo';
 import { useAppTheme } from '../../../lib/themeStore';
+import { createApiClient } from '../../../lib/api';
 
 const GOALS = [
-  { id: 'fat-loss', icon: Flame, label: 'Lose Fat', color: '#FF6B6B', colors: ['#FF6B6B', '#FF4444'] as const },
-  { id: 'muscle', icon: Dumbbell, label: 'Build Muscle', color: '#7C5CFC', colors: ['#7C5CFC', '#A07AF8'] as const },
-  { id: 'hybrid', icon: Zap, label: 'Hybrid Athlete', color: '#00D9B8', colors: ['#00D9B8', '#06B6D4'] as const },
+  { id: 'lose_fat', icon: Flame, label: 'Lose Fat', color: '#FF6B6B', colors: ['#FF6B6B', '#FF4444'] as const },
+  { id: 'maintain', icon: Scale, label: 'Maintain', color: '#00D9B8', colors: ['#00D9B8', '#06B6D4'] as const },
+  { id: 'build_muscle', icon: Dumbbell, label: 'Build Muscle', color: '#7C5CFC', colors: ['#7C5CFC', '#A07AF8'] as const },
+];
+
+const DIETS = [
+  { id: 'non-veg', label: 'Non-Veg' },
+  { id: 'vegetarian', label: 'Vegetarian' },
+  { id: 'vegan', label: 'Vegan' },
+  { id: 'eggetarian', label: 'Eggetarian' },
+  { id: 'no-preference', label: 'No Preference' },
 ];
 
 const SPLITS = [
-  { id: '3', label: '3-Day Split', sub: '3 sessions/week' },
-  { id: '4', label: '4-Day Split', sub: '4 sessions/week — Current' },
-  { id: '5', label: '5-Day Split', sub: '5 sessions/week' },
-  { id: '6', label: '6-Day Split', sub: '6 sessions/week' },
+  { id: 3, label: '3-Day Split', sub: '3 sessions/week' },
+  { id: 4, label: '4-Day Split', sub: '4 sessions/week' },
+  { id: 5, label: '5-Day Split', sub: '5 sessions/week' },
+  { id: 6, label: '6-Day Split', sub: '6 sessions/week' },
 ];
 
 export default function MyGoalsScreen() {
   const C = useAppTheme();
-  const [goal, setGoal] = useState('muscle');
-  const [split, setSplit] = useState('4');
+  const { getToken } = useAuth();
+  const api = useMemo(() => createApiClient(async () => await getToken()), [getToken]);
+  const queryClient = useQueryClient();
+
+  const { data: meData, isLoading: isMeLoading } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => api.getMe(),
+  });
+
+  const [goal, setGoal] = useState('build_muscle');
+  const [split, setSplit] = useState(4);
   const [env, setEnv] = useState<'gym' | 'home'>('gym');
+  const [diet, setDiet] = useState('no-preference');
   const [showConfirm, setShowConfirm] = useState(false);
+
+  useEffect(() => {
+    if (meData?.profile) {
+      setGoal((meData.profile.goal as string) === 'losefat' ? 'lose_fat' : ((meData.profile.goal as string) === 'maintain' ? 'maintain' : 'build_muscle'));
+      setSplit((meData.profile.workoutDaysPerWeek as number) || 4);
+      setDiet((meData.profile.dietaryPreference as string) || 'no-preference');
+    }
+    if (meData?.preferences) {
+      setEnv((meData.preferences.preferredEnvironment as 'gym' | 'home') || 'gym');
+    }
+  }, [meData]);
+
+  const mutation = useMutation({
+    mutationFn: (input: { goal: string; workoutDaysPerWeek: number; environment: string; dietaryPreference: string }) => api.regeneratePlan(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+      setShowConfirm(false);
+      router.navigate('/dashboard' as any);
+    },
+    onError: (error) => {
+      console.error('Failed to regenerate plan:', error);
+      alert('Failed to regenerate plan. Please try again.');
+    },
+  });
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.background }} edges={['top']}>
@@ -36,6 +82,11 @@ export default function MyGoalsScreen() {
         <Text style={{ fontSize: 24, fontWeight: '800', color: C.foreground }}>My Goals</Text>
       </View>
 
+      {isMeLoading ? (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <ActivityIndicator color={C.brand} size="large" />
+        </View>
+      ) : (
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }} showsVerticalScrollIndicator={false}>
         
         {/* Goal */}
@@ -105,7 +156,7 @@ export default function MyGoalsScreen() {
 
         {/* Environment */}
         <Text style={{ fontSize: 11, fontWeight: '700', color: C.textTertiary, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>Training Environment</Text>
-        <View style={{ flexDirection: 'row', gap: 12, marginBottom: 30 }}>
+        <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
           {([{ id: 'gym' as const, icon: Building2, label: 'Gym' }, { id: 'home' as const, icon: Home, label: 'Home' }]).map(({ id, icon: Icon, label }) => {
             const active = env === id;
             return (
@@ -131,6 +182,33 @@ export default function MyGoalsScreen() {
             );
           })}
         </View>
+        
+        {/* Diet */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+          <UtensilsCrossed size={14} color={C.textTertiary} />
+          <Text style={{ fontSize: 11, fontWeight: '700', color: C.textTertiary, textTransform: 'uppercase', letterSpacing: 1 }}>Dietary Preference</Text>
+        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingBottom: 20 }}>
+          {DIETS.map(({ id, label }) => {
+            const active = diet === id;
+            return (
+              <Pressable
+                key={id}
+                onPress={() => setDiet(id)}
+                style={{
+                  paddingHorizontal: 16,
+                  paddingVertical: 12,
+                  backgroundColor: active ? `${C.brand}15` : C.card,
+                  borderRadius: 99,
+                  borderWidth: 1.5,
+                  borderColor: active ? C.brand : C.border,
+                }}
+              >
+                <Text style={{ fontSize: 14, fontWeight: '700', color: active ? C.brand : C.foreground }}>{label}</Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
 
         <Pressable
           onPress={() => setShowConfirm(true)}
@@ -146,11 +224,12 @@ export default function MyGoalsScreen() {
         </Pressable>
 
       </ScrollView>
+      )}
 
       {/* Confirmation Modal */}
       <Modal visible={showConfirm} transparent animationType="fade">
         <View style={StyleSheet.absoluteFill}>
-          <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }} onPress={() => setShowConfirm(false)} />
+          <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }} onPress={() => !mutation.isPending && setShowConfirm(false)} />
           <View style={{ backgroundColor: C.card, borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 24, paddingBottom: 40, marginTop: 'auto' }}>
             <View style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: C.border, alignSelf: 'center', marginBottom: 20 }} />
             
@@ -160,22 +239,30 @@ export default function MyGoalsScreen() {
               </View>
               <View>
                 <Text style={{ fontSize: 18, fontWeight: '800', color: C.foreground }}>Regenerate your plan?</Text>
-                <Text style={{ fontSize: 14, color: C.textSecondary, marginTop: 4 }}>This creates a new workout & nutrition plan</Text>
+                <Text style={{ fontSize: 14, color: C.textSecondary, marginTop: 4 }}>This creates a new workout plan based on your goals.</Text>
               </View>
             </View>
 
             <Pressable
-              onPress={() => { setShowConfirm(false); router.navigate('/dashboard' as any); }}
+              onPress={() => {
+                mutation.mutate({ goal, workoutDaysPerWeek: split, environment: env, dietaryPreference: diet });
+              }}
+              disabled={mutation.isPending}
               style={{ overflow: 'hidden', borderRadius: 14, marginBottom: 10 }}
             >
               <LinearGradient colors={['#7C5CFC', '#A07AF8']} style={{ padding: 16, alignItems: 'center' }} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-                <Text style={{ color: '#FFF', fontSize: 16, fontWeight: '800' }}>Yes, Regenerate Plan</Text>
+                {mutation.isPending ? (
+                  <ActivityIndicator color="#FFF" />
+                ) : (
+                  <Text style={{ color: '#FFF', fontSize: 16, fontWeight: '800' }}>Yes, Regenerate Plan</Text>
+                )}
               </LinearGradient>
             </Pressable>
             
             <Pressable
               onPress={() => setShowConfirm(false)}
-              style={{ padding: 16, alignItems: 'center', backgroundColor: C.muted, borderRadius: 14 }}
+              disabled={mutation.isPending}
+              style={{ padding: 16, alignItems: 'center', backgroundColor: C.muted, borderRadius: 14, opacity: mutation.isPending ? 0.5 : 1 }}
             >
               <Text style={{ color: C.textSecondary, fontSize: 16, fontWeight: '700' }}>Cancel</Text>
             </Pressable>

@@ -72,8 +72,8 @@ export default function SubscriptionScreen() {
               ))}
             </View>
 
-            <Pressable style={{ width: '100%', padding: 16, backgroundColor: '#FFF', borderRadius: 16, alignItems: 'center' }}>
-              <Text style={{ color: '#7C5CFC', fontSize: 16, fontWeight: '800' }}>Start 7-Day Free Trial</Text>
+            <Pressable disabled style={{ width: '100%', padding: 16, backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: 16, alignItems: 'center' }}>
+              <Text style={{ color: '#3A20C0', fontSize: 16, fontWeight: '800' }}>Coming Soon</Text>
             </Pressable>
 
           </LinearGradient>

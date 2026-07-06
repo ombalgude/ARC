@@ -125,3 +125,36 @@ function isProfileComplete(
       Array.isArray(preferences.equipment),
   );
 }
+
+export async function handleGetWeightLogs(req: Request, res: Response<ApiResponse<any>>): Promise<void> {
+  if (!req.dbUser?.id) {
+    res.status(401).json({ success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" } });
+    return;
+  }
+  try {
+    const logs = await userRepository.getWeightLogs(req.dbUser.id);
+    res.status(200).json({ success: true, data: { logs } });
+  } catch (error) {
+    res.status(500).json({ success: false, error: { code: "INTERNAL_ERROR", message: "Unable to fetch weight logs" } });
+  }
+}
+
+export async function handleAddWeightLog(req: Request, res: Response<ApiResponse<any>>): Promise<void> {
+  if (!req.dbUser?.id) {
+    res.status(401).json({ success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" } });
+    return;
+  }
+  
+  const weightKg = req.body?.weightKg;
+  if (!weightKg) {
+    res.status(400).json({ success: false, error: { code: "VALIDATION_ERROR", message: "Weight is required" } });
+    return;
+  }
+
+  try {
+    const log = await userRepository.addWeightLog(req.dbUser.id, weightKg.toString());
+    res.status(200).json({ success: true, data: { log } });
+  } catch (error) {
+    res.status(500).json({ success: false, error: { code: "INTERNAL_ERROR", message: "Unable to add weight log" } });
+  }
+}

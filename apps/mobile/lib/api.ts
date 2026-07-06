@@ -323,5 +323,20 @@ export function createApiClient(getToken: GetToken) {
         body: JSON.stringify(input),
       });
     },
+    getWeightLogs() {
+      return request<{ logs: any[] }>("/api/v1/users/weight");
+    },
+    addWeightLog(weightKg: number) {
+      return request<{ log: any }>("/api/v1/users/weight", {
+        method: "POST",
+        body: JSON.stringify({ weightKg }),
+      });
+    },
+    regeneratePlan(input: { goal: string; workoutDaysPerWeek: number; environment: string; dietaryPreference?: string }) {
+      return request<{ success: boolean }>("/api/v1/plans/regenerate", {
+        method: "POST",
+        body: JSON.stringify(input),
+      });
+    },
   };
 }
