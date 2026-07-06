@@ -97,3 +97,27 @@ export async function findHistoricalLogsByUser(userId: string) {
     .where(eq(habitLogs.userId, userId))
     .orderBy(desc(habitLogs.loggedDate), desc(habitLogs.createdAt));
 }
+
+export async function deleteHabit(habitId: string, userId: string, executor: DatabaseExecutor = db) {
+  const [deletedHabit] = await executor
+    .delete(habits)
+    .where(and(eq(habits.id, habitId), eq(habits.userId, userId)))
+    .returning();
+    
+  return deletedHabit ?? null;
+}
+
+export async function updateHabit(
+  habitId: string,
+  userId: string,
+  updates: Partial<Pick<NewHabit, "type" | "targetValue" | "unit" | "iconName" | "colorHex">>,
+  executor: DatabaseExecutor = db
+) {
+  const [updatedHabit] = await executor
+    .update(habits)
+    .set({ ...updates, updatedAt: new Date() })
+    .where(and(eq(habits.id, habitId), eq(habits.userId, userId)))
+    .returning();
+
+  return updatedHabit ?? null;
+}

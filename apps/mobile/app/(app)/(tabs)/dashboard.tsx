@@ -303,15 +303,8 @@ export default function DashboardScreen() {
                     shadowColor: isDone ? color : '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: isDone ? 0.3 : 0.05, shadowRadius: 16, elevation: isDone ? 8 : 2
                   }, pressed && { transform: [{ scale: 0.85 }] }]}
                 >
-                  <Icon size={22} color={isDone ? color : C.textTertiary} strokeWidth={isDone ? 2.5 : 1.8} />
                   {isDone && (
-                    <View style={{
-                      position: 'absolute', top: -2, right: -2, width: 17, height: 17, borderRadius: 8.5,
-                      backgroundColor: color, borderWidth: 2, borderColor: C.background,
-                      alignItems: 'center', justifyContent: 'center'
-                    }}>
-                      <Check size={10} color="#FFF" strokeWidth={3} />
-                    </View>
+                    <Check size={28} color={color} strokeWidth={3} />
                   )}
                 </Pressable>
                 <Text style={{ fontSize: 10, fontWeight: '600', color: isDone ? C.foreground : C.textTertiary, letterSpacing: 0.2 }}>{name}</Text>

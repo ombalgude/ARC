@@ -25,25 +25,14 @@ function getHabitLogPayload(habit: HabitSummary, localDate: string) {
 }
 
 function getHabitName(habit: HabitSummary): string {
-  const names = {
+  const names: Record<string, string> = {
     workout: 'Workout',
     water: 'Water Intake',
     sleep: 'Sleep',
     steps: 'Step Goal',
     macros: 'Macros',
   };
-  return names[habit.type];
-}
-
-function getHabitIcon(habit: HabitSummary): string {
-  const icons = {
-    workout: '💪',
-    water: '💧',
-    sleep: '😴',
-    steps: '👟',
-    macros: '🥗',
-  };
-  return icons[habit.type];
+  return names[habit.type] || habit.type || 'Habit';
 }
 
 function getHabitButtonLabel(habit: HabitSummary): string {
@@ -146,9 +135,6 @@ export function HabitTracker(): React.JSX.Element {
 
             return (
               <View key={habit.id} style={styles.habitRow}>
-                <View style={styles.iconBox}>
-                  <Text style={styles.icon}>{getHabitIcon(habit)}</Text>
-                </View>
                 <View style={styles.habitMain}>
                   <Text style={styles.habitName}>{getHabitName(habit)}</Text>
                   <Text style={styles.habitMeta}>{progress}</Text>
@@ -224,15 +210,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 12,
   },
-  iconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  icon: { fontSize: 18 },
   habitMain: { flex: 1 },
   habitName: { fontSize: 15, fontWeight: '700', color: C.foreground, letterSpacing: -0.3 },
   habitMeta: { fontSize: 12, fontWeight: '500', color: C.textSecondary, marginTop: 2 },

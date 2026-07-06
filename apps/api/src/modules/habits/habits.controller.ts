@@ -1,6 +1,6 @@
 import type { ApiResponse } from "@arc/types";
 import { db, habitRepository } from "@arc/database";
-import { logHabitSchema } from "@arc/validations";
+import { logHabitSchema, createHabitSchema, updateHabitSchema } from "@arc/validations";
 import type { Request, Response } from "express";
 import { format, subDays, parseISO } from "date-fns";
 
@@ -11,6 +11,8 @@ interface HabitSummary extends HabitRecord {
   todayValue: number;
   completedToday: boolean;
   streak: number;
+  bestStreak: number;
+  completionRate: number;
 }
 
 interface HabitLogResult {
@@ -19,7 +21,7 @@ interface HabitLogResult {
 
 export async function handleGetHabits(
   req: Request,
-  res: Response<ApiResponse<{ habits: HabitSummary[] }>>,
+  res: Response<ApiResponse<{ habits: HabitSummary[], logs: HabitLogRecord[] }>>,
 ): Promise<void> {
   if (!req.dbUser?.id) {
     res.status(401).json({
@@ -141,13 +143,61 @@ export async function handleGetHabits(
             }
           }
 
+          // Calculate robust stats
+          const completedDates = new Set<string>();
+          const logsByDate = new Map<string, typeof logs>();
+          for (const l of logs) {
+            if (!logsByDate.has(l.loggedDate)) logsByDate.set(l.loggedDate, []);
+            logsByDate.get(l.loggedDate)!.push(l);
+          }
+
+          for (const [dateStr, dayLogs] of logsByDate.entries()) {
+            const dayValue = dayLogs.reduce((acc, l) => acc + Number(l.value ?? 0), 0);
+            const isCompleted = (dayLogs.length > 0 ? (dayLogs[0]?.completed ?? false) : false) || 
+                (habit.targetValue !== null && dayValue >= Number(habit.targetValue));
+            if (isCompleted) {
+              completedDates.add(dateStr);
+            }
+          }
+
+          const completedDatesArray = Array.from(completedDates).sort();
+          
+          let bestStreak = 0;
+          let tempStreak = 0;
+          let prevDateObj: Date | null = null;
+          
+          for (const dStr of completedDatesArray) {
+            const dObj = parseISO(dStr);
+            if (!prevDateObj) {
+              tempStreak = 1;
+            } else {
+              const diffTime = Math.abs(dObj.getTime() - prevDateObj.getTime());
+              const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+              if (diffDays === 1) {
+                tempStreak++;
+              } else {
+                tempStreak = 1;
+              }
+            }
+            bestStreak = Math.max(bestStreak, tempStreak);
+            prevDateObj = dObj;
+          }
+
+          const createdAtObj = new Date(habit.createdAt);
+          const diffTimeCreated = Math.max(0, parseISO(today).getTime() - createdAtObj.getTime());
+          const daysSinceCreated = Math.max(1, Math.floor(diffTimeCreated / (1000 * 60 * 60 * 24)) + 1);
+          const completionRate = Math.min(100, Math.round((completedDates.size / daysSinceCreated) * 100));
+
           return {
             ...habit,
             todayValue,
             completedToday,
             streak,
+            bestStreak,
+            completionRate,
           };
         }),
+        logs: allLogs,
       },
     });
   } catch (error) {
@@ -221,4 +271,145 @@ export async function handleLogHabit(
 
 function getLocalDayString(date: Date): string {
   return format(date, "yyyy-MM-dd");
+}
+
+export async function handleCreateHabit(
+  req: Request,
+  res: Response<ApiResponse<{ habit: HabitRecord }>>,
+): Promise<void> {
+  const parsedBody = createHabitSchema.safeParse(req.body);
+
+  if (!parsedBody.success) {
+    res.status(400).json({
+      success: false,
+      error: {
+        code: "VALIDATION_ERROR",
+        message: parsedBody.error.issues.map((issue) => issue.message).join("; "),
+      },
+    });
+    return;
+  }
+
+  if (!req.dbUser?.id) {
+    res.status(401).json({
+      success: false,
+      error: { code: "UNAUTHORIZED", message: "Authentication required" },
+    });
+    return;
+  }
+
+  try {
+    const newHabit = await habitRepository.createHabit({
+      userId: req.dbUser.id,
+      type: parsedBody.data.name, // Using 'type' as the name in the database
+      targetValue: parsedBody.data.targetValue ? parsedBody.data.targetValue.toString() : null,
+      unit: parsedBody.data.unit ?? null,
+      iconName: parsedBody.data.iconName ?? null,
+      colorHex: parsedBody.data.colorHex ?? null,
+      isActive: true,
+    });
+
+    res.status(201).json({ success: true, data: { habit: newHabit } });
+  } catch (error) {
+    console.error("Habit creation failed", error);
+    res.status(500).json({
+      success: false,
+      error: { code: "INTERNAL_ERROR", message: "Unable to create habit" },
+    });
+  }
+}
+
+export async function handleDeleteHabit(
+  req: Request,
+  res: Response<ApiResponse<{ success: boolean }>>,
+): Promise<void> {
+  if (!req.dbUser?.id) {
+    res.status(401).json({
+      success: false,
+      error: { code: "UNAUTHORIZED", message: "Authentication required" },
+    });
+    return;
+  }
+
+  const habitId = req.params.habitId as string;
+
+  try {
+    const deleted = await habitRepository.deleteHabit(habitId, req.dbUser.id);
+    if (!deleted) {
+      res.status(404).json({
+        success: false,
+        error: { code: "NOT_FOUND", message: "Habit not found" },
+      });
+      return;
+    }
+
+    res.status(200).json({ success: true, data: { success: true } });
+  } catch (error) {
+    console.error("Habit deletion failed", error);
+    res.status(500).json({
+      success: false,
+      error: { code: "INTERNAL_ERROR", message: "Unable to delete habit" },
+    });
+  }
+}
+
+export async function handleUpdateHabit(
+  req: Request,
+  res: Response<ApiResponse<{ habit: HabitRecord }>>,
+): Promise<void> {
+  const parsedBody = updateHabitSchema.safeParse(req.body);
+
+  if (!parsedBody.success) {
+    res.status(400).json({
+      success: false,
+      error: {
+        code: "VALIDATION_ERROR",
+        message: parsedBody.error.issues.map((issue) => issue.message).join("; "),
+      },
+    });
+    return;
+  }
+
+  if (!req.dbUser?.id) {
+    res.status(401).json({
+      success: false,
+      error: { code: "UNAUTHORIZED", message: "Authentication required" },
+    });
+    return;
+  }
+
+  const habitId = req.params.habitId as string;
+
+  try {
+    const updates: any = {};
+    if (parsedBody.data.name !== undefined) updates.type = parsedBody.data.name;
+    if (parsedBody.data.targetValue !== undefined) updates.targetValue = parsedBody.data.targetValue ? parsedBody.data.targetValue.toString() : null;
+    if (parsedBody.data.unit !== undefined) updates.unit = parsedBody.data.unit || null;
+    if (parsedBody.data.colorHex !== undefined) updates.colorHex = parsedBody.data.colorHex || null;
+
+    if (Object.keys(updates).length === 0) {
+      res.status(400).json({
+        success: false,
+        error: { code: "BAD_REQUEST", message: "No fields to update provided" },
+      });
+      return;
+    }
+
+    const updatedHabit = await habitRepository.updateHabit(habitId, req.dbUser.id, updates);
+    if (!updatedHabit) {
+      res.status(404).json({
+        success: false,
+        error: { code: "NOT_FOUND", message: "Habit not found" },
+      });
+      return;
+    }
+
+    res.status(200).json({ success: true, data: { habit: updatedHabit } });
+  } catch (error) {
+    console.error("Habit update failed", error);
+    res.status(500).json({
+      success: false,
+      error: { code: "INTERNAL_ERROR", message: "Unable to update habit" },
+    });
+  }
 }

@@ -78,6 +78,22 @@ export const logHabitSchema = z
     message: "Provide either a value or completed status",
   });
 
+export const createHabitSchema = z.object({
+  name: z.string().min(1).max(50),
+  targetValue: z.number().positive().optional(),
+  unit: z.string().max(20).optional(),
+  iconName: z.string().max(50).optional(),
+  colorHex: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Must be a valid hex color").optional(),
+});
+
+export const updateHabitSchema = z.object({
+  name: z.string().min(1).max(50).optional(),
+  targetValue: z.number().positive().optional(),
+  unit: z.string().max(20).optional(),
+  iconName: z.string().max(50).optional(),
+  colorHex: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Must be a valid hex color").optional(),
+});
+
 export type WorkoutInput = z.infer<typeof workoutInputSchema>;
 export type NutritionInput = z.infer<typeof nutritionInputSchema>;
 export type OnboardingInput = z.infer<typeof onboardingSchema>;
@@ -86,3 +102,5 @@ export type StartSessionInput = z.infer<typeof startSessionSchema>;
 export type LogSetInput = z.infer<typeof logSetSchema>;
 export type CompleteSessionInput = z.infer<typeof completeSessionSchema>;
 export type LogHabitInput = z.infer<typeof logHabitSchema>;
+export type CreateHabitInput = z.infer<typeof createHabitSchema>;
+export type UpdateHabitInput = z.infer<typeof updateHabitSchema>;

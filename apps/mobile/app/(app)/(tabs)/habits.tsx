@@ -1,22 +1,22 @@
 import { useMemo } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ScrollView, StyleSheet, Text, View, Pressable, ActivityIndicator } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useAuth } from '@clerk/clerk-expo';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createApiClient, HabitSummary } from '../../../lib/api';
-import { Droplets, Moon, Footprints, Dumbbell, Utensils, Flame, ChevronRight, Check } from 'lucide-react-native';
+import { ChevronRight, Check, Plus, Minus } from 'lucide-react-native';
 import { ProgressRing } from '../../../../../packages/ui/src/ProgressRing';
 
 import { useAppTheme } from '../../../lib/themeStore';
 
-const HABIT_CONFIG: Record<string, any> = {
-  water: { name: "Drink Water", Icon: Droplets, color: "#06B6D4" },
-  sleep: { name: "Quality Sleep", Icon: Moon, color: "#7C5CFC" },
-  steps: { name: "10k Steps", Icon: Footprints, color: "#FF6B6B" },
-  workout: { name: "Workout", Icon: Dumbbell, color: "#00D9B8" },
-  macros: { name: "Nutrition", Icon: Utensils, color: "#FFB300" },
+const DEFAULT_CONFIG: Record<string, any> = {
+  water: { name: "Drink Water", color: "#06B6D4" },
+  sleep: { name: "Quality Sleep", color: "#7C5CFC" },
+  steps: { name: "10k Steps", color: "#FF6B6B" },
+  workout: { name: "Workout", color: "#00D9B8" },
+  macros: { name: "Nutrition", color: "#FFB300" },
 };
 
 export default function HabitsScreen(): React.JSX.Element {
@@ -42,20 +42,23 @@ export default function HabitsScreen(): React.JSX.Element {
       .filter((h: any) => !['macros', 'protein', 'carbs', 'fats', 'micros', 'meal_breakfast', 'meal_lunch', 'meal_preworkout', 'meal_postworkout'].includes(h.type))
       .map((h: any) => ({
       ...h,
-      ...(HABIT_CONFIG[h.type] || { name: h.type, Icon: Check, color: C.brand }),
+      name: DEFAULT_CONFIG[h.type]?.name || h.type || 'Habit',
+      color: h.colorHex || DEFAULT_CONFIG[h.type]?.color || C.brand,
       done: h.completedToday,
       current: h.todayValue,
+      targetValue: h.targetValue,
       target: h.targetValue ? `${h.targetValue} ${h.unit || ''}` : 'Done',
       streak: h.streak,
     }));
   }, [rawHabits, C.brand]);
 
   const { mutate: toggleHabit } = useMutation({
-    mutationFn: async (habitId: string) => {
-      const isDone = !habits.find(h => h.id === habitId)?.done;
-      return api.logHabit({ habitId, localDate, completed: isDone }).catch(() => null);
+    mutationFn: async ({ habitId, value }: { habitId: string; value?: number }) => {
+      const habit = habits.find((h: any) => h.id === habitId);
+      const isDone = !habit?.done;
+      return api.logHabit({ habitId, localDate, completed: value === undefined ? isDone : undefined, value }).catch(() => null);
     },
-    onMutate: async (habitId: string) => {
+    onMutate: async ({ habitId, value }: { habitId: string; value?: number }) => {
       await queryClient.cancelQueries({ queryKey: ['habits-detail', localDate] });
       await queryClient.cancelQueries({ queryKey: ['dashboard-habits', localDate] });
       
@@ -64,7 +67,15 @@ export default function HabitsScreen(): React.JSX.Element {
 
       if (prevDetail) {
         queryClient.setQueryData<HabitSummary[]>(['habits-detail', localDate], old =>
-          (old || []).map(h => h.id === habitId ? { ...h, completedToday: !h.completedToday } : h)
+          (old || []).map(h => {
+            if (h.id !== habitId) return h;
+            if (value !== undefined) {
+              const newCurrent = Math.max(0, Number(h.todayValue || 0) + value);
+              const target = Number(h.targetValue);
+              return { ...h, todayValue: newCurrent, completedToday: target > 0 ? newCurrent >= target : h.completedToday };
+            }
+            return { ...h, completedToday: !h.completedToday };
+          })
         );
       }
       
@@ -80,10 +91,14 @@ export default function HabitsScreen(): React.JSX.Element {
     },
   });
 
-  const completed = habits.filter((h) => h.done).length;
+  const completed = habits.filter((h: any) => h.done).length;
   const pct = habits.length > 0 ? (completed / habits.length) * 100 : 0;
 
-  const toggle = (id: string) => toggleHabit(id);
+  const toggle = (id: string, value?: number) => {
+    const habit = habits.find((h: any) => h.id === id);
+    if (value === -1 && Number(habit?.current || 0) <= 0) return;
+    toggleHabit({ habitId: id, value });
+  };
 
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
@@ -108,9 +123,14 @@ export default function HabitsScreen(): React.JSX.Element {
             {today}
           </Text>
         </View>
-        <Pressable hitSlop={12} onPress={() => router.push('/habits/history' as any)}>
-          <Text style={{ fontSize: 13, fontWeight: '600', color: C.brand }}>History</Text>
-        </Pressable>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+          <Pressable hitSlop={12} onPress={() => router.push('/habits/history' as any)}>
+            <Text style={{ fontSize: 13, fontWeight: '600', color: C.brand }}>History</Text>
+          </Pressable>
+          <Pressable hitSlop={12} onPress={() => router.push('/habits/create' as any)}>
+            <Text style={{ fontSize: 13, fontWeight: '600', color: C.brand }}>Create a new habit</Text>
+          </Pressable>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
@@ -152,7 +172,7 @@ export default function HabitsScreen(): React.JSX.Element {
 
         {/* Habits list */}
         <View style={{ paddingHorizontal: 20, gap: 12, paddingBottom: 20 }}>
-          {habits.map(({ id, name, Icon, color, done, streak, current, target }) => (
+          {habits.map(({ id, name, color, done, streak, current, target, targetValue }: any) => (
             <View
               key={id}
               style={{
@@ -171,53 +191,81 @@ export default function HabitsScreen(): React.JSX.Element {
                 elevation: done ? 2 : 1,
               }}
             >
-              {/* Icon */}
-              <View
-                style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: 16,
-                  backgroundColor: done ? color : C.muted,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
+              <Pressable 
+                onPress={() => router.push(`/habits/${id}` as any)}
+                style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 16 }}
               >
-                <Icon size={24} color={done ? "#FFFFFF" : C.textTertiary} strokeWidth={done ? 2.5 : 2} />
-              </View>
-
-              {/* Info */}
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 16, fontWeight: '700', color: done ? color : C.foreground }}>
-                  {name}
-                </Text>
-                <Text style={{ fontSize: 13, color: done ? C.textSecondary : C.textTertiary, marginTop: 2 }}>
-                  {current} · target {target} {streak > 0 ? `· 🔥 ${streak} day${streak > 1 ? 's' : ''}` : ''}
-                </Text>
-              </View>
-
-              {/* Toggle */}
-              <Pressable
-                onPress={() => toggle(id)}
-                style={({ pressed }) => [
-                  {
-                    width: 36,
-                    height: 36,
-                    borderRadius: 18,
-                    backgroundColor: done ? color : C.muted,
-                    borderWidth: 2,
-                    borderColor: done ? color : C.border,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  },
-                  pressed && { transform: [{ scale: 0.85 }] }
-                ]}
-              >
-                {done ? (
-                  <Check size={20} color="#FFFFFF" strokeWidth={3} />
-                ) : (
-                  <Check size={20} color={C.textTertiary} strokeWidth={2.5} />
-                )}
+                {/* Info */}
+                <View style={{ flex: 1, paddingLeft: 4 }}>
+                  <Text style={{ fontSize: 16, fontWeight: '700', color: done ? color : C.foreground }}>
+                    {name}
+                  </Text>
+                  <Text style={{ fontSize: 13, color: done ? C.textSecondary : C.textTertiary, marginTop: 2 }}>
+                    {target === 'Done' ? 'Daily habit' : `${current} / ${target}`} {streak > 0 ? `· 🔥 ${streak} day${streak > 1 ? 's' : ''}` : ''}
+                  </Text>
+                  {target !== 'Done' && (
+                    <View style={{ height: 4, backgroundColor: C.muted, borderRadius: 2, marginTop: 8, overflow: 'hidden' }}>
+                      <View style={{ height: '100%', width: `${Math.min(100, (Number(current) / Number(targetValue)) * 100)}%`, backgroundColor: color, borderRadius: 2 }} />
+                    </View>
+                  )}
+                </View>
               </Pressable>
+
+              {/* Toggle / Stepper */}
+              {target !== 'Done' ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Pressable
+                    onPress={() => toggle(id, -1)}
+                    style={({ pressed }) => [
+                      {
+                        width: 32, height: 32, borderRadius: 16,
+                        backgroundColor: C.muted, alignItems: 'center', justifyContent: 'center'
+                      },
+                      pressed && { transform: [{ scale: 0.85 }] }
+                    ]}
+                  >
+                    <Minus size={16} color={C.textSecondary} strokeWidth={2.5} />
+                  </Pressable>
+                  <Text style={{ fontSize: 16, fontWeight: '700', color: C.foreground, minWidth: 20, textAlign: 'center' }}>
+                    {current}
+                  </Text>
+                  <Pressable
+                    onPress={() => toggle(id, 1)}
+                    style={({ pressed }) => [
+                      {
+                        width: 32, height: 32, borderRadius: 16,
+                        backgroundColor: color, alignItems: 'center', justifyContent: 'center'
+                      },
+                      pressed && { transform: [{ scale: 0.85 }] }
+                    ]}
+                  >
+                    <Plus size={16} color="#FFFFFF" strokeWidth={3} />
+                  </Pressable>
+                </View>
+              ) : (
+                <Pressable
+                  onPress={() => toggle(id)}
+                  style={({ pressed }) => [
+                    {
+                      width: 36,
+                      height: 36,
+                      borderRadius: 18,
+                      backgroundColor: done ? color : C.muted,
+                      borderWidth: 2,
+                      borderColor: done ? color : C.border,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    },
+                    pressed && { transform: [{ scale: 0.85 }] }
+                  ]}
+                >
+                  {done ? (
+                    <Check size={20} color="#FFFFFF" strokeWidth={3} />
+                  ) : (
+                    <Check size={20} color={C.textTertiary} strokeWidth={2.5} />
+                  )}
+                </Pressable>
+              )}
             </View>
           ))}
         </View>

@@ -1,6 +1,5 @@
 import { boolean, date, index, numeric, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
-import { habitTypeEnum } from "./enums.js";
 import { users } from "./users.js";
 
 export const habits = pgTable(
@@ -10,7 +9,9 @@ export const habits = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    type: habitTypeEnum("type").notNull(),
+    type: text("type").notNull(),
+    iconName: text("icon_name"),
+    colorHex: text("color_hex"),
     targetValue: numeric("target_value", { precision: 8, scale: 2 }),
     unit: text("unit"),
     isActive: boolean("is_active").default(true).notNull(),

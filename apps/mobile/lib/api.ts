@@ -96,15 +96,19 @@ export interface CompleteSessionInput {
 export interface HabitSummary {
   id: string;
   userId: string;
-  type: "workout" | "water" | "sleep" | "steps" | "macros";
+  type: string;
   targetValue: string | null;
   unit: string | null;
+  iconName?: string | null;
+  colorHex?: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
   todayValue: number;
   completedToday: boolean;
   streak: number;
+  bestStreak: number;
+  completionRate: number;
 }
 
 export interface LogHabitInput {
@@ -112,6 +116,22 @@ export interface LogHabitInput {
   localDate: string;
   value?: number;
   completed?: boolean;
+}
+
+export interface CreateHabitInput {
+  name: string;
+  targetValue?: number;
+  unit?: string;
+  iconName?: string;
+  colorHex?: string;
+}
+
+export interface UpdateHabitInput {
+  name?: string;
+  targetValue?: number;
+  unit?: string;
+  iconName?: string;
+  colorHex?: string;
 }
 
 export interface SessionLog {
@@ -263,7 +283,24 @@ export function createApiClient(getToken: GetToken) {
       });
     },
     getHabits(date: string) {
-      return request<{ habits: HabitSummary[] }>(`/api/v1/habits?date=${date}`);
+      return request<{ habits: HabitSummary[], logs: any[] }>(`/api/v1/habits?date=${date}`);
+    },
+    createHabit(input: CreateHabitInput) {
+      return request<{ habit: HabitSummary }>("/api/v1/habits", {
+        method: "POST",
+        body: JSON.stringify(input),
+      });
+    },
+    deleteHabit(habitId: string) {
+      return request<{ success: boolean }>(`/api/v1/habits/${habitId}`, {
+        method: "DELETE",
+      });
+    },
+    updateHabit(habitId: string, input: UpdateHabitInput) {
+      return request<{ habit: HabitSummary }>(`/api/v1/habits/${habitId}`, {
+        method: "PATCH",
+        body: JSON.stringify(input),
+      });
     },
     logHabit(input: LogHabitInput) {
       return request<{ log: unknown }>("/api/v1/habits/log", {
