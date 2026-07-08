@@ -184,14 +184,6 @@ export default function DashboardScreen() {
               <Bell size={17} color={C.foreground} strokeWidth={2} />
               <View style={{ position: 'absolute', top: 9, right: 10, width: 6, height: 6, borderRadius: 3, backgroundColor: C.energy, borderWidth: 1.5, borderColor: C.background }} />
             </Pressable>
-            <View style={{
-              width: 40, height: 40, borderRadius: 16, alignItems: 'center', justifyContent: 'center',
-              borderWidth: 2, borderColor: C.brand,
-              ...Shadows.brand,
-            }}>
-              <LinearGradient colors={['#7C5CFC', '#00D9B8']} start={{x: 0, y: 0}} end={{x: 1, y: 1}} style={{...StyleSheet.absoluteFillObject, borderRadius: 14}} />
-              <Text style={{ fontSize: 15, fontWeight: '700', color: '#FFF' }}>{firstName[0]?.toUpperCase() ?? 'A'}</Text>
-            </View>
           </View>
         </View>
 
