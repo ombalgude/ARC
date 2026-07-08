@@ -13,6 +13,16 @@ export default function LandingNav() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const handleGetAccess = (e: React.MouseEvent) => {
+    e.preventDefault(); // Stop any scrolling
+    const el = document.getElementById('waitlist');
+    if (el) {
+      el.classList.remove('pulse-trigger');
+      void el.offsetWidth; // force reflow
+      el.classList.add('pulse-trigger');
+    }
+  };
+
   return (
     <nav
       style={{
@@ -72,6 +82,7 @@ export default function LandingNav() {
           {/* CTA */}
           <a 
             href="#waitlist" 
+            onClick={handleGetAccess}
             style={{
               background: "rgba(255,255,255,0.08)",
               color: "#FFF",
@@ -104,6 +115,7 @@ export default function LandingNav() {
           `}</style>
           <a 
             href="#waitlist" 
+            onClick={handleGetAccess}
             style={{
               background: "var(--arc-blue)",
               color: "#FFF",

@@ -19,6 +19,7 @@ interface SignupResult {
 export default function HeroSection({ initialCount, referralCode }: HeroProps) {
   const [count, setCount] = useState(initialCount);
   const [confirmed, setConfirmed] = useState<SignupResult | null>(null);
+  const [showModal, setShowModal] = useState(false);
   const countRef = useRef(initialCount);
 
   // Slowly auto-increment counter for live social proof feel
@@ -39,41 +40,22 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
   function handleSuccess(data: SignupResult) {
     setCount(data.totalCount);
     setConfirmed(data);
+    setShowModal(true);
   }
 
   return (
     <section
-      id="waitlist"
       style={{
         position: "relative",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         minHeight: "80vh",
-        padding: "2.5rem 1.5rem 3rem",
+        padding: "2.5rem 1.5rem 4rem",
         overflow: "hidden",
-        background: "#000000",
+        background: "transparent",
       }}
     >
-      {/* ── Impeccable Static Background Glows ── */}
-      {/* Top-center — Electric Blue ambient (very subtle) */}
-      <div style={{
-        position: "absolute", top: "-15%", left: "50%", transform: "translateX(-50%)",
-        width: "800px", height: "800px",
-        background: "radial-gradient(ellipse at center, rgba(59,130,246,0.10) 0%, transparent 65%)",
-        pointerEvents: "none",
-        zIndex: 0,
-      }} />
-
-      {/* Bottom-left — deep accent */}
-      <div style={{
-        position: "absolute", bottom: 0, left: "5%",
-        width: "400px", height: "400px",
-        background: "radial-gradient(ellipse at center, rgba(59,130,246,0.04) 0%, transparent 70%)",
-        pointerEvents: "none",
-        zIndex: 0,
-      }} />
-
       {/* ── Two-Column Grid Layout ── */}
       <div style={{
         position: "relative", zIndex: 1,
@@ -155,18 +137,49 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
             ARC adapts your workouts, builds lasting habits, and tracks your nutrition — all powered by AI that learns from you, not at you.
           </p>
 
-          {/* Waitlist form or confirmation */}
           <div
             className="animate-fade-up opacity-0-init delay-800"
             style={{ width: "100%", maxWidth: "480px", marginBottom: "1.25rem" }}
           >
             {confirmed ? (
-              <ConfirmationScreen
-                position={confirmed.position}
-                referralCode={confirmed.referralCode}
-                totalCount={confirmed.totalCount}
-                alreadyRegistered={confirmed.alreadyRegistered}
-              />
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  background: "rgba(34,197,94,0.05)",
+                  border: "1px solid rgba(34,197,94,0.2)",
+                  borderRadius: "100px",
+                  padding: "0.375rem 0.375rem 0.375rem 1.25rem",
+                  width: "100%",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                  <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#22C55E", boxShadow: "0 0 10px #22C55E" }} />
+                  <span style={{ fontSize: "0.9375rem", fontWeight: 500, color: "#fff" }}>
+                    Spot secured
+                  </span>
+                </div>
+                <button
+                  onClick={() => setShowModal(true)}
+                  style={{
+                    background: "linear-gradient(90deg, #3B82F6, #60A5FA)",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "100px",
+                    padding: "0.625rem 1.25rem",
+                    fontSize: "0.8125rem",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    boxShadow: "0 2px 10px rgba(59,130,246,0.3)",
+                    transition: "transform 0.2s, opacity 0.2s",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.9")}
+                  onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+                >
+                  View Ticket
+                </button>
+              </div>
             ) : (
               <WaitlistForm
                 onSuccess={handleSuccess}
@@ -210,7 +223,6 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
         </div>
 
         {/* ── Right Column: Floating Phone Mockup ── */}
-        {!confirmed && (
           <div
             className="animate-fade-in opacity-0-init delay-1000"
             style={{
@@ -342,8 +354,18 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
             </div>
             </div>
           </div>
-        )}
       </div>
+      
+      {/* ── Celebration Modal ── */}
+      {showModal && confirmed && (
+        <ConfirmationScreen
+          position={confirmed.position}
+          referralCode={confirmed.referralCode}
+          totalCount={confirmed.totalCount}
+          alreadyRegistered={confirmed.alreadyRegistered}
+          onClose={() => setShowModal(false)}
+        />
+      )}
     </section>
   );
 }

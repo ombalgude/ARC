@@ -301,6 +301,28 @@ body::before {
   to { transform: translateY(0); opacity: 1; }
 }
 
+@keyframes auroraBreathe {
+  0%, 100% { 
+    transform: scale(0.8) translate(0%, 0%); 
+    opacity: 0.3; 
+  }
+  50% { 
+    transform: scale(1.4) translate(-10%, 8%); 
+    opacity: 1; 
+  }
+}
+
+@keyframes waitlistTargetPulse {
+  0%   { box-shadow: 0 0 0px transparent; border-color: rgba(255,255,255,0.12); transform: scale(1); }
+  20%  { box-shadow: 0 0 0 6px rgba(59,130,246,0.3), 0 0 30px rgba(59,130,246,0.5); border-color: var(--arc-blue); transform: scale(1.02); }
+  100% { box-shadow: 0 0 0px transparent; border-color: rgba(255,255,255,0.12); transform: scale(1); }
+}
+
+#waitlist:target,
+.pulse-trigger {
+  animation: waitlistTargetPulse 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 /* ─── ANIMATION UTILITIES ───────────────────────────────────── */
 .animate-fade-up   { animation: arcFadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .animate-scale-up  { animation: arcScaleUp 1.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
@@ -467,9 +489,19 @@ body::before {
   pointer-events: none;
 }
 
-/* ─── INPUT FOCUS RING ──────────────────────────────────────── */
+/* ─── INPUT FOCUS RING & AUTOFILL ───────────────────────────── */
 input:focus-visible {
   outline: none;
+}
+
+/* Definitive fix for browser autofill glitch in dark mode */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  transition: background-color 5000s ease-in-out 0s !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  color: #FFFFFF !important;
 }
 
 /* ─── BENTO GRID ────────────────────────────────────────────── */

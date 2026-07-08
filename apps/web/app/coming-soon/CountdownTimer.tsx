@@ -70,7 +70,7 @@ export default function CountdownTimer() {
   return (
     <section
       style={{
-        padding: "5rem 1.5rem 4rem",
+        padding: "4rem 1.5rem",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",

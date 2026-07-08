@@ -82,8 +82,9 @@ export default function PerksSection({ spotsRemaining }: PerksProps) {
 
   return (
     <section
+      id="perks"
       style={{
-        padding: "4rem 1.5rem 8rem", /* Balanced top gap */
+        padding: "4rem 1.5rem",
         maxWidth: "1100px",
         margin: "0 auto",
         width: "100%",

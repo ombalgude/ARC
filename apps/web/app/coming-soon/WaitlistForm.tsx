@@ -58,6 +58,8 @@ export default function WaitlistForm({ onSuccess, initialCount, referralCode }: 
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {/* Input + button row */}
         <div
+          id="waitlist"
+          className="waitlist-pill-wrapper"
           style={{
             display: "flex",
             alignItems: "center",
@@ -68,7 +70,8 @@ export default function WaitlistForm({ onSuccess, initialCount, referralCode }: 
             border: `1px solid ${focused ? "rgba(59,130,246,0.50)" : "rgba(255,255,255,0.12)"}`,
             borderRadius: "7.5rem",
             padding: "6px 6px 6px 1.25rem",
-            transition: "border-color 0.2s ease",
+            transition: "all 0.3s ease",
+            scrollMarginTop: "120px", // Keeps it nicely below the navbar when scrolled to
           }}
         >
           {/* Email icon */}

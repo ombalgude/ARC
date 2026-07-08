@@ -46,20 +46,59 @@ export default async function Home({ searchParams }: HomeProps) {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        background: "var(--arc-bg)",
+        background: "transparent",
         color: "var(--arc-text)",
         position: "relative",
         isolation: "isolate",
       }}
     >
-      {/* ── Ultra-Premium Subtle Background ── */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        {/* Deep, organic aurora shadows */}
-        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-blue-900/10 blur-[150px] animate-float opacity-60" style={{ animationDuration: '18s' }} />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-900/10 blur-[150px] animate-float opacity-50" style={{ animationDuration: '24s', animationDelay: '-8s' }} />
-        
-        {/* Luxury Dot-Matrix Grid */}
-        <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_70%_80%_at_50%_30%,#000_20%,transparent_100%)] opacity-80" />
+      {/* ── Impeccable High-Fidelity Studio Background ── */}
+      <div 
+        className="fixed inset-0 -z-10 overflow-hidden pointer-events-none"
+        style={{ backgroundColor: "#02040A" }}
+      >
+        {/* 1. Cinematic Film Grain */}
+        <div style={{
+          position: "absolute", inset: 0, zIndex: 1,
+          opacity: 0.035, mixBlendMode: "overlay",
+          backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")"
+        }} />
+
+        {/* 2. Luxury Dot-Matrix Grid */}
+        <div style={{
+          position: "absolute", inset: 0,
+          backgroundImage: "radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)",
+          backgroundSize: "32px 32px",
+          WebkitMaskImage: "radial-gradient(ellipse at 50% 40%, black 10%, transparent 80%)",
+        }} />
+
+        {/* 3. Deep Left-Side Oceanic Wash (Ambient) */}
+        <div style={{
+          position: "absolute", top: "-10%", left: "-20%", width: "80vw", height: "120vh",
+          background: "radial-gradient(ellipse at center, rgba(16, 42, 82, 0.45) 0%, transparent 70%)",
+          filter: "blur(90px)",
+        }} />
+
+        {/* 4. Sharp Accent Core Behind Phone (Creates 3D Rim Lighting) */}
+        <div style={{
+          position: "absolute", top: "20%", right: "10%", width: "40vw", height: "60vh",
+          background: "radial-gradient(ellipse at center, rgba(59, 130, 246, 0.15) 0%, transparent 60%)",
+          filter: "blur(60px)",
+        }} />
+
+        {/* 5. Right-Side Deep Indigo/Navy Bloom (Base Environment) */}
+        <div style={{
+          position: "absolute", top: "5%", right: "-20%", width: "90vw", height: "130vh",
+          background: "radial-gradient(ellipse at center, rgba(17, 28, 78, 0.55) 0%, transparent 70%)",
+          filter: "blur(100px)",
+        }} />
+
+        {/* 6. Base Foundation Light (Ensures the bottom half of the screen is never dead black) */}
+        <div style={{
+          position: "absolute", bottom: "-20%", left: "10%", width: "80vw", height: "60vh",
+          background: "radial-gradient(ellipse at center, rgba(16, 32, 64, 0.5) 0%, transparent 70%)",
+          filter: "blur(80px)",
+        }} />
       </div>
 
       {/* Navigation */}
@@ -75,7 +114,7 @@ export default async function Home({ searchParams }: HomeProps) {
       />
 
       {/* Social Proof Marquee */}
-      <MarqueeStrip />
+      {/* <MarqueeStrip /> */}
 
       {/* Countdown */}
       <Suspense fallback={null}>

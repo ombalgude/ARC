@@ -93,8 +93,9 @@ export default function FeaturesSection() {
 
   return (
     <section
+      id="features"
       style={{
-        padding: "4rem 1.5rem 8rem",
+        padding: "4rem 1.5rem",
         maxWidth: "1100px",
         margin: "0 auto",
         width: "100%",
