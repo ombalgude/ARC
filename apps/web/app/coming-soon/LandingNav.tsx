@@ -1,16 +1,17 @@
 "use client";
+import React from "react";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 
-export default function LandingNav() {
+export default function LandingNav(): React.JSX.Element | Promise<React.JSX.Element> {
+  const { scrollY } = useScroll();
   const [scrolled, setScrolled] = useState(false);
   const [activeLink, setActiveLink] = useState<string | null>(null);
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 30);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    setScrolled(latest > 50);
+  });
 
   const handleGetAccess = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -26,152 +27,196 @@ export default function LandingNav() {
   const navLinks = ["Features", "Perks"];
 
   return (
-    <nav
+    <div
       style={{
-        position: "sticky",
+        position: "fixed",
         top: 0,
         left: 0,
         right: 0,
-        zIndex: 200,
+        zIndex: 9999,
         display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 clamp(1.25rem, 3vw, 2.5rem)",
-        height: "4.5rem",
-        background: scrolled
-          ? "rgba(0,0,0,0.78)"
-          : "rgba(0,0,0,0.0)",
-        backdropFilter: scrolled ? "blur(28px) saturate(180%)" : "none",
-        WebkitBackdropFilter: scrolled ? "blur(28px) saturate(180%)" : "none",
-        borderBottom: `1px solid ${scrolled ? "rgba(255,255,255,0.07)" : "transparent"}`,
-        transition: "background 0.45s cubic-bezier(0.16,1,0.3,1), border-color 0.45s ease, backdrop-filter 0.45s ease",
+        justifyContent: "center",
+        padding: scrolled ? "1.25rem 1rem 0" : "0",
+        transition: "padding 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
       }}
     >
-      <div
+      <motion.nav
+        initial={false}
+        animate={{
+          width: scrolled ? "640px" : "100%",
+          borderRadius: scrolled ? "100px" : "0px",
+          background: scrolled ? "rgba(4, 5, 12, 0.75)" : "rgba(0, 0, 0, 0)",
+          borderColor: scrolled ? "rgba(59,130,246,0.15)" : "rgba(59,130,246,0)",
+          boxShadow: scrolled ? "0 24px 48px rgba(0,0,0,0.8), 0 0 20px rgba(59,130,246,0.1), inset 0 1px 1px rgba(59,130,246,0.2)" : "none",
+        }}
+        transition={{ type: "spring", stiffness: 250, damping: 30 }}
         style={{
-          maxWidth: "1240px",
-          width: "100%",
-          margin: "0 auto",
+          position: "relative",
+          maxWidth: "100%",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          padding: "0 clamp(1rem, 3vw, 2rem)",
+          height: scrolled ? "4rem" : "5rem",
+          borderWidth: "1px",
+          borderStyle: "solid",
+          backdropFilter: scrolled ? "blur(32px) saturate(180%)" : "none",
+          WebkitBackdropFilter: scrolled ? "blur(32px) saturate(180%)" : "none",
+          overflow: "hidden",
         }}
       >
         
-        <a
-          href="/"
-          style={{ display: "flex", alignItems: "center", gap: "0.6rem", textDecoration: "none" }}
-        >
-          
-          <div
-            style={{
-              width: "22px", height: "22px",
-              borderRadius: "7px",
-              background: "linear-gradient(145deg, #3B82F6 0%, #1D4ED8 100%)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M2 9 Q6 2 10 9" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-            </svg>
-          </div>
-
-          <span
-            style={{
-              fontSize: "0.9375rem",
-              fontWeight: 600,
-              letterSpacing: "0.22em",
-              color: "#FFFFFF",
-              textTransform: "uppercase" as const,
-              fontFamily: "'Space Grotesk', sans-serif",
-            }}
-          >
-            ARC
-          </span>
-        </a>
+        {/* Glow behind the island */}
+        <motion.div
+          animate={{ opacity: scrolled ? 1 : 0 }}
+          style={{
+            position: "absolute",
+            top: 0, left: "15%", right: "15%", height: "1px",
+            background: "linear-gradient(90deg, transparent, rgba(59,130,246,0.6), transparent)",
+            zIndex: 0,
+          }}
+        />
 
         <div
-          className="arc-nav-links"
-          style={{ display: "flex", gap: "2.5rem", alignItems: "center" }}
+          style={{
+            maxWidth: "1240px",
+            width: "100%",
+            margin: "0 auto",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            position: "relative",
+            zIndex: 10,
+          }}
         >
-          <style>{`
-            @media (max-width: 768px) { .arc-nav-links { display: none !important; } }
-            @media (max-width: 768px) { .arc-nav-mobile { display: block !important; } }
-          `}</style>
-
-          {navLinks.map((link) => (
-            <a
-              key={link}
-              href={`#${link.toLowerCase()}`}
-              onMouseEnter={() => setActiveLink(link)}
-              onMouseLeave={() => setActiveLink(null)}
+          
+          <a
+            href="/"
+            style={{ display: "flex", alignItems: "center", gap: "0.5rem", textDecoration: "none" }}
+          >
+            <div
               style={{
-                fontSize: "0.875rem",
-                fontWeight: 400,
-                color: activeLink === link ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.42)",
-                transition: "color 0.2s ease",
-                cursor: "pointer",
-                letterSpacing: "-0.005em",
-                textDecoration: "none",
-                fontFamily: "'Space Grotesk', sans-serif",
+                width: "24px", height: "24px",
+                borderRadius: "6px",
+                background: "linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0,
+                boxShadow: "0 2px 8px rgba(59,130,246,0.4), inset 0 1px 1px rgba(255,255,255,0.3)"
               }}
             >
-              {link}
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2 9 Q6 2 10 9" stroke="#FFFFFF" strokeWidth="1.75" strokeLinecap="round" fill="none"/>
+              </svg>
+            </div>
+
+            <span
+              style={{
+                fontSize: "1.05rem",
+                fontWeight: 700,
+                letterSpacing: "0.22em",
+                color: "#FFFFFF",
+                textTransform: "uppercase" as const,
+                fontFamily: "'Inter', sans-serif",
+                transform: "translateY(1px)",
+              }}
+            >
+              ARC
+            </span>
+          </a>
+
+          <div
+            className="arc-nav-links"
+            style={{ display: "flex", gap: "1rem", alignItems: "center" }}
+          >
+            <style>{`
+              @media (max-width: 768px) { .arc-nav-links { display: none !important; } }
+              @media (max-width: 768px) { .arc-nav-mobile { display: block !important; } }
+            `}</style>
+
+            {navLinks.map((link) => (
+              <a
+                key={link}
+                href={`#${link.toLowerCase()}`}
+                onMouseEnter={() => setActiveLink(link)}
+                onMouseLeave={() => setActiveLink(null)}
+                style={{
+                  fontSize: "0.8125rem",
+                  fontWeight: 500,
+                  color: activeLink === link ? "#FFFFFF" : "rgba(255,255,255,0.6)",
+                  transition: "all 0.2s ease",
+                  cursor: "pointer",
+                  letterSpacing: "0.02em",
+                  textDecoration: "none",
+                  padding: "0.4rem 1rem",
+                  borderRadius: "100px",
+                  background: activeLink === link ? "rgba(59,130,246,0.15)" : "transparent",
+                }}
+              >
+                {link}
+              </a>
+            ))}
+
+            <a
+              href="#waitlist"
+              onClick={handleGetAccess}
+              className="group"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                background: "rgba(59,130,246,0.1)",
+                color: "#FFFFFF",
+                fontSize: "0.8125rem",
+                fontWeight: 600,
+                padding: "0.5rem 1.25rem",
+                borderRadius: "100px",
+                border: "1px solid rgba(59,130,246,0.3)",
+                textDecoration: "none",
+                transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+                letterSpacing: "0.01em",
+                marginLeft: "0.5rem",
+              }}
+              onMouseEnter={(e) => {
+                const target = e.currentTarget as HTMLAnchorElement;
+                target.style.background = "#3B82F6";
+                target.style.color = "#FFFFFF";
+                target.style.borderColor = "#3B82F6";
+                target.style.boxShadow = "0 4px 14px rgba(59,130,246,0.4)";
+                target.style.transform = "translateY(-1px)";
+              }}
+              onMouseLeave={(e) => {
+                const target = e.currentTarget as HTMLAnchorElement;
+                target.style.background = "rgba(59,130,246,0.1)";
+                target.style.color = "#FFFFFF";
+                target.style.borderColor = "rgba(59,130,246,0.3)";
+                target.style.boxShadow = "none";
+                target.style.transform = "translateY(0px)";
+              }}
+            >
+              Get Access 
             </a>
-          ))}
+          </div>
 
-          <a
-            href="#waitlist"
-            onClick={handleGetAccess}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              background: "var(--arc-blue)",
-              color: "#FFF",
-              fontSize: "0.8125rem",
-              fontWeight: 500,
-              padding: "0.5rem 1.25rem",
-              borderRadius: "100px",
-              border: "none",
-              textDecoration: "none",
-              transition: "background 0.2s ease, opacity 0.2s ease",
-              letterSpacing: "-0.01em",
-              fontFamily: "'Space Grotesk', sans-serif",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.background = "var(--arc-blue-hover)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.background = "var(--arc-blue)";
-            }}
-          >
-            Claim Early Access
-          </a>
+          <div className="arc-nav-mobile" style={{ display: "none" }}>
+            <a
+              href="#waitlist"
+              onClick={handleGetAccess}
+              style={{
+                background: "rgba(59,130,246,0.1)",
+                border: "1px solid rgba(59,130,246,0.3)",
+                color: "#3B82F6",
+                fontSize: "0.8125rem",
+                fontWeight: 600,
+                padding: "0.5rem 1.125rem",
+                borderRadius: "100px",
+                textDecoration: "none",
+              }}
+            >
+              Access
+            </a>
+          </div>
         </div>
-
-        <div className="arc-nav-mobile" style={{ display: "none" }}>
-          <a
-            href="#waitlist"
-            onClick={handleGetAccess}
-            style={{
-              background: "var(--arc-blue)",
-              color: "#FFF",
-              fontSize: "0.8125rem",
-              fontWeight: 500,
-              padding: "0.5rem 1.125rem",
-              borderRadius: "100px",
-              textDecoration: "none",
-              fontFamily: "'Space Grotesk', sans-serif",
-              letterSpacing: "-0.01em",
-            }}
-          >
-            Claim Access
-          </a>
-        </div>
-      </div>
-    </nav>
+      </motion.nav>
+    </div>
   );
 }

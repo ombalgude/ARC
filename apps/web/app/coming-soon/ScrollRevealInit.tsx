@@ -1,8 +1,9 @@
 "use client";
+import React from "react";
 
 import { useEffect } from "react";
 
-export default function ScrollRevealInit() {
+export default function ScrollRevealInit(): React.JSX.Element | null {
   useEffect(() => {
     const els = document.querySelectorAll('.reveal');
     const obs = new IntersectionObserver((entries) => {

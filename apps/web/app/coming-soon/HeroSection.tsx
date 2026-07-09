@@ -91,7 +91,9 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
       }}
     >
 
-      <div style={{
+      <div 
+        className="hero-grid"
+        style={{
         position: "relative", zIndex: 1,
         display: "grid",
         gridTemplateColumns: "1fr 1fr",
@@ -100,23 +102,26 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
         maxWidth: "1240px",
         width: "100%",
         margin: "0 auto",
-        marginTop: "-10vh",
+        marginTop: "-4vh",
         padding: "clamp(5rem, 10vh, 8rem) 0 clamp(4rem, 8vh, 6rem)",
       }}>
         
-        <div style={{
+        <div 
+          className="hero-text-col"
+          style={{
           display: "flex", flexDirection: "column",
           alignItems: "flex-start", textAlign: "left",
+          marginTop: "10px"
         }}>
 
           <div
             className="glass-blue animate-fade-up opacity-0-init"
             style={{
               display: "inline-flex", alignItems: "center", gap: "0.5rem",
-              padding: "5px 14px 5px 10px", borderRadius: "100px",
+              padding: "5px 16px 5px 10px", borderRadius: "100px",
               fontSize: "0.6875rem", fontWeight: 500,
               letterSpacing: "0.07em", textTransform: "uppercase" as const,
-              color: "var(--arc-blue)", marginBottom: "2rem",
+              color: "var(--arc-blue)", marginBottom: "2rem", marginTop: "2rem",
             }}
           >
             <span className="animate-pulse-dot" style={{
@@ -134,6 +139,7 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
               lineHeight: 1.08,
               color: "#FFFFFF",
               marginBottom: "1.75rem",
+              marginTop:"-10px",
               fontSize: "clamp(3.25rem, 6.5vw, 7rem)",
             }}
           >
@@ -175,7 +181,7 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
           </p>
 
           <div
-            className="animate-fade-up opacity-0-init delay-800"
+            className="animate-fade-up opacity-0-init delay-800 waitlist-wrapper"
             style={{ width: "100%", maxWidth: "460px", marginBottom: "1.5rem" }}
           >
             {confirmed ? (
@@ -278,7 +284,7 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
           )}
 
           <div
-            className="animate-fade-in opacity-0-init delay-1200"
+            className="animate-fade-in opacity-0-init delay-1200 hero-stats"
             style={{
               display: "flex", alignItems: "center", gap: "1.5rem",
               marginTop: "2.5rem",
@@ -305,6 +311,7 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
         </div>
 
         <div
+          className="hero-phone-col"
           style={{
             display: "flex",
             justifyContent: "center",
@@ -584,9 +591,86 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
       </div>
 
       <style>{`
-        @media (max-width: 820px) {
-          .hero-grid { grid-template-columns: 1fr !important; }
-          .hero-phone-col { display: none !important; }
+        .waitlist-wrapper { width: 100%; max-width: 460px; margin-bottom: 1.5rem; }
+        .hero-stats {
+          display: flex; align-items: center; gap: 1.5rem;
+          margin-top: 2.5rem; padding-top: 2rem;
+          border-top: 1px solid rgba(255,255,255,0.07);
+          width: 100%; max-width: 460px;
+        }
+        @media (max-width: 950px) {
+          .hero-grid { 
+            grid-template-columns: 1fr !important; 
+            gap: 2rem !important;
+            padding-top: clamp(3rem, 5vh, 6rem) !important;
+            margin-top: 0vh !important;
+          }
+          .hero-text-col {
+            align-items: center !important;
+            text-align: center !important;
+          }
+          .hero-text-col h1 {
+            font-size: clamp(2.5rem, 8vw, 4rem) !important;
+            margin-bottom: 1rem !important;
+            line-height: 1.1 !important;
+          }
+          .hero-text-col p {
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 0.9375rem !important;
+            padding: 0 1rem;
+          }
+          .waitlist-wrapper {
+            margin-left: auto;
+            margin-right: auto;
+            display: flex;
+            justify-content: center;
+            padding: 0 1rem;
+          }
+          .waitlist-pill-wrapper {
+            padding: 4px 4px 4px 1rem !important;
+          }
+          .waitlist-pill-wrapper input {
+            font-size: 0.875rem !important;
+          }
+          .waitlist-pill-wrapper button {
+            padding: 0 1rem !important;
+            font-size: 0.8125rem !important;
+          }
+          .hero-stats {
+            justify-content: space-around !important;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 1.5rem 1rem 0 !important;
+            gap: 0.5rem !important;
+          }
+          .hero-stats span:first-child {
+            font-size: 1.125rem !important;
+          }
+          .hero-phone-col { 
+            display: flex !important;
+            transform: scale(0.9);
+            margin-top: 20px !important;
+          }
+        }
+        @media (max-width: 600px) {
+          .hero-phone-col { 
+            transform: scale(0.7);
+            margin-top: -30px !important;
+          }
+        }
+        @media (max-width: 400px) {
+          .hero-phone-col { 
+            transform: scale(0.6);
+            margin-top: -60px !important;
+          }
+          .hero-text-col h1 {
+            font-size: 2.25rem !important;
+          }
+          .hero-stats {
+            flex-direction: column !important;
+            gap: 1.25rem !important;
+          }
         }
       `}</style>
 

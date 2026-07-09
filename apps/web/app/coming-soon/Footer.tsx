@@ -1,254 +1,268 @@
 "use client";
+import React from "react";
 
-export default function LandingFooter() {
+import { motion } from "framer-motion";
+
+export default function LandingFooter(): React.JSX.Element | Promise<React.JSX.Element> {
   return (
     <footer
       style={{
-        position: "relative",
         width: "100%",
-        padding: "5rem 0 2.5rem",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        fontFamily: "'Space Grotesk', 'Inter', sans-serif",
-        overflow: "hidden", 
+        background: "radial-gradient(100% 100% at 50% 100%, rgba(37,99,235,0.08) 0%, #000000 100%)",
+        backgroundColor: "#000000", // Fallback
+        borderTop: "1px solid rgba(255,255,255,0.08)",
+        color: "#FFFFFF",
+        fontFamily: "'Inter', sans-serif",
       }}
     >
-      
+      <style>{`
+        .footer-link {
+          color: #8B96A5;
+          font-size: 0.875rem;
+          text-decoration: none;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+          display: inline-block;
+        }
+        .footer-link:hover {
+          color: #FFFFFF;
+          text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+        .creator-link {
+          color: #FFFFFF;
+          text-decoration: none;
+          font-weight: 500;
+          border-bottom: 1px solid rgba(255,255,255,0.2);
+          padding-bottom: 2px;
+          transition: all 0.2s ease;
+        }
+        .creator-link:hover {
+          color: #3B82F6;
+          border-bottom-color: #3B82F6;
+        }
+      `}</style>
+      {/* Top CTA Banner */}
       <div
-        aria-hidden
         style={{
-          position: "absolute",
-          bottom: 0,
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "120vw",
-          height: "600px", 
-          background: "radial-gradient(ellipse at 50% 100%, rgba(37,99,235, 0.12) 0%, rgba(29,78,216, 0.05) 40%, transparent 70%)",
-          pointerEvents: "none",
-          zIndex: 0,
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          padding: "5rem 1.5rem",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          textAlign: "center",
+          position: "relative",
+          overflow: "hidden",
         }}
-      />
-
-      <div
-        style={{
-          position: "absolute",
-          top: 0, left: "2rem", right: "2rem",
-          height: "1px",
-          background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.07) 30%, rgba(59,130,246,0.12) 50%, rgba(255,255,255,0.07) 70%, transparent 100%)",
-          zIndex: 1,
-        }}
-      />
-
-      <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: "1160px", padding: "0 2rem" }}>
-
+      >
         <div
+          aria-hidden
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: "3rem",
-            marginBottom: "5rem",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "100%",
+            maxWidth: "800px",
+            height: "400px",
+            background: "radial-gradient(ellipse at center, rgba(37,99,235,0.15) 0%, transparent 70%)",
+            filter: "blur(60px)",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+
+        <h2
+          style={{
+            fontSize: "clamp(2.5rem, 5vw, 4.5rem)",
+            fontWeight: 500,
+            letterSpacing: "-0.04em",
+            marginBottom: "2.5rem",
+            fontFamily: "'Space Grotesk', sans-serif",
+            color: "#FFFFFF",
+            position: "relative",
+            zIndex: 1,
           }}
         >
-          
-          <div style={{ maxWidth: "340px" }}>
-            
+          Ready to lock in{" "}
+          <span
+            style={{
+              background: "linear-gradient(130deg, #93C5FD 0%, #3B82F6 60%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            your access?
+          </span>
+        </h2>
+        <a
+          href="#waitlist"
+          className="group animate-gradient-shift"
+          onClick={(e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            const el = document.getElementById("waitlist");
+            if (el) {
+              el.classList.remove("pulse-trigger");
+              void el.offsetWidth;
+              el.classList.add("pulse-trigger");
+            }
+          }}
+          style={{
+            position: "relative",
+            zIndex: 1,
+            padding: "1rem 2.5rem",
+            background: "linear-gradient(135deg, rgba(37,99,235,0.9) 0%, rgba(37,99,235,0.9) 42%, rgba(96,165,250,0.8) 50%, rgba(37,99,235,0.9) 58%, rgba(37,99,235,0.9) 100%)",
+            color: "#FFFFFF",
+            borderRadius: "100px",
+            fontWeight: 600,
+            fontSize: "1rem",
+            textDecoration: "none",
+            letterSpacing: "-0.01em",
+            border: "1px solid rgba(255,255,255,0.15)",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          Join the First 500
+          <span 
+            style={{ transition: "transform 0.2s ease" }}
+            className="group-hover:translate-x-1"
+          >
+            →
+          </span>
+        </a>
+      </div>
+
+      {/* Main Grid */}
+      <div
+        style={{
+          maxWidth: "1400px",
+          margin: "0 auto",
+          padding: "4rem 1.5rem",
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "4rem",
+          justifyContent: "space-between",
+        }}
+      >
+        {/* Col 1: Brand */}
+        <div style={{ flex: "2 1 300px", display: "flex", flexDirection: "column", gap: "2rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
             <div
               style={{
-                display: "flex", alignItems: "center", gap: "0.6rem",
-                marginBottom: "1.25rem",
+                width: "28px", height: "28px",
+                borderRadius: "8px",
+                background: "linear-gradient(145deg, #3B82F6 0%, #1D4ED8 100%)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: "0 2px 8px rgba(59,130,246,0.4), inset 0 1px 1px rgba(255,255,255,0.3)"
               }}
             >
-              <div
-                style={{
-                  width: "22px", height: "22px",
-                  borderRadius: "7px",
-                  background: "linear-gradient(145deg, #3B82F6 0%, #1D4ED8 100%)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path d="M2 9 Q6 2 10 9" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-                </svg>
-              </div>
-              <span
-                style={{
-                  fontSize: "0.9375rem",
-                  fontWeight: 600,
-                  letterSpacing: "0.22em",
-                  color: "#FFFFFF",
-                  textTransform: "uppercase" as const,
-                }}
-              >
-                ARC
-              </span>
+              <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
+                <path d="M2 9 Q6 2 10 9" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+              </svg>
             </div>
-
-            <p
+            <span
               style={{
-                color: "rgba(255,255,255,0.38)",
-                fontSize: "0.875rem",
-                lineHeight: 1.75,
-                maxWidth: "300px",
+                fontSize: "1.25rem",
+                fontWeight: 600,
+                letterSpacing: "0.15em",
+                fontFamily: "'Space Grotesk', sans-serif",
               }}
             >
-              An AI-powered coach that perfectly connects your workouts, meals, and daily habits into one winning system.
-            </p>
-
-            <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem" }}>
-              {[
-                {
-                  label: "X / Twitter",
-                  href: "https://twitter.com/arcfitnessapp",
-                  icon: (
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.63 5.905-5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                    </svg>
-                  ),
-                },
-                {
-                  label: "Instagram",
-                  href: "https://instagram.com/arcfitnessapp",
-                  icon: (
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                      <circle cx="12" cy="12" r="4"/>
-                      <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
-                    </svg>
-                  ),
-                },
-              ].map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={social.label}
-                  style={{
-                    width: "34px", height: "34px",
-                    borderRadius: "10px",
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    color: "rgba(255,255,255,0.40)",
-                    transition: "color 0.2s, background 0.2s, border-color 0.2s",
-                  }}
-                  onMouseEnter={(e) => {
-                    const el = e.currentTarget as HTMLAnchorElement;
-                    el.style.color = "#FFFFFF";
-                    el.style.background = "rgba(255,255,255,0.08)";
-                    el.style.borderColor = "rgba(255,255,255,0.14)";
-                  }}
-                  onMouseLeave={(e) => {
-                    const el = e.currentTarget as HTMLAnchorElement;
-                    el.style.color = "rgba(255,255,255,0.40)";
-                    el.style.background = "rgba(255,255,255,0.04)";
-                    el.style.borderColor = "rgba(255,255,255,0.08)";
-                  }}
-                >
-                  {social.icon}
-                </a>
-              ))}
-            </div>
+              ARC
+            </span>
           </div>
-
-          <div style={{ display: "flex", gap: "4rem", flexWrap: "wrap" }}>
-            {[
-              {
-                heading: "Platform",
-                links: [
-                  { label: "Core Intelligence", href: "#features" },
-                  { label: "Early Access Perks", href: "#perks" },
-                  { label: "Waitlist Access", href: "#waitlist" },
-                ],
-              },
-              {
-                heading: "Legal",
-                links: [
-                  { label: "Privacy Policy", href: "/legal/privacy" },
-                  { label: "Terms of Service", href: "/legal/terms" },
-                ],
-              },
-            ].map((col) => (
-              <div key={col.heading} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-                <h4
-                  style={{
-                    color: "#8B96A5",
-                    fontSize: "0.6875rem",
-                    fontWeight: 500,
-                    textTransform: "uppercase" as const,
-                    letterSpacing: "0.10em",
-                  }}
-                >
-                  {col.heading}
-                </h4>
-                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                  {col.links.map((link) => (
-                    <a
-                      key={link.label}
-                      href={link.href}
-                      onClick={(e) => {
-                        if (link.href === "#waitlist") {
-                          e.preventDefault();
-                          window.scrollTo({ top: 0, behavior: "smooth" });
-                          const el = document.getElementById("waitlist");
-                          if (el) {
-                            el.classList.remove("pulse-trigger");
-                            void el.offsetWidth;
-                            el.classList.add("pulse-trigger");
-                          }
-                        }
-                      }}
-                      style={{
-                        fontSize: "0.875rem",
-                        color: "rgba(255,255,255,0.38)",
-                        transition: "color 0.2s ease",
-                        textDecoration: "none",
-                        letterSpacing: "-0.005em",
-                      }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.88)"; }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.38)"; }}
-                    >
-                      {link.label}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+          
+          <p style={{ color: "#8B96A5", fontSize: "0.9375rem", lineHeight: 1.6, maxWidth: "300px" }}>
+            The definitive AI-powered health and fitness ecosystem. Engineered for those who demand precision.
+          </p>
         </div>
 
+        {/* Links Columns */}
+        <div style={{ flex: "1 1 600px", display: "flex", flexWrap: "wrap", gap: "4rem", justifyContent: "space-between" }}>
+          {[
+            {
+              title: "Product",
+              links: [
+                { label: "Core Intelligence", href: "#features" },
+                { label: "Exclusive Perks", href: "#perks" },
+                { label: "Waitlist", href: "#waitlist" },
+              ]
+            },
+            {
+              title: "Legal",
+              links: [
+                { label: "Privacy Policy", href: "/legal/privacy" },
+                { label: "Terms of Service", href: "/legal/terms" },
+                { label: "Cookie Policy", href: "/legal/cookies" },
+              ]
+            },
+            {
+              title: "Connect",
+              links: [
+                { label: "Twitter / X", href: "https://twitter.com/arcfitnessapp" },
+                { label: "Instagram", href: "https://instagram.com/arcfitnessapp" },
+                { label: "Contact Us", href: "mailto:hello@arcfitness.app" },
+              ]
+            }
+          ].map((column) => (
+            <div key={column.title} style={{ display: "flex", flexDirection: "column", gap: "1.5rem", minWidth: "140px" }}>
+              <h4 style={{ color: "#FFFFFF", fontSize: "0.875rem", fontWeight: 500 }}>
+                {column.title}
+              </h4>
+              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                {column.links.map((link) => (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    className="footer-link"
+                    onClick={(e) => {
+                      if (link.href === "#waitlist" || link.href === "#features" || link.href === "#perks") {
+                        e.preventDefault();
+                        const el = document.getElementById(link.href.substring(1));
+                        if (el) {
+                          el.scrollIntoView({ behavior: "smooth" });
+                        } else if (link.href === "#waitlist") {
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }
+                      }
+                    }}
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom Bar */}
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", padding: "2rem 0" }}>
         <div
           style={{
+            maxWidth: "1400px",
+            margin: "0 auto",
+            padding: "0 2rem",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            paddingTop: "2rem",
-            borderTop: "1px solid rgba(255,255,255,0.06)",
             flexWrap: "wrap",
             gap: "1rem",
           }}
         >
-          <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.8125rem" }}>
-            © 2026 ARC Fitness. All rights reserved. Precision in Motion.
+          <p style={{ color: "#8B96A5", fontSize: "0.875rem" }}>
+            © 2026 ARC Fitness. All rights reserved.
           </p>
 
-          <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.8125rem" }}>
+          <p style={{ color: "#8B96A5", fontSize: "0.875rem" }}>
             Engineered by{" "}
             <a
               href="https://www.ombalgude.app/"
               target="_blank"
               rel="noopener noreferrer"
-              style={{
-                color: "#8B96A5",
-                textDecoration: "none",
-                transition: "color 0.2s ease",
-                paddingLeft: "3px",
-              }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "#FFFFFF"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "#8B96A5"; }}
+              className="creator-link"
             >
               Om Balgude
             </a>

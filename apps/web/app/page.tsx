@@ -1,3 +1,4 @@
+import React from "react";
 import { Suspense } from "react";
 import CountdownTimer from "./coming-soon/CountdownTimer";
 import FeaturesSection from "./coming-soon/FeaturesSection";
@@ -24,7 +25,7 @@ interface HomeProps {
   searchParams: Promise<{ ref?: string }>;
 }
 
-export default async function Home({ searchParams }: HomeProps) {
+export default async function Home({ searchParams }: HomeProps): Promise<React.JSX.Element> {
   const [stats, params] = await Promise.all([getWaitlistStats(), searchParams]);
   const referralCode = params.ref;
 

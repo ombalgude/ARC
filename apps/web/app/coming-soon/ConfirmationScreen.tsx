@@ -11,13 +11,15 @@ interface ConfirmationScreenProps {
   onClose?: () => void;
 }
 
+import React from "react";
+
 export default function ConfirmationScreen({
   position,
   referralCode,
   totalCount,
   alreadyRegistered,
   onClose,
-}: ConfirmationScreenProps) {
+}: ConfirmationScreenProps): React.JSX.Element {
   const [copied, setCopied] = useState(false);
 
   const appUrl =

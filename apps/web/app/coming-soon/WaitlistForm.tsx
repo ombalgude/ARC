@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 
 import { useState } from "react";
 
@@ -8,7 +9,7 @@ interface WaitlistFormProps {
   referralCode?: string;
 }
 
-export default function WaitlistForm({ onSuccess, initialCount, referralCode }: WaitlistFormProps) {
+export default function WaitlistForm({ onSuccess, initialCount, referralCode }: WaitlistFormProps): React.JSX.Element | Promise<React.JSX.Element> {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

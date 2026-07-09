@@ -1,49 +1,41 @@
 "use client";
+import React from "react";
 
-import { useEffect, useRef } from "react";
+import { motion, useMotionValue, useMotionTemplate } from "framer-motion";
 
 const perks = [
   {
     icon: (
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
         <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
     accentColor: "#3B82F6",
-    accentDim: "rgba(59,130,246,0.08)",
-    accentBorder: "rgba(59,130,246,0.18)",
-    badge: "All members",
-    title: "Early Access Badge",
-    desc: "A permanent badge on your profile showing you were here first.",
-    detail: "Permanent · Never offered again",
+    accentDim: "rgba(59,130,246,0.1)",
+    title: "Founding Member Badge",
+    desc: "A permanent marker on your ARC profile.",
   },
   {
     icon: (
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
-    accentColor: "rgba(255,255,255,0.70)",
-    accentDim: "rgba(255,255,255,0.03)",
-    accentBorder: "rgba(255,255,255,0.08)",
-    badge: "First 500 only",
+    accentColor: "#F59E0B",
+    accentDim: "rgba(245,158,11,0.1)",
     title: "3 Months Pro Free",
-    desc: "Strictly limited to the first 500 people who join.",
-    detail: "Valued at $89.97",
+    desc: "Uncompromised access to all AI features.",
   },
   {
     icon: (
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
         <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
-    accentColor: "rgba(255,255,255,0.70)",
-    accentDim: "rgba(255,255,255,0.03)",
-    accentBorder: "rgba(255,255,255,0.08)",
-    badge: "All members",
-    title: "Priority Access",
-    desc: "Skip the line and get the app on day one.",
-    detail: "Day 1 · No queue",
+    accentColor: "#10B981",
+    accentDim: "rgba(16,185,129,0.1)",
+    title: "Priority App Access",
+    desc: "Skip the queue. Guaranteed day-one access.",
   },
 ];
 
@@ -51,283 +43,277 @@ interface PerksProps {
   spotsRemaining: number;
 }
 
-export default function PerksSection({ spotsRemaining }: PerksProps) {
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const headerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) entry.target.classList.add("visible");
-        });
-      },
-      { threshold: 0.10 }
-    );
-    cardRefs.current.forEach((el) => el && observer.observe(el));
-    if (headerRef.current) observer.observe(headerRef.current);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const cards = document.querySelectorAll<HTMLElement>(".perk-spotlight");
-      cards.forEach((card) => {
-        const rect = card.getBoundingClientRect();
-        card.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
-        card.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
-      });
-    };
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
-
+export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.Element | Promise<React.JSX.Element> {
   const pctUsed = Math.round(((500 - spotsRemaining) / 500) * 100);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  }
 
   return (
     <section
       id="perks"
       style={{
-        padding: "6rem 1.5rem",
-        maxWidth: "1160px",
-        margin: "0 auto",
-        width: "100%",
+        padding: "5rem 1.5rem",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
         position: "relative",
+        background: "#000000",
       }}
     >
-      <div className="section-divider" style={{ position: "absolute", top: 0, left: 0, right: 0 }} />
-
-      <div ref={headerRef} className="reveal" style={{ textAlign: "center", marginBottom: "4rem" }}>
-
-        <div
-          className="glass-blue"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "6px",
-            padding: "5px 16px",
-            borderRadius: "100px",
-            fontSize: "0.6875rem",
-            fontWeight: 500,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase" as const,
-            color: "var(--arc-blue)",
-            marginBottom: "1.5rem",
-          }}
-        >
-          <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "var(--arc-blue)", display: "inline-block" }} />
-          Early Access Perks
-        </div>
-
-        <h2
-          style={{
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: "clamp(2.25rem, 4vw, 4rem)",
-            fontWeight: 500,
-            letterSpacing: "-0.03em",
-            lineHeight: 1.02,
-            color: "#FFFFFF",
-            marginBottom: "1.25rem",
-          }}
-        >
-          The First 500{" "}
-          <span
-            style={{
-              background: "linear-gradient(130deg, #93C5FD 0%, #3B82F6 60%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
-          >
-            Get Pro Free.
-          </span>
-        </h2>
-
-        <p
-          style={{
-            color: "#8B96A5",
-            fontSize: "1.0625rem",
-            maxWidth: "480px",
-            margin: "0 auto 2.5rem",
-            lineHeight: 1.65,
-            letterSpacing: "-0.01em",
-          }}
-        >
-          These perks lock in the moment you join — and disappear the moment we hit capacity.
-        </p>
-
-        <div
-          style={{
-            display: "inline-flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "16px",
-            padding: "24px 40px",
-            background: "linear-gradient(160deg, rgba(245,158,11,0.15) 0%, rgba(4,5,15,0.9) 100%)",
-            backdropFilter: "blur(24px)",
-            WebkitBackdropFilter: "blur(24px)",
-            border: "1px solid rgba(245,158,11,0.25)",
-            boxShadow: "0 24px 48px -12px rgba(0,0,0,0.8), 0 0 30px rgba(245,158,11,0.1), inset 0 1px 1px rgba(255,255,255,0.1)",
-            borderRadius: "24px",
-            minWidth: "320px",
-            position: "relative",
-            overflow: "hidden"
-          }}
-        >
-          
-          <div style={{ position: "absolute", top: 0, left: "20%", right: "20%", height: "1px", background: "linear-gradient(90deg, transparent, rgba(245,158,11,0.5), transparent)" }} />
-          
-          <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
-            <span style={{
-              fontSize: "3.5rem", fontWeight: 700,
-              background: "linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              letterSpacing: "-0.04em",
-              fontFamily: "'Space Grotesk', monospace",
-              filter: "drop-shadow(0 4px 16px rgba(245,158,11,0.4))"
-            }}>
-              {spotsRemaining}
-            </span>
-            <span style={{ fontSize: "1rem", color: "rgba(255,255,255,0.5)", fontWeight: 500, letterSpacing: "-0.01em" }}>
-              / 500 Pro spots left
-            </span>
-          </div>
-
-          <div style={{ width: "100%", height: "4px", background: "rgba(0,0,0,0.6)", borderRadius: "100px", overflow: "hidden", boxShadow: "inset 0 1px 3px rgba(0,0,0,0.8)" }}>
-            <div
-              style={{
-                height: "100%",
-                width: `${pctUsed}%`,
-                background: "linear-gradient(90deg, #F59E0B, #FDE68A)",
-                boxShadow: "0 0 12px rgba(245,158,11,0.8)",
-                borderRadius: "100px",
-                transition: "width 1.5s cubic-bezier(0.16, 1, 0.3, 1)",
-              }}
-            />
-          </div>
-
-          <p style={{ fontSize: "0.75rem", color: "#FCD34D", letterSpacing: "0.1em", textTransform: "uppercase" as const, fontWeight: 600 }}>
-            {pctUsed}% claimed · closes at 500
-          </p>
-        </div>
-      </div>
-
       <div
         aria-hidden
         style={{
           position: "absolute",
-          top: "60%",
+          top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
           width: "100%",
           maxWidth: "1000px",
           height: "600px",
-          background: "radial-gradient(ellipse at center, rgba(37,99,235,0.05) 0%, transparent 60%)",
+          background: "radial-gradient(ellipse at center, rgba(59,130,246,0.06) 0%, transparent 60%)",
           filter: "blur(80px)",
           pointerEvents: "none",
           zIndex: 0,
         }}
       />
 
-      <div
-        className="cards-dim-siblings"
+      <motion.div
+        initial={{ opacity: 0, y: 40, scale: 0.98 }}
+        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+        viewport={{ once: true, margin: "-10%" }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        onMouseMove={handleMouseMove}
+        className="group"
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-          gap: "1.25rem",
+          width: "100%",
+          maxWidth: "1100px",
+          display: "flex",
+          flexDirection: "row",
+          flexWrap: "wrap",
+          background: "#030303",
+          borderRadius: "32px",
+          border: "1px solid rgba(255,255,255,0.12)",
+          position: "relative",
+          zIndex: 1,
+          overflow: "hidden",
+          boxShadow: "0 40px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)",
         }}
       >
-        {perks.map((perk, i) => (
-          <div
-            key={perk.title}
-            ref={(el) => { cardRefs.current[i] = el; }}
-            className={`reveal reveal-delay-${i + 1} perks-spotlight perk-spotlight`}
-            style={{
-              padding: "2.25rem 2rem",
-              display: "flex",
-              flexDirection: "column",
-              gap: "0",
-              backdropFilter: "blur(48px)",
-              WebkitBackdropFilter: "blur(48px)",
-              minHeight: "260px",
-              justifyContent: "space-between",
-            }}
-          >
-            <div style={{ position: "relative", zIndex: 2 }}>
-              
-              <div
-                style={{
-                  width: "48px", height: "48px", borderRadius: "14px",
-                  background: perk.accentDim,
-                  border: `1px solid ${perk.accentBorder}`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  color: perk.accentColor,
-                  marginBottom: "1.25rem",
-                }}
-              >
-                {perk.icon}
-              </div>
+        <motion.div
+          className="pointer-events-none absolute -inset-px opacity-0 transition duration-500 group-hover:opacity-100"
+          style={{
+            background: useMotionTemplate`
+              radial-gradient(
+                800px circle at ${mouseX}px ${mouseY}px,
+                rgba(255,255,255,0.04),
+                transparent 80%
+              )
+            `,
+            zIndex: 1,
+          }}
+        />
 
-              <div
-                style={{
-                  display: "inline-flex",
-                  padding: "3px 10px",
-                  borderRadius: "100px",
-                  background: perk.accentDim,
-                  border: `1px solid ${perk.accentBorder}`,
-                  fontSize: "0.625rem",
-                  fontWeight: 600,
-                  letterSpacing: "0.09em",
-                  textTransform: "uppercase" as const,
-                  color: perk.accentColor,
-                  marginBottom: "1rem",
-                }}
-              >
-                {perk.badge}
-              </div>
-
-              <h3
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: 500,
-                  color: "#FFFFFF",
-                  marginBottom: "0.625rem",
-                  letterSpacing: "-0.02em",
-                  lineHeight: 1.2,
-                }}
-              >
-                {perk.title}
-              </h3>
-
-              <p
-                style={{
-                  fontSize: "0.875rem",
-                  color: "#8B96A5",
-                  lineHeight: 1.6,
-                  letterSpacing: "-0.005em",
-                }}
-              >
-                {perk.desc}
-              </p>
-            </div>
-
+        {/* Left Side: The Hook & Scarcity */}
+        <div 
+          style={{ 
+            flex: "1 1 450px", 
+            padding: "clamp(3rem, 5vw, 5rem)", 
+            position: "relative", 
+            zIndex: 2, 
+            display: "flex", 
+            flexDirection: "column", 
+            justifyContent: "space-between",
+            gap: "4rem",
+          }}
+        >
+          <div>
             <div
+              className="glass-blue"
               style={{
-                position: "relative", zIndex: 2,
-                marginTop: "1.75rem",
-                paddingTop: "1rem",
-                borderTop: `1px solid ${perk.accentBorder}`,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "6px 20px",
+                borderRadius: "100px",
                 fontSize: "0.75rem",
-                color: "rgba(255,255,255,0.32)",
-                letterSpacing: "0.03em",
+                fontWeight: 600,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase" as const,
+                color: "var(--arc-blue)",
+                marginBottom: "2rem",
               }}
             >
-              {perk.detail}
+              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--arc-blue)", display: "inline-block" }} />
+              Exclusive Pass
             </div>
+
+            <h2
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: "clamp(2.5rem, 4vw, 3.5rem)",
+                fontWeight: 500,
+                letterSpacing: "-0.03em",
+                lineHeight: 1.05,
+                color: "#FFFFFF",
+                marginBottom: "1.5rem",
+              }}
+            >
+              The First 500{" "}
+              <span
+                style={{
+                  background: "linear-gradient(130deg, #FDE68A 0%, #F59E0B 60%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
+                Get Pro Free.
+              </span>
+            </h2>
+            <p
+              style={{
+                color: "#8B96A5",
+                fontSize: "1.125rem",
+                lineHeight: 1.6,
+                letterSpacing: "-0.01em",
+              }}
+            >
+              Lock in your lifetime perks before we hit capacity and launch to the general public.
+            </p>
           </div>
-        ))}
-      </div>
+
+          <div
+            style={{
+              padding: "2rem",
+              background: "rgba(255,255,255,0.02)",
+              border: "1px solid rgba(245,158,11,0.15)",
+              borderRadius: "20px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "baseline", gap: "12px", marginBottom: "1rem" }}>
+              <span style={{
+                fontSize: "3.5rem", fontWeight: 500,
+                color: "#F59E0B",
+                letterSpacing: "-0.05em",
+                fontFamily: "'Space Grotesk', monospace",
+                lineHeight: 0.9,
+              }}>
+                {spotsRemaining}
+              </span>
+              <span style={{ fontSize: "1rem", color: "rgba(255,255,255,0.4)", fontWeight: 500, letterSpacing: "-0.01em" }}>
+                spots left
+              </span>
+            </div>
+
+            <div style={{ width: "100%", height: "4px", background: "rgba(255,255,255,0.05)", borderRadius: "100px", overflow: "hidden", marginBottom: "0.75rem" }}>
+              <div
+                style={{
+                  height: "100%",
+                  width: `${pctUsed}%`,
+                  background: "#F59E0B",
+                  borderRadius: "100px",
+                  boxShadow: "0 0 10px rgba(245,158,11,0.5)",
+                }}
+              />
+            </div>
+
+            <p style={{ fontSize: "0.75rem", color: "rgba(245,158,11,0.8)", letterSpacing: "0.1em", textTransform: "uppercase" as const, fontWeight: 600 }}>
+              {pctUsed}% claimed · Closes at 500
+            </p>
+          </div>
+        </div>
+
+        {/* The Perforation (Desktop: Vertical, Mobile: Horizontal) */}
+        {/* Desktop Vertical Perforation */}
+        <div 
+          className="hidden md:block" 
+          style={{ 
+            width: "2px", 
+            background: "linear-gradient(to bottom, transparent 50%, rgba(255,255,255,0.1) 50%)",
+            backgroundSize: "2px 16px",
+            position: "relative",
+            zIndex: 2,
+          }}
+        >
+          <div style={{ position: "absolute", top: "-16px", left: "-15px", width: "32px", height: "32px", borderRadius: "50%", background: "#000000", borderBottom: "1px solid rgba(255,255,255,0.12)" }} />
+          <div style={{ position: "absolute", bottom: "-16px", left: "-15px", width: "32px", height: "32px", borderRadius: "50%", background: "#000000", borderTop: "1px solid rgba(255,255,255,0.12)" }} />
+        </div>
+
+        {/* Mobile Horizontal Perforation */}
+        <div 
+          className="block md:hidden" 
+          style={{ 
+            height: "2px",
+            width: "100%", 
+            background: "linear-gradient(to right, transparent 50%, rgba(255,255,255,0.1) 50%)",
+            backgroundSize: "16px 2px",
+            position: "relative",
+            zIndex: 2,
+          }}
+        >
+          <div style={{ position: "absolute", left: "-16px", top: "-15px", width: "32px", height: "32px", borderRadius: "50%", background: "#000000", borderRight: "1px solid rgba(255,255,255,0.12)" }} />
+          <div style={{ position: "absolute", right: "-16px", top: "-15px", width: "32px", height: "32px", borderRadius: "50%", background: "#000000", borderLeft: "1px solid rgba(255,255,255,0.12)" }} />
+        </div>
+
+        {/* Right Side: The Perks List */}
+        <div 
+          style={{ 
+            flex: "1 1 450px", 
+            padding: "clamp(3rem, 5vw, 5rem)", 
+            position: "relative", 
+            zIndex: 2, 
+            background: "rgba(255,255,255,0.02)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
+          <h3 
+            style={{ 
+              textTransform: "uppercase", 
+              letterSpacing: "0.15em", 
+              color: "rgba(255,255,255,0.3)", 
+              marginBottom: "3rem", 
+              fontSize: "0.75rem",
+              fontWeight: 600,
+            }}
+          >
+            Included in your pass
+          </h3>
+          
+          <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
+            {perks.map((perk, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "1.25rem" }}>
+                <div
+                  style={{
+                    width: "48px", height: "48px", borderRadius: "12px",
+                    background: perk.accentDim,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: perk.accentColor,
+                    flexShrink: 0,
+                  }}
+                >
+                  {perk.icon}
+                </div>
+                <div>
+                  <h4 style={{ fontSize: "1.125rem", fontWeight: 500, color: "#FFFFFF", marginBottom: "0.25rem", letterSpacing: "-0.01em" }}>
+                    {perk.title}
+                  </h4>
+                  <p style={{ fontSize: "0.875rem", color: "#8B96A5", lineHeight: 1.5 }}>
+                    {perk.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
     </section>
   );
 }

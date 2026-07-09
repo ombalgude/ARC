@@ -1,6 +1,8 @@
 "use client";
+import React from "react";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
+import { motion, useMotionValue, useMotionTemplate } from "framer-motion";
 
 const features = [
   {
@@ -16,7 +18,8 @@ const features = [
     title: "Workouts built just for you",
     desc: "Leave the guesswork at the door. ARC builds your weekly training plan based on your exact goals and experience. It tells you exactly what to do to build muscle or lose fat. You just show up and put in the work.",
     stat: { value: "40%", label: "faster progression" },
-    isHero: true,
+    colSpanClass: "md:col-span-8 col-span-12",
+    number: "01",
   },
   {
     icon: (
@@ -29,10 +32,11 @@ const features = [
     accentDim: "rgba(255,255,255,0.03)",
     accentBorder: "rgba(255,255,255,0.08)",
     tag: "Science",
-    title: "Build unstoppable momentum",
-    desc: "Great results come from daily habits. Log your sleep, water, and steps in seconds. Our smart streak system keeps you hooked, motivated, and moving forward every single day.",
+    title: "Unstoppable momentum",
+    desc: "Great results come from daily habits. Log your sleep, water, and steps in seconds. Our smart streak system keeps you hooked.",
     stat: { value: "3×", label: "habit retention" },
-    isHero: false,
+    colSpanClass: "md:col-span-4 col-span-12",
+    number: "02",
   },
   {
     icon: (
@@ -47,7 +51,8 @@ const features = [
     title: "Perfect your nutrition",
     desc: "Fuel your body the right way. ARC calculates exactly how many calories, protein, and fats you need to hit your goals. No more guessing—just clear daily targets that actually work.",
     stat: { value: "100%", label: "macro precision" },
-    isHero: false,
+    colSpanClass: "md:col-span-5 col-span-12",
+    number: "03",
   },
   {
     icon: (
@@ -62,47 +67,177 @@ const features = [
     title: "Your 24/7 fitness coach",
     desc: "Get instant answers to your training and nutrition questions. Our AI companion provides real-time exercise tips and guidance exactly when you need it.",
     stat: { value: "24/7", label: "instant guidance" },
-    isHero: true,
+    colSpanClass: "md:col-span-7 col-span-12",
+    number: "04",
   },
 ];
 
-export default function FeaturesSection() {
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const sectionRef = useRef<HTMLDivElement>(null);
+function FeatureCard({ feature, index }: { feature: typeof features[0], index: number }) {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) entry.target.classList.add("visible");
-        });
-      },
-      { threshold: 0.10 }
-    );
-    cardRefs.current.forEach((el) => el && observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
+  function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  }
 
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const cards = document.querySelectorAll<HTMLElement>(".feature-spotlight");
-      cards.forEach((card) => {
-        const rect = card.getBoundingClientRect();
-        card.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
-        card.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
-      });
-    };
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+  return (
+    <motion.div
+      onMouseMove={handleMouseMove}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-10%" }}
+      transition={{ duration: 0.8, delay: index * 0.15, ease: [0.16, 1, 0.3, 1] }}
+      className={`card-spotlight-wrapper feature-spotlight ${feature.colSpanClass}`}
+      style={{
+        padding: "clamp(2.5rem, 4vw, 3.5rem)",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        minHeight: "380px",
+        backdropFilter: "blur(48px)",
+        WebkitBackdropFilter: "blur(48px)",
+        position: "relative",
+        overflow: "hidden",
+        borderRadius: "1.5rem",
+        border: "1px solid rgba(255, 255, 255, 0.08)",
+        background: "rgba(255,255,255,0.02)",
+      }}
+    >
+      <div 
+        style={{ 
+          position: "absolute", 
+          top: "-20px", 
+          right: "-10px", 
+          fontSize: "12rem", 
+          fontWeight: 700, 
+          color: "rgba(255,255,255,0.02)",
+          fontFamily: "'Space Grotesk', sans-serif",
+          lineHeight: 1,
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      >
+        {feature.number}
+      </div>
 
+      <motion.div
+        className="pointer-events-none absolute -inset-px opacity-0 transition duration-500 group-hover:opacity-100"
+        style={{
+          background: useMotionTemplate`
+            radial-gradient(
+              600px circle at ${mouseX}px ${mouseY}px,
+              rgba(255,255,255,0.04),
+              transparent 80%
+            )
+          `,
+          zIndex: 1,
+        }}
+      />
+      <div style={{ position: "relative", zIndex: 2 }}>
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          marginBottom: "2.5rem",
+        }}>
+          <div style={{
+            width: "56px", height: "56px",
+            borderRadius: "16px",
+            background: feature.accentDim,
+            border: `1px solid ${feature.accentBorder}`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: feature.accentColor,
+          }}>
+            {feature.icon}
+          </div>
+          <div
+            style={{
+              padding: "6px 14px",
+              borderRadius: "100px",
+              background: feature.accentDim,
+              border: `1px solid ${feature.accentBorder}`,
+              fontSize: "0.6875rem",
+              fontWeight: 600,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase" as const,
+              color: feature.accentColor,
+            }}
+          >
+            {feature.tag}
+          </div>
+        </div>
+        <h3
+          style={{
+            fontSize: "clamp(1.5rem, 2.5vw, 2rem)",
+            fontWeight: 500,
+            color: "#FFFFFF",
+            marginBottom: "1rem",
+            letterSpacing: "-0.03em",
+            lineHeight: 1.1,
+            fontFamily: "'Space Grotesk', sans-serif",
+            maxWidth: "90%",
+          }}
+        >
+          {feature.title}
+        </h3>
+        <p
+          style={{
+            fontSize: "1rem",
+            color: "#8B96A5",
+            lineHeight: 1.7,
+            letterSpacing: "-0.01em",
+            maxWidth: "90%",
+          }}
+        >
+          {feature.desc}
+        </p>
+      </div>
+      <div
+        style={{
+          position: "relative",
+          zIndex: 2,
+          marginTop: "3rem",
+          paddingTop: "1.5rem",
+          borderTop: `1px solid ${feature.accentBorder}`,
+          display: "flex",
+          alignItems: "baseline",
+          gap: "0.75rem",
+        }}
+      >
+        <span
+          style={{
+            fontSize: "2rem",
+            fontWeight: 500,
+            color: feature.accentColor,
+            letterSpacing: "-0.04em",
+          }}
+        >
+          {feature.stat.value}
+        </span>
+        <span
+          style={{
+            fontSize: "0.875rem",
+            color: "rgba(255,255,255,0.4)",
+            letterSpacing: "0.03em",
+            textTransform: "uppercase" as const,
+          }}
+        >
+          {feature.stat.label}
+        </span>
+      </div>
+    </motion.div>
+  );
+}
+
+export default function FeaturesSection(): React.JSX.Element | Promise<React.JSX.Element> {
   return (
     <section
       id="features"
-      ref={sectionRef}
       style={{
-        padding: "6rem 1.5rem 8rem",
-        maxWidth: "1160px",
+        padding: "5rem 1.5rem 8rem",
+        maxWidth: "1400px",
         margin: "0 auto",
         width: "100%",
         position: "relative",
@@ -110,41 +245,53 @@ export default function FeaturesSection() {
     >
       <div className="section-divider" style={{ position: "absolute", top: 0, left: 0, right: 0 }} />
 
-      <div style={{ textAlign: "center", marginBottom: "5rem" }}>
-
-        <div
-          className="reveal glass-blue"
+      <motion.div 
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-20%" }}
+        variants={{
+          visible: { transition: { staggerChildren: 0.15 } },
+          hidden: {}
+        }}
+        style={{ textAlign: "center", marginBottom: "6rem" }}
+      >
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 30 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+          }}
+          className="glass-blue"
           style={{
             display: "inline-flex",
             alignItems: "center",
-            gap: "6px",
-            padding: "5px 16px",
+            gap: "8px",
+            padding: "6px 20px",
             borderRadius: "100px",
-            fontSize: "0.6875rem",
-            fontWeight: 500,
-            letterSpacing: "0.08em",
+            fontSize: "0.75rem",
+            fontWeight: 600,
+            letterSpacing: "0.1em",
             textTransform: "uppercase" as const,
             color: "var(--arc-blue)",
-            marginBottom: "1.5rem",
+            marginBottom: "2rem",
           }}
         >
-          <span style={{
-            width: "4px", height: "4px", borderRadius: "50%",
-            background: "var(--arc-blue)", display: "inline-block",
-          }} />
+          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--arc-blue)", display: "inline-block" }} />
           Core Intelligence
-        </div>
+        </motion.div>
 
-        <h2
-          className="reveal"
+        <motion.h2
+          variants={{
+            hidden: { opacity: 0, y: 30 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+          }}
           style={{
             fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: "clamp(2.25rem, 4vw, 4rem)",
+            fontSize: "clamp(3rem, 5vw, 5.5rem)",
             fontWeight: 500,
-            letterSpacing: "-0.03em",
+            letterSpacing: "-0.04em",
             lineHeight: 1.02,
             color: "#FFFFFF",
-            marginBottom: "1.25rem",
+            marginBottom: "1.5rem",
           }}
         >
           Train smarter.{" "}
@@ -158,153 +305,51 @@ export default function FeaturesSection() {
           >
             Not harder.
           </span>
-        </h2>
+        </motion.h2>
 
-        <p
-          className="reveal"
+        <motion.p
+          variants={{
+            hidden: { opacity: 0, y: 30 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+          }}
           style={{
             color: "#8B96A5",
-            fontSize: "1.0625rem",
-            maxWidth: "480px",
+            fontSize: "1.25rem",
+            maxWidth: "600px",
             margin: "0 auto",
-            lineHeight: 1.65,
+            lineHeight: 1.6,
             letterSpacing: "-0.01em",
           }}
         >
           Four pillars of elite performance, unified in one beautifully engineered system.
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
 
       <div
         aria-hidden
         style={{
           position: "absolute",
-          top: "60%",
+          top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: "100%",
-          maxWidth: "1000px",
-          height: "600px",
-          background: "radial-gradient(ellipse at center, rgba(37,99,235,0.05) 0%, transparent 60%)",
-          filter: "blur(80px)",
+          width: "120%",
+          height: "800px",
+          background: "radial-gradient(ellipse at center, rgba(37,99,235,0.04) 0%, transparent 60%)",
+          filter: "blur(100px)",
           pointerEvents: "none",
           zIndex: 0,
         }}
       />
 
-      <div className="bento-grid cards-dim-siblings">
+      <div 
+        className="cards-dim-siblings group grid gap-5"
+        style={{
+          gridTemplateColumns: "repeat(12, 1fr)",
+          width: "100%",
+        }}
+      >
         {features.map((feature, i) => (
-          <div
-            key={feature.title}
-            ref={(el) => { cardRefs.current[i] = el; }}
-            className={`reveal reveal-delay-${i + 1} card-spotlight-wrapper feature-spotlight ${feature.isHero ? "bento-hero" : ""}`}
-            style={{
-              padding: "clamp(2rem, 3vw, 2.75rem)",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              minHeight: feature.isHero ? "300px" : "270px",
-              backdropFilter: "blur(48px)",
-              WebkitBackdropFilter: "blur(48px)",
-              
-            }}
-          >
-            
-            <div style={{ position: "relative", zIndex: 2 }}>
-              
-              <div style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                marginBottom: "1.75rem",
-              }}>
-                
-                <div style={{
-                  width: "48px", height: "48px",
-                  borderRadius: "14px",
-                  background: feature.accentDim,
-                  border: `1px solid ${feature.accentBorder}`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  color: feature.accentColor,
-                }}>
-                  {feature.icon}
-                </div>
-
-                <div
-                  style={{
-                    padding: "5px 12px",
-                    borderRadius: "100px",
-                    background: feature.accentDim,
-                    border: `1px solid ${feature.accentBorder}`,
-                    fontSize: "0.625rem",
-                    fontWeight: 600,
-                    letterSpacing: "0.09em",
-                    textTransform: "uppercase" as const,
-                    color: feature.accentColor,
-                  }}
-                >
-                  {feature.tag}
-                </div>
-              </div>
-
-              <h3
-                style={{
-                  fontSize: "1.3125rem",
-                  fontWeight: 500,
-                  color: "#FFFFFF",
-                  marginBottom: "0.625rem",
-                  letterSpacing: "-0.02em",
-                  lineHeight: 1.2,
-                }}
-              >
-                {feature.title}
-              </h3>
-
-              <p
-                style={{
-                  fontSize: "0.875rem",
-                  color: "#8B96A5",
-                  lineHeight: 1.6,
-                  letterSpacing: "-0.01em",
-                }}
-              >
-                {feature.desc}
-              </p>
-            </div>
-
-            <div
-              style={{
-                position: "relative",
-                zIndex: 2,
-                marginTop: "2rem",
-                paddingTop: "1.25rem",
-                borderTop: `1px solid ${feature.accentBorder}`,
-                display: "flex",
-                alignItems: "baseline",
-                gap: "0.5rem",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "1.5rem",
-                  fontWeight: 500,
-                  color: feature.accentColor,
-                  letterSpacing: "-0.03em",
-                }}
-              >
-                {feature.stat.value}
-              </span>
-              <span
-                style={{
-                  fontSize: "0.75rem",
-                  color: "rgba(255,255,255,0.35)",
-                  letterSpacing: "0.02em",
-                }}
-              >
-                {feature.stat.label}
-              </span>
-            </div>
-          </div>
+          <FeatureCard key={feature.title} feature={feature} index={i} />
         ))}
       </div>
     </section>

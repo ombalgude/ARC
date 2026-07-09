@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 
 const members = [
   { name: "Alex M.", city: "New York", emoji: "🗽" },
@@ -17,7 +18,7 @@ const members = [
 
 const doubled = [...members, ...members];
 
-export default function MarqueeStrip() {
+export default function MarqueeStrip(): React.JSX.Element | Promise<React.JSX.Element> {
   return (
     <div
       style={{
