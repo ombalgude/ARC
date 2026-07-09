@@ -56,25 +56,29 @@ export default function WaitlistForm({ onSuccess, initialCount, referralCode }: 
   return (
     <form onSubmit={handleSubmit} style={{ width: "100%", maxWidth: "480px" }}>
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-        {/* Input + button row */}
+        
         <div
-          id="waitlist-wrapper"
+          id="waitlist"
           className="waitlist-pill-wrapper"
           style={{
             display: "flex",
             alignItems: "center",
             gap: "6px",
-            background: "rgba(255,255,255,0.05)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            border: `1px solid ${focused ? "rgba(59,130,246,0.50)" : "rgba(255,255,255,0.12)"}`,
+            background: "rgba(4,5,15,0.7)",
+            backdropFilter: "blur(24px)",
+            WebkitBackdropFilter: "blur(24px)",
+            border: `1px solid ${focused ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.15)"}`,
+            boxShadow: focused
+              ? "0 0 0 1px rgba(255,255,255,0.3), 0 24px 40px rgba(0,0,0,0.6), inset 0 2px 10px rgba(0,0,0,1)"
+              : "0 20px 40px rgba(0,0,0,0.5), inset 0 2px 10px rgba(0,0,0,0.8)",
             borderRadius: "7.5rem",
             padding: "6px 6px 6px 1.25rem",
             transition: "all 0.3s ease",
-            scrollMarginTop: "120px", // Keeps it nicely below the navbar when scrolled to
+            scrollMarginTop: "120px",
+            transform: focused ? "translateY(-1px)" : "translateY(0)",
           }}
         >
-          {/* Email icon */}
+          
           <svg
             width="16"
             height="16"
@@ -110,19 +114,26 @@ export default function WaitlistForm({ onSuccess, initialCount, referralCode }: 
             }}
           />
 
-          {/* CTA Button — inside pill */}
           <button
             type="submit"
             disabled={loading}
-            id="waitlist"
-            className="btn-primary"
+            className="btn-primary animate-gradient-shift"
             style={{
-              height: "2.5rem",
-              padding: "0 1.25rem",
+              height: "2.75rem",
+              padding: "0 1.5rem",
               fontSize: "0.875rem",
+              fontWeight: 800,
               flexShrink: 0,
               opacity: loading ? 0.6 : 1,
               cursor: loading ? "not-allowed" : "pointer",
+              background: "linear-gradient(135deg, rgba(37,99,235,0.9) 0%, rgba(37,99,235,0.9) 42%, rgba(96,165,250,0.8) 50%, rgba(37,99,235,0.9) 58%, rgba(37,99,235,0.9) 100%)",
+              color: "#FFFFFF",
+              border: "1px solid rgba(255,255,255,0.15)",
+              boxShadow: "0 6px 20px rgba(37,99,235,0.4), inset 0 1px 1px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.2)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              borderRadius: "100px",
+              transition: "transform 0.2s ease"
             }}
           >
             {loading ? (
@@ -138,12 +149,11 @@ export default function WaitlistForm({ onSuccess, initialCount, referralCode }: 
                 }}
               />
             ) : (
-              "Get Early Access →"
+              "Claim Early Access →"
             )}
           </button>
         </div>
 
-        {/* Error message */}
         {error && (
           <p
             style={{

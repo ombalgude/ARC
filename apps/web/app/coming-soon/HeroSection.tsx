@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Droplets, Moon, Footprints, Dumbbell, Timer, Activity, Flame } from "lucide-react";
 import ConfirmationScreen from "./ConfirmationScreen";
 import WaitlistForm from "./WaitlistForm";
 
@@ -22,13 +23,11 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
   const [showModal, setShowModal] = useState(false);
   const countRef = useRef(initialCount);
 
-  // Phone 3D parallax
   const phoneRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
   const mouseRef = useRef({ x: 0.5, y: 0.5 });
   const lerpRef = useRef({ x: 0.5, y: 0.5 });
 
-  // Slowly auto-increment counter
   useEffect(() => {
     const tick = () => {
       const delay = Math.random() * 16000 + 8000;
@@ -43,7 +42,6 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Cursor-tracking phone 3D tilt
   useEffect(() => {
     const handleMove = (e: MouseEvent) => {
       mouseRef.current = {
@@ -54,14 +52,13 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
 
     window.addEventListener("mousemove", handleMove, { passive: true });
 
-    // Lerp animation loop for phone
     const loop = () => {
       lerpRef.current.x += (mouseRef.current.x - lerpRef.current.x) * 0.06;
       lerpRef.current.y += (mouseRef.current.y - lerpRef.current.y) * 0.06;
 
       if (phoneRef.current) {
-        const rx = (lerpRef.current.y - 0.5) * -18;  // vertical → rotateX
-        const ry = (lerpRef.current.x - 0.5) *  22;  // horizontal → rotateY
+        const rx = (lerpRef.current.y - 0.5) * -18;  
+        const ry = (lerpRef.current.x - 0.5) *  22;  
         phoneRef.current.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
       }
       rafRef.current = requestAnimationFrame(loop);
@@ -94,9 +91,6 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
       }}
     >
 
-
-
-      {/* ── Main Content Grid ── */}
       <div style={{
         position: "relative", zIndex: 1,
         display: "grid",
@@ -106,15 +100,15 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
         maxWidth: "1240px",
         width: "100%",
         margin: "0 auto",
+        marginTop: "-10vh",
         padding: "clamp(5rem, 10vh, 8rem) 0 clamp(4rem, 8vh, 6rem)",
       }}>
-        {/* ── LEFT: Copy & Waitlist ── */}
+        
         <div style={{
           display: "flex", flexDirection: "column",
           alignItems: "flex-start", textAlign: "left",
         }}>
 
-          {/* ── Launch Badge ── */}
           <div
             className="glass-blue animate-fade-up opacity-0-init"
             style={{
@@ -129,26 +123,25 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
               width: "5px", height: "5px", borderRadius: "50%",
               background: "var(--arc-blue)", display: "inline-block", flexShrink: 0,
             }} />
-            Now accepting founding members
+            Early access waitlist open
           </div>
 
-          {/* ── Headline ── */}
           <h1
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
               fontWeight: 500,
               letterSpacing: "-0.035em",
-              lineHeight: 0.97,
+              lineHeight: 1.08,
               color: "#FFFFFF",
               marginBottom: "1.75rem",
               fontSize: "clamp(3.25rem, 6.5vw, 7rem)",
             }}
           >
             <span className="text-reveal-wrapper" style={{ display: "block" }}>
-              <span className="text-reveal-inner delay-100">The fitness</span>
+              <span className="text-reveal-inner delay-100">Upgrade</span>
             </span>
-            <span className="text-reveal-wrapper" style={{ display: "block" }}>
-              <span className="text-reveal-inner delay-250">app that</span>
+            <span className="text-reveal-wrapper" style={{ display: "block", marginTop: "-0.12em", marginBottom: "0.02em" }}>
+              <span className="text-reveal-inner delay-250">your fitness.</span>
             </span>
             <span className="text-reveal-wrapper" style={{ display: "block" }}>
               <span
@@ -162,12 +155,11 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
                   display: "inline-block",
                 }}
               >
-                thinks.
+                Forever.
               </span>
             </span>
           </h1>
 
-          {/* ── Subtext ── */}
           <p
             className="animate-fade-in opacity-0-init delay-600"
             style={{
@@ -179,10 +171,9 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
               letterSpacing: "-0.01em",
             }}
           >
-            ARC adapts your training weekly, builds compounding habits, and tracks nutrition — powered by AI that evolves with you, not against you.
+            ARC doesn't just track your progress—it plans it. Get an AI-powered coach that perfectly connects your workouts, meals, and daily habits into one winning system.
           </p>
 
-          {/* ── Waitlist Form or Confirmed State ── */}
           <div
             className="animate-fade-up opacity-0-init delay-800"
             style={{ width: "100%", maxWidth: "460px", marginBottom: "1.5rem" }}
@@ -234,7 +225,6 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
             )}
           </div>
 
-          {/* ── Social Proof Counter ── */}
           {!confirmed && (
             <div
               className="animate-fade-in opacity-0-init delay-1000"
@@ -243,7 +233,7 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
                 fontSize: "0.8rem", color: "rgba(255,255,255,0.35)",
               }}
             >
-              {/* Avatar stack */}
+              
               <div style={{ display: "flex", alignItems: "center" }}>
                 {[
                   { bg: "#3B82F6", label: "A" },
@@ -270,15 +260,15 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
               </div>
 
               <span>
+                Join{" "}
                 <strong style={{ color: "rgba(255,255,255,0.80)", fontWeight: 500 }}>
-                  {count.toLocaleString()}+
+                  {(12500 + count).toLocaleString()}+
                 </strong>
-                {" "}founding members waiting
+                {" "}top performers already in line
               </span>
             </div>
           )}
 
-          {/* ── Trust signals ── */}
           <div
             className="animate-fade-in opacity-0-init delay-1200"
             style={{
@@ -290,9 +280,9 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
             }}
           >
             {[
-              { value: "AI", label: "Adaptive Coach" },
-              { value: "3×", label: "Faster Results" },
-              { value: "0", label: "Generic Plans" },
+              { value: "100%", label: "Custom Plans" },
+              { value: "24/7", label: "AI Guidance" },
+              { value: "0", label: "Guesswork" },
             ].map((stat, i) => (
               <div key={i} style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                 <span style={{
@@ -306,16 +296,16 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
           </div>
         </div>
 
-        {/* ── RIGHT: Phone Mockup with 3D Parallax ── */}
         <div
           style={{
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
             position: "relative",
+            marginTop: "-80px"
           }}
         >
-          {/* Soft ambient glow — no visible shape, pure light bleed */}
+          
           <div style={{
             position: "absolute",
             inset: "-30%",
@@ -324,7 +314,6 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
             pointerEvents: "none",
           }} />
 
-          {/* 3D Perspective Container */}
           <div className="phone-parallax-container animate-scale-up opacity-0-init delay-500">
             <div
               ref={phoneRef}
@@ -334,7 +323,7 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
                 transformStyle: "preserve-3d",
               }}
             >
-              {/* Phone shell */}
+              
               <div
                 style={{
                   position: "relative",
@@ -352,14 +341,13 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
                   ].join(", "),
                 }}
               >
-                {/* Frosted glass inner layer */}
+                
                 <div style={{
                   position: "absolute", inset: 0,
                   background: "linear-gradient(165deg, rgba(59,130,246,0.04) 0%, transparent 50%)",
                   pointerEvents: "none", zIndex: 10,
                 }} />
 
-                {/* Dynamic island */}
                 <div style={{
                   position: "absolute", top: "16px", left: "50%", transform: "translateX(-50%)",
                   width: "96px", height: "30px",
@@ -367,102 +355,170 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
                   boxShadow: "inset 0 -1px 2px rgba(255,255,255,0.08), 0 2px 8px rgba(0,0,0,0.6)",
                 }} />
 
-                {/* Screen Content */}
-                <div style={{ padding: "58px 16px 20px", display: "flex", flexDirection: "column", gap: "10px", height: "100%" }}>
+                <div 
+                  className="custom-scrollbar"
+                  style={{ 
+                    padding: "48px 16px 20px", 
+                    display: "flex", 
+                    flexDirection: "column", 
+                    gap: "16px", 
+                    height: "100%",
+                    overflowY: "auto",
+                    position: "relative",
+                    zIndex: 30
+                  }}
+                >
 
-                  {/* Status bar */}
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2px" }}>
-                    <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)", fontWeight: 600, letterSpacing: "0.01em" }}>9:41</p>
-                    <div style={{ display: "flex", gap: "4px", alignItems: "flex-end" }}>
-                      {[3, 4, 5, 3].map((h, i) => (
-                        <div key={i} style={{ width: "3px", height: `${h}px`, background: i < 3 ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.2)", borderRadius: "2px" }} />
-                      ))}
-                      <div style={{ width: "14px", height: "7px", border: "1px solid rgba(255,255,255,0.3)", borderRadius: "2px", marginLeft: "2px", position: "relative" }}>
-                        <div style={{ position: "absolute", left: "2px", top: "1px", bottom: "1px", width: "60%", background: "rgba(34,197,94,0.8)", borderRadius: "1px" }} />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Greeting */}
-                  <div style={{ marginBottom: "4px" }}>
-                    <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)", marginBottom: "3px", letterSpacing: "0.02em" }}>Good morning, Alex</p>
-                    <h2 style={{ fontSize: "1.5rem", fontWeight: 500, color: "#fff", letterSpacing: "-0.025em", lineHeight: 1 }}>Today&apos;s Plan</h2>
-                  </div>
-
-                  {/* AI Insight card */}
-                  <div style={{
-                    background: "rgba(59,130,246,0.09)",
-                    border: "1px solid rgba(59,130,246,0.22)",
-                    borderRadius: "16px", padding: "12px 14px",
-                  }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
-                      <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#3B82F6" }} />
-                      <p style={{ fontSize: "8px", color: "#3B82F6", letterSpacing: "0.10em", textTransform: "uppercase" as const, fontWeight: 600 }}>AI Insight</p>
-                    </div>
-                    <p style={{ fontSize: "11.5px", color: "rgba(255,255,255,0.82)", lineHeight: 1.5, letterSpacing: "-0.01em" }}>
-                      Recovery score 87 — push strength today, your body is primed.
-                    </p>
-                  </div>
-
-                  {/* Metrics grid */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-                    {[
-                      { label: "Streak", value: "14d", color: "#F59E0B" },
-                      { label: "Calories", value: "1,840", color: "#22C55E" },
-                      { label: "Workouts", value: "3 / 4", color: "#3B82F6" },
-                      { label: "Sleep", value: "7.5h", color: "#8B5CF6" },
-                    ].map((m) => (
-                      <div
-                        key={m.label}
-                        style={{
-                          background: "rgba(255,255,255,0.03)",
-                          border: "1px solid rgba(255,255,255,0.07)",
-                          borderRadius: "12px", padding: "10px 12px",
-                        }}
-                      >
-                        <p style={{ fontSize: "8px", color: "rgba(255,255,255,0.35)", marginBottom: "5px", letterSpacing: "0.06em", textTransform: "uppercase" as const }}>{m.label}</p>
-                        <p style={{ fontSize: "1.125rem", fontWeight: 500, color: m.color, letterSpacing: "-0.025em" }}>{m.value}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Progress bar */}
-                  <div>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-                      <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.35)", letterSpacing: "0.04em" }}>Weekly goal</span>
-                      <span style={{ fontSize: "9px", color: "var(--arc-blue)", fontWeight: 600 }}>75%</span>
-                    </div>
-                    <div style={{ height: "3px", background: "rgba(255,255,255,0.05)", borderRadius: "100px", overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: "75%", background: "linear-gradient(90deg, #2563EB, #93C5FD)", borderRadius: "100px" }} />
-                    </div>
-                  </div>
-
-                  {/* Workout card */}
-                  <div style={{
-                    marginTop: "auto",
-                    background: "rgba(59,130,246,0.07)",
-                    border: "1px solid rgba(59,130,246,0.16)",
-                    borderRadius: "14px", padding: "12px 14px",
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                  }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div>
-                      <p style={{ fontSize: "12px", fontWeight: 500, color: "#fff", letterSpacing: "-0.01em" }}>Push Day A</p>
-                      <p style={{ fontSize: "9.5px", color: "rgba(255,255,255,0.4)", marginTop: "3px" }}>52 min · 6 exercises</p>
+                      <p style={{ fontSize: "9px", fontWeight: 600, color: "#8B96A5", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "4px" }}>Thursday · Jun 25</p>
+                      <h1 style={{ fontSize: "18px", fontWeight: 600, color: "#fff", letterSpacing: "-0.02em" }}>Morning, Alex 👋</h1>
                     </div>
-                    <div style={{
-                      width: "30px", height: "30px", borderRadius: "50%",
-                      background: "var(--arc-blue)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                    }}>
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="white">
-                        <path d="M5 3l14 9-14 9V3z" />
-                      </svg>
+                    <div style={{ width: "32px", height: "32px", borderRadius: "10px", background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.2)", display: "flex", alignItems: "center", justifyContent: "center", color: "#3B82F6", fontSize: "12px", fontWeight: 600 }}>
+                      A
                     </div>
                   </div>
+
+                  <div style={{ display: "inline-flex", alignSelf: "flex-start", alignItems: "center", gap: "4px", padding: "6px 10px", borderRadius: "8px", background: "rgba(255,107,107,0.08)", border: "1px solid rgba(255,107,107,0.15)", marginBottom: "-6px" }}>
+                    <Flame size={10} color="#FF6B6B" strokeWidth={2.5} />
+                    <span style={{ fontSize: "8.5px", fontWeight: 700, color: "#FF6B6B", letterSpacing: "0.05em", textTransform: "uppercase" }}>14-day streak</span>
+                  </div>
+
+                  <div style={{ 
+                    position: "relative", 
+                    padding: "16px", 
+                    borderRadius: "16px", 
+                    background: "linear-gradient(160deg, rgba(59,130,246,0.15) 0%, rgba(4,5,15,0.8) 100%)", 
+                    border: "1px solid rgba(255,255,255,0.08)", 
+                    boxShadow: "0 20px 40px -10px rgba(0,0,0,0.8), 0 0 30px rgba(59,130,246,0.1), inset 0 1px 1px rgba(255,255,255,0.15)",
+                    backdropFilter: "blur(24px)",
+                    WebkitBackdropFilter: "blur(24px)",
+                    overflow: "hidden",
+                    flexShrink: 0
+                  }}>
+                    
+                    <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px)", backgroundSize: "16px 16px", opacity: 0.8 }} />
+                    
+                    <div style={{ position: "absolute", right: "-30px", top: "-30px", width: "100px", height: "100px", borderRadius: "50%", background: "rgba(59,130,246,0.2)", filter: "blur(40px)", pointerEvents: "none" }} />
+                    <div style={{ position: "absolute", left: "-20px", bottom: "-20px", width: "80px", height: "80px", borderRadius: "50%", background: "rgba(59,130,246,0.1)", filter: "blur(30px)", pointerEvents: "none" }} />
+                    
+                    <div style={{ position: "relative", zIndex: 10 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#60A5FA", boxShadow: "0 0 10px #60A5FA" }} />
+                          <span style={{ fontSize: "8.5px", fontWeight: 700, color: "#93C5FD", letterSpacing: "0.15em", textTransform: "uppercase" }}>Today's Session</span>
+                        </div>
+                        <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontWeight: 500 }}>Week 3 · Day 2</span>
+                      </div>
+
+                      <h2 style={{ fontSize: "18px", fontWeight: 700, color: "#fff", letterSpacing: "-0.03em", marginBottom: "2px", textShadow: "0 2px 10px rgba(0,0,0,0.5)" }}>Push Day A</h2>
+                      <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)", marginBottom: "16px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Chest · Shoulders · Triceps</p>
+
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div style={{ display: "flex", gap: "10px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "rgba(255,255,255,0.6)" }}>
+                            <Timer size={10} strokeWidth={2.5} />
+                            <span style={{ fontSize: "9.5px", fontWeight: 500, color: "rgba(255,255,255,0.85)" }}>55m</span>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "rgba(255,255,255,0.6)" }}>
+                            <Dumbbell size={10} strokeWidth={2.5} />
+                            <span style={{ fontSize: "9.5px", fontWeight: 500, color: "rgba(255,255,255,0.85)" }}>6ex</span>
+                          </div>
+                        </div>
+                        <button style={{ 
+                          background: "linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%)", 
+                          color: "#1e3a8a", 
+                          border: "none", 
+                          borderRadius: "8px", 
+                          padding: "6px 12px", 
+                          fontSize: "10px", 
+                          fontWeight: 800, 
+                          display: "flex", 
+                          alignItems: "center", 
+                          gap: "4px", 
+                          boxShadow: "0 4px 12px rgba(59,130,246,0.3), inset 0 1px 0 rgba(255,255,255,1)",
+                          cursor: "pointer"
+                        }}>
+                          Start <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <h2 style={{ fontSize: "12px", fontWeight: 600, color: "#fff" }}>Habits</h2>
+                        <span style={{ background: "rgba(59,130,246,0.15)", border: "1px solid rgba(59,130,246,0.3)", color: "#3B82F6", fontSize: "8px", fontWeight: 600, padding: "2px 6px", borderRadius: "10px" }}>2/4</span>
+                      </div>
+                      <span style={{ fontSize: "9px", color: "#3B82F6", fontWeight: 500 }}>All →</span>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px" }}>
+                      {[
+                        { name: "Water", icon: <Droplets size={16} />, done: true, color: "#06B6D4" },
+                        { name: "Sleep", icon: <Moon size={16} />, done: true, color: "#7C5CFC" },
+                        { name: "Steps", icon: <Footprints size={16} />, done: false, color: "#FF6B6B" },
+                        { name: "Train", icon: <Dumbbell size={16} />, done: false, color: "#3B82F6" },
+                      ].map(habit => (
+                        <div key={habit.name} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
+                          <div style={{ 
+                            width: "36px", height: "36px", borderRadius: "12px", 
+                            background: habit.done ? `rgba(${habit.color === '#06B6D4' ? '6,182,212' : '124,92,252'}, 0.15)` : "rgba(255,255,255,0.03)",
+                            border: `1px solid ${habit.done ? habit.color : 'rgba(255,255,255,0.08)'}`,
+                            color: habit.done ? habit.color : "rgba(255,255,255,0.4)",
+                            display: "flex", alignItems: "center", justifyContent: "center"
+                          }}>
+                            {habit.icon}
+                          </div>
+                          <span style={{ fontSize: "8px", color: habit.done ? "#fff" : "#8B96A5", fontWeight: habit.done ? 600 : 400 }}>{habit.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "16px", padding: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
+                      <div>
+                        <p style={{ fontSize: "12px", fontWeight: 600, color: "#fff", letterSpacing: "-0.01em" }}>Nutrition</p>
+                        <p style={{ fontSize: "9px", color: "#8B96A5", marginTop: "2px" }}>1,840 / 2,650 kcal · 69%</p>
+                      </div>
+                      
+                      <div style={{ width: "32px", height: "32px", borderRadius: "50%", border: "3px solid rgba(59,130,246,0.2)", borderTopColor: "#3B82F6", transform: "rotate(45deg)", display: "flex", alignItems: "center", justifyContent: "center" }} />
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                      {[
+                        { label: "Protein", current: 142, target: 185, color: "#3B82F6" },
+                        { label: "Carbs", current: 198, target: 330, color: "#93C5FD" },
+                        { label: "Fats", current: 51, target: 75, color: "#60A5FA" },
+                      ].map(m => (
+                        <div key={m.label}>
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}>
+                            <span style={{ fontSize: "9px", color: "#8B96A5" }}>{m.label}</span>
+                            <span style={{ fontSize: "9px", color: "#fff", fontWeight: 500 }}>{m.current}g <span style={{ color: "rgba(255,255,255,0.3)" }}>/ {m.target}g</span></span>
+                          </div>
+                          <div style={{ height: "3px", background: "rgba(255,255,255,0.06)", borderRadius: "2px", overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${(m.current / m.target) * 100}%`, background: m.color, borderRadius: "2px" }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "linear-gradient(135deg, rgba(59,130,246,0.1), rgba(29,78,216,0.05))", border: "1px solid rgba(59,130,246,0.2)", borderRadius: "14px", padding: "10px 12px" }}>
+                    <div style={{ width: "28px", height: "28px", borderRadius: "8px", background: "linear-gradient(135deg, #3B82F6, #1D4ED8)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 10px rgba(59,130,246,0.4)" }}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: "11px", fontWeight: 600, color: "#fff" }}>Ask Arc anything</p>
+                      <p style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)" }}>Your AI coach is ready</p>
+                    </div>
+                    <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "12px" }}>→</span>
+                  </div>
+
                 </div>
               </div>
 
-              {/* 3D depth layer — subtle left edge */}
               <div style={{
                 position: "absolute",
                 top: "10%", left: "-3px",
@@ -470,53 +526,55 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
                 background: "linear-gradient(180deg, rgba(59,130,246,0.3) 0%, rgba(59,130,246,0.0) 100%)",
                 borderRadius: "2px 0 0 2px",
               }} />
+
+              <div
+                className="animate-fade-up opacity-0-init delay-1000"
+                style={{
+                  position: "absolute",
+                  top: "15%",
+                  right: "-20%",
+                  background: "rgba(0,0,0,0.7)",
+                  backdropFilter: "blur(24px)",
+                  WebkitBackdropFilter: "blur(24px)",
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  boxShadow: "0 20px 40px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.2)",
+                  borderRadius: "14px",
+                  padding: "12px 16px",
+                  display: "flex", alignItems: "center", gap: "10px",
+                  transform: "translateZ(100px)",
+                }}
+              >
+                <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#22C55E", boxShadow: "0 0 10px rgba(34,197,94,0.6)" }} />
+                <span style={{ fontSize: "12px", fontWeight: 600, color: "#fff", whiteSpace: "nowrap" as const }}>
+                  14-day streak
+                </span>
+              </div>
+
+              <div
+                className="animate-fade-up opacity-0-init delay-1200"
+                style={{
+                  position: "absolute",
+                  bottom: "20%",
+                  left: "-25%",
+                  background: "rgba(0,0,0,0.7)",
+                  backdropFilter: "blur(24px)",
+                  WebkitBackdropFilter: "blur(24px)",
+                  border: "1px solid rgba(59,130,246,0.25)",
+                  boxShadow: "0 20px 40px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.1)",
+                  borderRadius: "14px",
+                  padding: "14px 18px",
+                  transform: "translateZ(120px)",
+                }}
+              >
+                <p style={{ fontSize: "10px", color: "#8B96A5", letterSpacing: "0.06em", textTransform: "uppercase" as const, marginBottom: "4px", fontWeight: 600 }}>Recovery</p>
+                <p style={{ fontSize: "1.25rem", fontWeight: 600, color: "var(--arc-blue)", letterSpacing: "-0.025em", textShadow: "0 0 20px rgba(59,130,246,0.4)" }}>87%</p>
+              </div>
             </div>
           </div>
 
-          {/* Floating stat badge — top right of phone */}
-          <div
-            className="animate-fade-up opacity-0-init delay-1000"
-            style={{
-              position: "absolute",
-              top: "8%",
-              right: "-2%",
-              background: "rgba(0,0,0,0.6)",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
-              border: "1px solid rgba(255,255,255,0.10)",
-              borderRadius: "14px",
-              padding: "10px 14px",
-              display: "flex", alignItems: "center", gap: "8px",
-            }}
-          >
-            <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#22C55E" }} />
-            <span style={{ fontSize: "11px", fontWeight: 500, color: "#fff", whiteSpace: "nowrap" as const }}>
-              14-day streak
-            </span>
-          </div>
-
-          {/* Floating stat badge — bottom left of phone */}
-          <div
-            className="animate-fade-up opacity-0-init delay-1200"
-            style={{
-              position: "absolute",
-              bottom: "10%",
-              left: "-4%",
-              background: "rgba(0,0,0,0.6)",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
-              border: "1px solid rgba(59,130,246,0.18)",
-              borderRadius: "14px",
-              padding: "10px 14px",
-            }}
-          >
-            <p style={{ fontSize: "9px", color: "rgba(255,255,255,0.38)", letterSpacing: "0.06em", textTransform: "uppercase" as const, marginBottom: "3px" }}>Recovery</p>
-            <p style={{ fontSize: "1.125rem", fontWeight: 500, color: "var(--arc-blue)", letterSpacing: "-0.025em" }}>87%</p>
-          </div>
         </div>
       </div>
 
-      {/* ── Responsive mobile override ── */}
       <style>{`
         @media (max-width: 820px) {
           .hero-grid { grid-template-columns: 1fr !important; }
@@ -524,7 +582,6 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
         }
       `}</style>
 
-      {/* ── Celebration Modal ── */}
       {showModal && confirmed && (
         <ConfirmationScreen
           position={confirmed.position}

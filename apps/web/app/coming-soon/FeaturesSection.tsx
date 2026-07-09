@@ -13,8 +13,8 @@ const features = [
     accentDim: "rgba(59,130,246,0.08)",
     accentBorder: "rgba(59,130,246,0.18)",
     tag: "AI-Powered",
-    title: "AI Workout Engine",
-    desc: "Adaptive plans built by your personal AI coach. Adjusts every single week based on your actual performance, recovery, and feedback.",
+    title: "Workouts built just for you",
+    desc: "Leave the guesswork at the door. ARC builds your weekly training plan based on your exact goals and experience. It tells you exactly what to do to build muscle or lose fat. You just show up and put in the work.",
     stat: { value: "40%", label: "faster progression" },
     isHero: true,
   },
@@ -29,8 +29,8 @@ const features = [
     accentDim: "rgba(255,255,255,0.03)",
     accentBorder: "rgba(255,255,255,0.08)",
     tag: "Science",
-    title: "Habit Intelligence",
-    desc: "Visual streaks, smart nudges, and 2-day rule protection to build unbreakable consistency.",
+    title: "Build unstoppable momentum",
+    desc: "Great results come from daily habits. Log your sleep, water, and steps in seconds. Our smart streak system keeps you hooked, motivated, and moving forward every single day.",
     stat: { value: "3×", label: "habit retention" },
     isHero: false,
   },
@@ -44,9 +44,9 @@ const features = [
     accentDim: "rgba(255,255,255,0.03)",
     accentBorder: "rgba(255,255,255,0.08)",
     tag: "Nutrition",
-    title: "Macro Clarity",
-    desc: "Dynamic macro targets that shift with your training intensity and body feedback.",
-    stat: { value: "AI", label: "meal recognition" },
+    title: "Perfect your nutrition",
+    desc: "Fuel your body the right way. ARC calculates exactly how many calories, protein, and fats you need to hit your goals. No more guessing—just clear daily targets that actually work.",
+    stat: { value: "100%", label: "macro precision" },
     isHero: false,
   },
   {
@@ -58,10 +58,10 @@ const features = [
     accentColor: "rgba(255,255,255,0.70)",
     accentDim: "rgba(255,255,255,0.03)",
     accentBorder: "rgba(255,255,255,0.08)",
-    tag: "Recovery",
-    title: "Readiness Score",
-    desc: "Know exactly when to push your limits and when to rest — powered by biometric analysis.",
-    stat: { value: "87%", label: "avg readiness" },
+    tag: "AI Chat",
+    title: "Your 24/7 fitness coach",
+    desc: "Get instant answers to your training and nutrition questions. Our AI companion provides real-time exercise tips and guidance exactly when you need it.",
+    stat: { value: "24/7", label: "instant guidance" },
     isHero: true,
   },
 ];
@@ -70,7 +70,6 @@ export default function FeaturesSection() {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const sectionRef = useRef<HTMLDivElement>(null);
 
-  // Scroll reveal
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -84,7 +83,6 @@ export default function FeaturesSection() {
     return () => observer.disconnect();
   }, []);
 
-  // Spotlight mouse tracking
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       const cards = document.querySelectorAll<HTMLElement>(".feature-spotlight");
@@ -112,10 +110,8 @@ export default function FeaturesSection() {
     >
       <div className="section-divider" style={{ position: "absolute", top: 0, left: 0, right: 0 }} />
 
-      {/* Section header */}
       <div style={{ textAlign: "center", marginBottom: "5rem" }}>
 
-        {/* Eyebrow label */}
         <div
           className="reveal glass-blue"
           style={{
@@ -179,7 +175,6 @@ export default function FeaturesSection() {
         </p>
       </div>
 
-      {/* Surgical Ambient Bleed behind the cards */}
       <div
         aria-hidden
         style={{
@@ -197,7 +192,6 @@ export default function FeaturesSection() {
         }}
       />
 
-      {/* Bento Grid */}
       <div className="bento-grid cards-dim-siblings">
         {features.map((feature, i) => (
           <div
@@ -212,19 +206,19 @@ export default function FeaturesSection() {
               minHeight: feature.isHero ? "300px" : "270px",
               backdropFilter: "blur(48px)",
               WebkitBackdropFilter: "blur(48px)",
-              /* background & border come from .card-spotlight-wrapper in CSS */
+              
             }}
           >
-            {/* Content */}
+            
             <div style={{ position: "relative", zIndex: 2 }}>
-              {/* Icon + tag row */}
+              
               <div style={{
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "flex-start",
                 marginBottom: "1.75rem",
               }}>
-                {/* Icon box */}
+                
                 <div style={{
                   width: "48px", height: "48px",
                   borderRadius: "14px",
@@ -236,7 +230,6 @@ export default function FeaturesSection() {
                   {feature.icon}
                 </div>
 
-                {/* Tag pill */}
                 <div
                   style={{
                     padding: "5px 12px",
@@ -254,7 +247,6 @@ export default function FeaturesSection() {
                 </div>
               </div>
 
-              {/* Title */}
               <h3
                 style={{
                   fontSize: "1.3125rem",
@@ -268,7 +260,6 @@ export default function FeaturesSection() {
                 {feature.title}
               </h3>
 
-              {/* Description */}
               <p
                 style={{
                   fontSize: "0.875rem",
@@ -281,7 +272,6 @@ export default function FeaturesSection() {
               </p>
             </div>
 
-            {/* Stat — bottom of card */}
             <div
               style={{
                 position: "relative",

@@ -57,12 +57,12 @@ export default function LandingNav() {
           justifyContent: "space-between",
         }}
       >
-        {/* ── Wordmark ── */}
+        
         <a
           href="/"
           style={{ display: "flex", alignItems: "center", gap: "0.6rem", textDecoration: "none" }}
         >
-          {/* Logo mark — geometric arc shape */}
+          
           <div
             style={{
               width: "22px", height: "22px",
@@ -72,7 +72,7 @@ export default function LandingNav() {
               flexShrink: 0,
             }}
           >
-            {/* Small arc icon inside */}
+            
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
               <path d="M2 9 Q6 2 10 9" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
             </svg>
@@ -92,7 +92,6 @@ export default function LandingNav() {
           </span>
         </a>
 
-        {/* ── Nav Links — Desktop ── */}
         <div
           className="arc-nav-links"
           style={{ display: "flex", gap: "2.5rem", alignItems: "center" }}
@@ -123,7 +122,6 @@ export default function LandingNav() {
             </a>
           ))}
 
-          {/* ── CTA button ── */}
           <a
             href="#waitlist"
             onClick={handleGetAccess}
@@ -150,11 +148,10 @@ export default function LandingNav() {
               (e.currentTarget as HTMLAnchorElement).style.background = "var(--arc-blue)";
             }}
           >
-            Get Early Access
+            Claim Early Access
           </a>
         </div>
 
-        {/* ── Mobile CTA ── */}
         <div className="arc-nav-mobile" style={{ display: "none" }}>
           <a
             href="#waitlist"
@@ -171,7 +168,7 @@ export default function LandingNav() {
               letterSpacing: "-0.01em",
             }}
           >
-            Get Access
+            Claim Access
           </a>
         </div>
       </div>

@@ -30,12 +30,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
   return (
     <>
-      {/* ─────────────────────────────────────────────────────────────
-          PAGE SHELL — pure black base, always.
-          The raah.dev gradient is applied to the HERO WRAPPER only,
-          not as a fixed full-page background.
-          This is exactly how raah.dev does it.
-      ───────────────────────────────────────────────────────────── */}
+
       <div style={{
         minHeight: "100vh",
         display: "flex",
@@ -46,7 +41,6 @@ export default async function Home({ searchParams }: HomeProps) {
         isolation: "isolate",
       }}>
 
-        {/* ── Film grain overlay (fixed, full page) ── */}
         <div
           aria-hidden
           className="fixed inset-0 pointer-events-none"
@@ -59,35 +53,9 @@ export default async function Home({ searchParams }: HomeProps) {
           }}
         />
 
-        {/* Navigation */}
         <LandingNav />
         <ScrollRevealInit />
 
-        {/* ════════════════════════════════════════════════════════════
-            HERO WRAPPER — THIS is where raah.dev puts the gradient.
-            It wraps only the hero section, not the whole page.
-
-            Their exact CSS class (decoded from Tailwind arbitrary):
-            background: radial-gradient(
-              125% 125% at 50% 0%,
-              transparent 40%,
-              var(--color-blue-600),   ← #2563EB
-              var(--landing-page-bg) 100%   ← their dark bg (#000 equivalent)
-            )
-
-            How it renders:
-            - Center point: top-center (50% 0%)
-            - 0–40% from center: TRANSPARENT (shows black base)
-            - ~40–70%: transitions through blue-600
-            - 70–100%: fades to their page bg (dark)
-
-            On a 1440px wide, 100vh tall hero:
-            - The gradient ellipse is 125% × 125% = 1800px × 1125px
-            - Center is at top-center
-            - 40% stop = 720px from center horizontally, 450px vertically
-            - So the blue ring appears at ~450px down from the top
-            - Which is roughly halfway down the hero viewport
-        ════════════════════════════════════════════════════════════ */}
         <div style={{
           position: "relative",
           overflow: "hidden",
@@ -98,7 +66,7 @@ export default async function Home({ searchParams }: HomeProps) {
             rgba(17,24,39,1)   100%
           )`,
         }}>
-          {/* Bottom fade overlay inside this wrapper to prevent hard edges on widescreen */}
+          
           <div
             aria-hidden
             style={{
@@ -112,7 +80,7 @@ export default async function Home({ searchParams }: HomeProps) {
               background: "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.9) 65%, rgba(0,0,0,1) 100%)",
             }}
           />
-          {/* Raah also has a bottom blur pill to soften the edge */}
+          
           <div
             aria-hidden
             style={{
@@ -129,7 +97,6 @@ export default async function Home({ searchParams }: HomeProps) {
             }}
           />
 
-          {/* Dot grid — only inside the hero, masked to the blue zone */}
           <div
             aria-hidden
             style={{
@@ -139,8 +106,7 @@ export default async function Home({ searchParams }: HomeProps) {
               zIndex: 0,
               backgroundImage: "radial-gradient(rgba(255,255,255,0.040) 1px, transparent 1px)",
               backgroundSize: "30px 30px",
-              /* Mask matches the gradient shape — invisible in transparent top,
-                 visible in the blue band, fades out toward edges */
+              
               WebkitMaskImage: `radial-gradient(
                 125% 125% at 50% 0%,
                 transparent 35%,
@@ -159,7 +125,6 @@ export default async function Home({ searchParams }: HomeProps) {
           <HeroSection initialCount={stats.totalCount} referralCode={referralCode} />
         </div>
 
-        {/* Remaining page sections on plain black */}
         <Suspense fallback={null}>
           <CountdownTimer />
         </Suspense>

@@ -6,7 +6,6 @@ export const metadata: Metadata = {
     "Understand how ARC Fitness collects, uses, stores, and protects your personal and health data. Compliant with GDPR and CCPA.",
 };
 
-/* ─── inline styles reusing CSS variables from globals.css ─────────── */
 const s = {
   page: {
     maxWidth: "860px",
@@ -212,7 +211,7 @@ function SectionCard({
 export default function PrivacyPolicyPage(): React.JSX.Element {
   return (
     <div style={s.page}>
-      {/* Hero */}
+      
       <div style={s.heroSection}>
         <span style={s.badge}>Legal · Privacy</span>
         <h1 style={s.h1}>Privacy Policy</h1>
@@ -226,7 +225,6 @@ export default function PrivacyPolicyPage(): React.JSX.Element {
         </p>
       </div>
 
-      {/* Health Data Notice */}
       <div style={s.warningCard}>
         <span style={s.warningIcon}>🔒</span>
         <p style={s.warningText}>
@@ -238,7 +236,6 @@ export default function PrivacyPolicyPage(): React.JSX.Element {
         </p>
       </div>
 
-      {/* Section 01 */}
       <SectionCard num="Section 01" title="Who We Are">
         <p style={s.p}>
           ARC Fitness (&quot;ARC&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) is a
@@ -257,7 +254,6 @@ export default function PrivacyPolicyPage(): React.JSX.Element {
         </p>
       </SectionCard>
 
-      {/* Section 02 */}
       <SectionCard num="Section 02" title="Data We Collect">
         <h3 style={s.h3}>2.1 Account &amp; Identity Data</h3>
         <p style={s.p}>
@@ -321,7 +317,6 @@ export default function PrivacyPolicyPage(): React.JSX.Element {
         </p>
       </SectionCard>
 
-      {/* Section 03 */}
       <SectionCard num="Section 03" title="How We Use Your Data">
         <h3 style={s.h3}>3.1 Service Delivery (Contract Performance)</h3>
         <ul style={s.ul}>
@@ -353,7 +348,6 @@ export default function PrivacyPolicyPage(): React.JSX.Element {
         </p>
       </SectionCard>
 
-      {/* Section 04 */}
       <SectionCard num="Section 04" title="Third-Party Services &amp; Data Sharing">
         <p style={s.p}>
           We use carefully selected service providers bound by Data Processing Agreements (DPAs):
@@ -454,7 +448,6 @@ export default function PrivacyPolicyPage(): React.JSX.Element {
         </p>
       </SectionCard>
 
-      {/* Section 05 */}
       <SectionCard num="Section 05" title="Data Storage &amp; Security">
         <p style={s.p}>
           All data is stored in <strong>Neon DB (Serverless PostgreSQL, us-east-1)</strong>,
@@ -485,7 +478,6 @@ export default function PrivacyPolicyPage(): React.JSX.Element {
         </ul>
       </SectionCard>
 
-      {/* Section 06 */}
       <SectionCard num="Section 06" title="Data Retention &amp; Deletion">
         <ul style={s.ul}>
           <Bullet>
@@ -512,7 +504,6 @@ export default function PrivacyPolicyPage(): React.JSX.Element {
         </p>
       </SectionCard>
 
-      {/* Section 07 */}
       <SectionCard num="Section 07" title="Your Privacy Rights">
         <h3 style={s.h3}>GDPR Rights (EEA &amp; UK)</h3>
         <ul style={s.ul}>
@@ -554,7 +545,6 @@ export default function PrivacyPolicyPage(): React.JSX.Element {
         </p>
       </SectionCard>
 
-      {/* Section 08 */}
       <SectionCard num="Section 08" title="Children's Privacy">
         <p style={s.p}>
           ARC is not directed to children under <strong>16</strong> (or 13 where COPPA applies).
@@ -563,7 +553,6 @@ export default function PrivacyPolicyPage(): React.JSX.Element {
         </p>
       </SectionCard>
 
-      {/* Section 09 */}
       <SectionCard num="Section 09" title="Cookies &amp; Local Storage">
         <ul style={s.ul}>
           <Bullet>
@@ -579,7 +568,6 @@ export default function PrivacyPolicyPage(): React.JSX.Element {
         </p>
       </SectionCard>
 
-      {/* Section 10 */}
       <SectionCard num="Section 10" title="International Data Transfers">
         <p style={s.p}>
           Your data may be processed in the <strong>United States</strong> and other countries
@@ -592,7 +580,6 @@ export default function PrivacyPolicyPage(): React.JSX.Element {
         </ul>
       </SectionCard>
 
-      {/* Section 11 */}
       <SectionCard num="Section 11" title="Changes to This Privacy Policy">
         <p style={s.p}>
           We may update this policy periodically. For material changes, we will update the
@@ -603,7 +590,6 @@ export default function PrivacyPolicyPage(): React.JSX.Element {
 
       <hr style={s.divider} />
 
-      {/* Contact */}
       <div style={s.contactCard}>
         <span style={{ fontSize: "28px", display: "block", marginBottom: "12px" }}>📬</span>
         <h2 style={{ ...s.h2, marginBottom: "10px", textAlign: "center" }}>

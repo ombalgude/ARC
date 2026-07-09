@@ -7,7 +7,7 @@ export default function LegalLayout({
 }): React.JSX.Element {
   return (
     <div className="arc-landing">
-      {/* ── Nav ── */}
+      
       <nav className="arc-nav">
         <Link href="/" className="arc-wordmark">
           ARC
@@ -25,10 +25,8 @@ export default function LegalLayout({
         </div>
       </nav>
 
-      {/* ── Content ── */}
       <main style={{ flex: 1 }}>{children}</main>
 
-      {/* ── Footer ── */}
       <footer className="arc-footer">
         <span className="arc-footer-copy">
           © {new Date().getFullYear()} [Company Name]. All rights reserved.

@@ -15,7 +15,6 @@ const members = [
   { name: "Ryan D.", city: "Chicago", emoji: "🏙️" },
 ];
 
-// Duplicate for seamless loop
 const doubled = [...members, ...members];
 
 export default function MarqueeStrip() {

@@ -13,8 +13,8 @@ const perks = [
     accentDim: "rgba(59,130,246,0.08)",
     accentBorder: "rgba(59,130,246,0.18)",
     badge: "All members",
-    title: "Founding Member Badge",
-    desc: "A badge locked to your profile forever — only the first wave gets this. It marks you as an original.",
+    title: "Early Access Badge",
+    desc: "A permanent badge on your profile showing you were here first.",
     detail: "Permanent · Never offered again",
   },
   {
@@ -28,7 +28,7 @@ const perks = [
     accentBorder: "rgba(255,255,255,0.08)",
     badge: "First 500 only",
     title: "3 Months Pro Free",
-    desc: "The full premium experience — AI coaching, advanced analytics, unlimited plans — for 3 months, on us.",
+    desc: "Strictly limited to the first 500 people who join.",
     detail: "Valued at $89.97",
   },
   {
@@ -41,8 +41,8 @@ const perks = [
     accentDim: "rgba(255,255,255,0.03)",
     accentBorder: "rgba(255,255,255,0.08)",
     badge: "All members",
-    title: "Priority Day-1 Access",
-    desc: "Skip the launch queue entirely. You get in on Day 1, before anyone else. No waiting, no delays.",
+    title: "Priority Access",
+    desc: "Skip the line and get the app on day one.",
     detail: "Day 1 · No queue",
   },
 ];
@@ -55,7 +55,6 @@ export default function PerksSection({ spotsRemaining }: PerksProps) {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const headerRef = useRef<HTMLDivElement>(null);
 
-  // Scroll reveal
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -70,7 +69,6 @@ export default function PerksSection({ spotsRemaining }: PerksProps) {
     return () => observer.disconnect();
   }, []);
 
-  // Spotlight mouse tracking
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       const cards = document.querySelectorAll<HTMLElement>(".perk-spotlight");
@@ -99,10 +97,8 @@ export default function PerksSection({ spotsRemaining }: PerksProps) {
     >
       <div className="section-divider" style={{ position: "absolute", top: 0, left: 0, right: 0 }} />
 
-      {/* Section header */}
       <div ref={headerRef} className="reveal" style={{ textAlign: "center", marginBottom: "4rem" }}>
 
-        {/* Eyebrow */}
         <div
           className="glass-blue"
           style={{
@@ -120,7 +116,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps) {
           }}
         >
           <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "var(--arc-blue)", display: "inline-block" }} />
-          Founding Member Perks
+          Early Access Perks
         </div>
 
         <h2
@@ -134,7 +130,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps) {
             marginBottom: "1.25rem",
           }}
         >
-          Join early.{" "}
+          The First 500{" "}
           <span
             style={{
               background: "linear-gradient(130deg, #93C5FD 0%, #3B82F6 60%)",
@@ -143,7 +139,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps) {
               backgroundClip: "text",
             }}
           >
-            Get rewarded forever.
+            Get Pro Free.
           </span>
         </h2>
 
@@ -160,53 +156,63 @@ export default function PerksSection({ spotsRemaining }: PerksProps) {
           These perks lock in the moment you join — and disappear the moment we hit capacity.
         </p>
 
-        {/* Scarcity counter */}
         <div
           style={{
             display: "inline-flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: "12px",
-            padding: "20px 32px",
-            background: "rgba(245,158,11,0.05)",
-            border: "1px solid rgba(245,158,11,0.18)",
-            borderRadius: "20px",
-            minWidth: "280px",
+            gap: "16px",
+            padding: "24px 40px",
+            background: "linear-gradient(160deg, rgba(245,158,11,0.15) 0%, rgba(4,5,15,0.9) 100%)",
+            backdropFilter: "blur(24px)",
+            WebkitBackdropFilter: "blur(24px)",
+            border: "1px solid rgba(245,158,11,0.25)",
+            boxShadow: "0 24px 48px -12px rgba(0,0,0,0.8), 0 0 30px rgba(245,158,11,0.1), inset 0 1px 1px rgba(255,255,255,0.1)",
+            borderRadius: "24px",
+            minWidth: "320px",
+            position: "relative",
+            overflow: "hidden"
           }}
         >
-          <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
+          
+          <div style={{ position: "absolute", top: 0, left: "20%", right: "20%", height: "1px", background: "linear-gradient(90deg, transparent, rgba(245,158,11,0.5), transparent)" }} />
+          
+          <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
             <span style={{
-              fontSize: "2.5rem", fontWeight: 500,
-              color: "#F59E0B", letterSpacing: "-0.035em",
+              fontSize: "3.5rem", fontWeight: 700,
+              background: "linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              letterSpacing: "-0.04em",
               fontFamily: "'Space Grotesk', monospace",
+              filter: "drop-shadow(0 4px 16px rgba(245,158,11,0.4))"
             }}>
               {spotsRemaining}
             </span>
-            <span style={{ fontSize: "0.875rem", color: "rgba(255,255,255,0.45)", fontWeight: 400 }}>
+            <span style={{ fontSize: "1rem", color: "rgba(255,255,255,0.5)", fontWeight: 500, letterSpacing: "-0.01em" }}>
               / 500 Pro spots left
             </span>
           </div>
 
-          {/* Progress bar */}
-          <div style={{ width: "100%", height: "3px", background: "rgba(255,255,255,0.07)", borderRadius: "100px", overflow: "hidden" }}>
+          <div style={{ width: "100%", height: "4px", background: "rgba(0,0,0,0.6)", borderRadius: "100px", overflow: "hidden", boxShadow: "inset 0 1px 3px rgba(0,0,0,0.8)" }}>
             <div
               style={{
                 height: "100%",
                 width: `${pctUsed}%`,
-                background: "linear-gradient(90deg, #F59E0B, #FCD34D)",
+                background: "linear-gradient(90deg, #F59E0B, #FDE68A)",
+                boxShadow: "0 0 12px rgba(245,158,11,0.8)",
                 borderRadius: "100px",
-                transition: "width 1s ease",
+                transition: "width 1.5s cubic-bezier(0.16, 1, 0.3, 1)",
               }}
             />
           </div>
 
-          <p style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.32)", letterSpacing: "0.06em", textTransform: "uppercase" as const }}>
+          <p style={{ fontSize: "0.75rem", color: "#FCD34D", letterSpacing: "0.1em", textTransform: "uppercase" as const, fontWeight: 600 }}>
             {pctUsed}% claimed · closes at 500
           </p>
         </div>
       </div>
 
-      {/* Surgical Ambient Bleed behind the cards */}
       <div
         aria-hidden
         style={{
@@ -224,7 +230,6 @@ export default function PerksSection({ spotsRemaining }: PerksProps) {
         }}
       />
 
-      {/* Perk cards */}
       <div
         className="cards-dim-siblings"
         style={{
@@ -250,7 +255,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps) {
             }}
           >
             <div style={{ position: "relative", zIndex: 2 }}>
-              {/* Icon */}
+              
               <div
                 style={{
                   width: "48px", height: "48px", borderRadius: "14px",
@@ -264,7 +269,6 @@ export default function PerksSection({ spotsRemaining }: PerksProps) {
                 {perk.icon}
               </div>
 
-              {/* Badge */}
               <div
                 style={{
                   display: "inline-flex",
@@ -308,7 +312,6 @@ export default function PerksSection({ spotsRemaining }: PerksProps) {
               </p>
             </div>
 
-            {/* Bottom detail line */}
             <div
               style={{
                 position: "relative", zIndex: 2,

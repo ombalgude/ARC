@@ -6,7 +6,6 @@ import { Resend } from "resend";
 const sql = neon(process.env.DATABASE_URL!);
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Ensure table exists
 async function ensureTable() {
   await sql`
     CREATE TABLE IF NOT EXISTS waitlist_entries (
@@ -28,7 +27,6 @@ export async function POST(request: Request) {
       referralCode?: string;
     };
 
-    // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email || !emailRegex.test(email)) {
       return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
@@ -36,12 +34,12 @@ export async function POST(request: Request) {
 
     await ensureTable();
 
-    // Check if already signed up
     const existing = await sql`
       SELECT id, position, referral_code FROM waitlist_entries WHERE email = ${email}
     `;
     if (existing.length > 0) {
       const entry = existing[0];
+      if (!entry) throw new Error("Entry missing");
       const totalCount = await sql`SELECT COUNT(*) as count FROM waitlist_entries`;
       return NextResponse.json({
         alreadyRegistered: true,
@@ -51,20 +49,16 @@ export async function POST(request: Request) {
       });
     }
 
-    // Get current count for position
     const countResult = await sql`SELECT COUNT(*) as count FROM waitlist_entries`;
     const position = Number((countResult[0] as { count: string }).count) + 1;
 
-    // Generate unique referral code
     const myReferralCode = nanoid(8).toUpperCase();
 
-    // Insert new entry
     await sql`
       INSERT INTO waitlist_entries (email, referral_code, referred_by, position)
       VALUES (${email}, ${myReferralCode}, ${referredByCode ?? null}, ${position})
     `;
 
-    // If referred by someone, bump them up 5 positions (lower number = higher rank)
     if (referredByCode) {
       await sql`
         UPDATE waitlist_entries
@@ -75,7 +69,6 @@ export async function POST(request: Request) {
       `;
     }
 
-    // Send welcome email (fire-and-forget if Resend key is placeholder)
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://arcfitness.app";
     const referralLink = `${appUrl}?ref=${myReferralCode}`;
 
@@ -93,7 +86,7 @@ export async function POST(request: Request) {
                 You're <span style="color:#3B82F6">#${position}</span> on the waitlist! 🚀
               </h1>
               <p style="color:#9CA3AF;margin-bottom:24px;">
-                Welcome to ARC Fitness. You're one of the founding members getting early access to the most intelligent fitness app ever built.
+                Welcome to ARC Fitness. You're one of the early access members getting into the most intelligent fitness app ever built.
               </p>
               <div style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:12px;padding:20px;margin-bottom:24px;">
                 <p style="font-weight:700;margin-bottom:8px;">🔗 Your referral link</p>
@@ -101,9 +94,9 @@ export async function POST(request: Request) {
                 <a href="${referralLink}" style="color:#3B82F6;word-break:break-all;">${referralLink}</a>
               </div>
               <div style="margin-bottom:24px;">
-                <p style="font-weight:700;margin-bottom:12px;">🎁 Your founding member perks:</p>
+                <p style="font-weight:700;margin-bottom:12px;">🎁 Your early access perks:</p>
                 <ul style="color:#9CA3AF;padding-left:20px;line-height:2;">
-                  <li>🏅 Founding Member Badge — locked forever</li>
+                  <li>🏅 Early Access Badge — locked forever</li>
                   <li>⚡ 3 Months Pro Free (first 500 members)</li>
                   <li>🚀 Priority Access on launch day</li>
                 </ul>
@@ -115,7 +108,7 @@ export async function POST(request: Request) {
         });
       }
     } catch (_emailError) {
-      // Email failure is non-fatal
+      
     }
 
     const totalCount = await sql`SELECT COUNT(*) as count FROM waitlist_entries`;

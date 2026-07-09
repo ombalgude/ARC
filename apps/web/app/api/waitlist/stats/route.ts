@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 const sql = neon(process.env.DATABASE_URL!);
 
-export const revalidate = 60; // cache 60 seconds
+export const revalidate = 60; 
 
 export async function GET() {
   try {
@@ -13,7 +13,7 @@ export async function GET() {
 
     return NextResponse.json({ totalCount, spotsRemaining });
   } catch {
-    // Table might not exist yet — return defaults
+    
     return NextResponse.json({ totalCount: 2847, spotsRemaining: 347 });
   }
 }

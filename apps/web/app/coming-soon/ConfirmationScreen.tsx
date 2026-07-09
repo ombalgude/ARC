@@ -27,11 +27,11 @@ export default function ConfirmationScreen({
   const referralLink = `${appUrl}?ref=${referralCode}`;
 
   const twitterText = encodeURIComponent(
-    `Just joined the @ARCFitnessApp waitlist! I'm #${position} in line for the AI fitness app changing everything.\n\nJoin me → ${referralLink}`
+    `I just claimed my spot for ARC Fitness—the ultimate app for people who take training seriously. Use my link to join and we both jump ahead in line! ${referralLink}`
   );
 
   const whatsappText = encodeURIComponent(
-    `I just signed up for ARC Fitness — an AI fitness coach launching soon 🔥 Use my link to join and we both move up the waitlist: ${referralLink}`
+    `Just locked in my spot for ARC. It's a massive upgrade that perfectly plans your workouts and meals. Use my link to get in, and we both skip the waitlist: ${referralLink}`
   );
 
   async function copyLink() {
@@ -39,7 +39,7 @@ export default function ConfirmationScreen({
       await navigator.clipboard.writeText(referralLink);
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
-    } catch { /* fallback */ }
+    } catch {  }
   }
 
   async function nativeShare() {
@@ -52,7 +52,7 @@ export default function ConfirmationScreen({
         });
       } catch (err) {}
     } else {
-      copyLink(); // fallback
+      copyLink(); 
     }
   }
 
@@ -67,7 +67,7 @@ export default function ConfirmationScreen({
   }
 
   useEffect(() => {
-    // Fire a luxurious blue/white confetti explosion
+    
     const duration = 2500;
     const end = Date.now() + duration;
 
@@ -97,7 +97,6 @@ export default function ConfirmationScreen({
     })();
   }, []);
 
-  // Escape key functionality
   useEffect(() => {
     if (!onClose) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -126,7 +125,7 @@ export default function ConfirmationScreen({
         animation: "arcFadeUp 0.4s ease-out forwards",
       }}
     >
-      {/* Celebratory Pop-Up Light / Ambient Glow behind the ticket */}
+      
       <div
         style={{
           position: "absolute",
@@ -159,7 +158,7 @@ export default function ConfirmationScreen({
           zIndex: 1,
         }}
       >
-        {/* Close Button Inside Card */}
+        
         {onClose && (
           <button
             onClick={onClose}
@@ -202,7 +201,6 @@ export default function ConfirmationScreen({
           </button>
         )}
 
-        {/* Success header */}
         <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
           <div style={{ fontSize: "2.5rem", marginBottom: "0.5rem" }}>{alreadyRegistered ? "👋" : "🎉"}</div>
           <h3
@@ -220,11 +218,10 @@ export default function ConfirmationScreen({
               <>You&apos;re <span style={{ color: "var(--arc-blue)" }}>#{position}</span> in line!</>
             )}
           </h3>
-          <p style={{ color: "var(--arc-text-secondary)", fontSize: "0.875rem" }}>
-            Share your link — each referral moves you up 5 spots.
+          <p style={{ color: "var(--arc-text-secondary)", fontSize: "0.875rem", lineHeight: 1.5, marginTop: "0.5rem" }}>
+            Want to skip the wait? The first 500 people get 3 months of Pro for free. Share your link to jump 5 spots ahead for every friend who joins.
           </p>
 
-          {/* Progress bar */}
           <div
             style={{
               marginTop: "1.25rem",
@@ -246,7 +243,6 @@ export default function ConfirmationScreen({
           </div>
         </div>
 
-        {/* Referral link */}
         <div
           style={{
             padding: "1.25rem",
@@ -314,10 +310,8 @@ export default function ConfirmationScreen({
         </div>
       </div>
 
-      {/* Proper Share Options - Impeccable Design Polish */}
       <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-        
-        {/* Cinematic Divider */}
+
         <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.25rem", marginTop: "0.5rem" }}>
           <div style={{ height: "1px", flex: 1, background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.1))" }} />
           <span style={{ fontSize: "0.65rem", fontWeight: 500, color: "rgba(255,255,255,0.4)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
@@ -327,8 +321,7 @@ export default function ConfirmationScreen({
         </div>
 
         <div className="animate-fade-in" style={{ display: "grid", gridTemplateColumns: "1fr", gap: "0.75rem" }}>
-          
-          {/* Instagram */}
+
           <button
             onClick={nativeShare}
             className="btn-ghost"
@@ -368,7 +361,6 @@ export default function ConfirmationScreen({
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
 
-          {/* WhatsApp */}
           <button
             onClick={shareWhatsApp}
             className="btn-ghost"
@@ -409,7 +401,7 @@ export default function ConfirmationScreen({
           </button>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
-            {/* X / Twitter */}
+            
             <a
               href={`https://twitter.com/intent/tweet?text=${twitterText}`}
               target="_blank"
@@ -445,7 +437,6 @@ export default function ConfirmationScreen({
               <span style={{ fontSize: "0.875rem", fontWeight: 500 }}>Post to X</span>
             </a>
 
-            {/* Copy Link */}
             <button
               onClick={copyLink}
               className="btn-ghost"

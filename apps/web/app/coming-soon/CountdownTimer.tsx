@@ -88,7 +88,6 @@ export default function CountdownTimer() {
     return () => clearInterval(interval);
   }, []);
 
-  // Scroll reveal
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -117,7 +116,6 @@ export default function CountdownTimer() {
     >
       <div className="section-divider" style={{ position: "absolute", top: 0, left: 0, right: 0 }} />
 
-      {/* Background accent */}
       <div
         aria-hidden
         style={{
@@ -145,26 +143,29 @@ export default function CountdownTimer() {
           textAlign: "center",
         }}
       >
-        {/* Header */}
+        
         <div>
-          {/* Eyebrow */}
+          
           <div
+            className="glass-blue animate-fade-up opacity-0-init"
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: "6px",
-              padding: "5px 14px",
+              gap: "8px",
+              padding: "5px 14px 5px 10px",
               borderRadius: "100px",
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.08)",
               fontSize: "0.6875rem",
-              fontWeight: 500,
-              letterSpacing: "0.08em",
+              fontWeight: 600,
+              letterSpacing: "0.07em",
               textTransform: "uppercase" as const,
-              color: "rgba(255,255,255,0.45)",
+              color: "var(--arc-blue)",
               marginBottom: "1.5rem",
             }}
           >
+            <span className="animate-pulse-dot" style={{
+              width: "5px", height: "5px", borderRadius: "50%",
+              background: "var(--arc-blue)", display: "inline-block", flexShrink: 0,
+            }} />
             Launch Countdown
           </div>
 
@@ -200,11 +201,10 @@ export default function CountdownTimer() {
               lineHeight: 1.6,
             }}
           >
-            Launching globally on the Google Play Store. Founding members get in first.
+            Launching globally on the Google Play Store. Early access members get in first.
           </p>
         </div>
 
-        {/* Timer display */}
         <div
           style={{
             display: "flex",
@@ -240,7 +240,6 @@ export default function CountdownTimer() {
           )}
         </div>
 
-        {/* CTA nudge */}
         <a
           href="#waitlist"
           onClick={(e) => {

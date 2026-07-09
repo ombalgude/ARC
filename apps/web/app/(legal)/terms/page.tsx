@@ -203,7 +203,7 @@ function SectionCard({
 export default function TermsAndConditionsPage(): React.JSX.Element {
   return (
     <div style={s.page}>
-      {/* Hero */}
+      
       <div style={s.heroSection}>
         <span style={s.badge}>Legal · Terms</span>
         <h1 style={s.h1}>Terms &amp; Conditions</h1>
@@ -217,7 +217,6 @@ export default function TermsAndConditionsPage(): React.JSX.Element {
         </p>
       </div>
 
-      {/* ⚠ Critical Medical Disclaimer — must be most prominent */}
       <div style={s.criticalCard}>
         <p style={s.criticalTitle}>⚠ Critical Medical &amp; Fitness Disclaimer — Read Before Use</p>
         <p style={s.criticalText}>
@@ -236,7 +235,6 @@ export default function TermsAndConditionsPage(): React.JSX.Element {
         </p>
       </div>
 
-      {/* Section 01 — Acceptance */}
       <SectionCard num="Section 01" title="Acceptance of Terms">
         <p style={s.p}>
           These Terms and Conditions (&quot;Terms&quot;) constitute a legally binding agreement
@@ -261,7 +259,6 @@ export default function TermsAndConditionsPage(): React.JSX.Element {
         </div>
       </SectionCard>
 
-      {/* Section 02 — Medical Disclaimer (Full) */}
       <SectionCard num="Section 02" title="Medical &amp; Fitness Disclaimer">
         <p style={s.p}>
           <strong>2.1 Not Medical Advice.</strong> All content, features, and functionality
@@ -319,7 +316,6 @@ export default function TermsAndConditionsPage(): React.JSX.Element {
         </p>
       </SectionCard>
 
-      {/* Section 03 — AI Disclaimer */}
       <SectionCard num="Section 03" title="AI Assistant — Scope &amp; Limitations">
         <p style={s.p}>
           ARC includes an in-app AI conversational assistant (&quot;AI Assistant&quot;) powered by
@@ -368,7 +364,6 @@ export default function TermsAndConditionsPage(): React.JSX.Element {
         </p>
       </SectionCard>
 
-      {/* Section 04 — Account Registration */}
       <SectionCard num="Section 04" title="Account Registration &amp; Eligibility">
         <p style={s.p}>
           <strong>4.1 Age Requirement.</strong> You must be at least{" "}
@@ -406,7 +401,6 @@ export default function TermsAndConditionsPage(): React.JSX.Element {
         </p>
       </SectionCard>
 
-      {/* Section 05 — User Conduct */}
       <SectionCard num="Section 05" title="Acceptable Use &amp; User Conduct">
         <p style={s.p}>
           When using ARC, you agree that you will <strong>not</strong>:
@@ -444,7 +438,6 @@ export default function TermsAndConditionsPage(): React.JSX.Element {
         </p>
       </SectionCard>
 
-      {/* Section 06 — Subscriptions & Billing */}
       <SectionCard num="Section 06" title="Subscriptions, Billing &amp; Refunds">
         <p style={s.p}>
           <strong>6.1 Subscription Model.</strong> ARC operates on a freemium subscription model.
@@ -508,7 +501,6 @@ export default function TermsAndConditionsPage(): React.JSX.Element {
         </p>
       </SectionCard>
 
-      {/* Section 07 — Intellectual Property */}
       <SectionCard num="Section 07" title="Intellectual Property">
         <p style={s.p}>
           <strong>7.1 ARC Ownership.</strong> All rights, title, and interest in and to the
@@ -548,7 +540,6 @@ export default function TermsAndConditionsPage(): React.JSX.Element {
         </p>
       </SectionCard>
 
-      {/* Section 08 — Limitation of Liability */}
       <SectionCard num="Section 08" title="Limitation of Liability">
         <p style={s.p}>
           <strong>8.1 &quot;As Is&quot; Service.</strong> THE SERVICE IS PROVIDED &quot;AS IS&quot;
@@ -587,7 +578,6 @@ export default function TermsAndConditionsPage(): React.JSX.Element {
         </p>
       </SectionCard>
 
-      {/* Section 09 — Indemnification */}
       <SectionCard num="Section 09" title="Indemnification">
         <p style={s.p}>
           You agree to indemnify, defend, and hold harmless <strong>[Company Name]</strong> and
@@ -609,7 +599,6 @@ export default function TermsAndConditionsPage(): React.JSX.Element {
         </ul>
       </SectionCard>
 
-      {/* Section 10 — Third-Party Services */}
       <SectionCard num="Section 10" title="Third-Party Services">
         <p style={s.p}>
           ARC integrates with third-party services including Clerk (authentication), Neon DB
@@ -623,7 +612,6 @@ export default function TermsAndConditionsPage(): React.JSX.Element {
         </p>
       </SectionCard>
 
-      {/* Section 11 — Service Availability & Modifications */}
       <SectionCard num="Section 11" title="Service Availability &amp; Modifications">
         <p style={s.p}>
           <strong>11.1 Availability.</strong> We strive to maintain high availability but do not
@@ -643,7 +631,6 @@ export default function TermsAndConditionsPage(): React.JSX.Element {
         </p>
       </SectionCard>
 
-      {/* Section 12 — Termination */}
       <SectionCard num="Section 12" title="Termination">
         <p style={s.p}>
           <strong>12.1 By You.</strong> You may terminate your agreement with us at any time by
@@ -663,7 +650,6 @@ export default function TermsAndConditionsPage(): React.JSX.Element {
         </p>
       </SectionCard>
 
-      {/* Section 13 — Governing Law & Dispute Resolution */}
       <SectionCard num="Section 13" title="Governing Law &amp; Dispute Resolution">
         <p style={s.p}>
           <strong>13.1 Governing Law.</strong> These Terms shall be governed by and construed in
@@ -690,7 +676,6 @@ export default function TermsAndConditionsPage(): React.JSX.Element {
         </p>
       </SectionCard>
 
-      {/* Section 14 — Changes to Terms */}
       <SectionCard num="Section 14" title="Changes to These Terms">
         <p style={s.p}>
           We reserve the right to modify these Terms at any time. We will notify you of material
@@ -711,7 +696,6 @@ export default function TermsAndConditionsPage(): React.JSX.Element {
         </p>
       </SectionCard>
 
-      {/* Section 15 — General Provisions */}
       <SectionCard num="Section 15" title="General Provisions">
         <p style={s.p}>
           <strong>Entire Agreement.</strong> These Terms, together with our Privacy Policy,
@@ -746,7 +730,6 @@ export default function TermsAndConditionsPage(): React.JSX.Element {
 
       <hr style={s.divider} />
 
-      {/* Contact */}
       <div style={s.contactCard}>
         <span style={{ fontSize: "28px", display: "block", marginBottom: "12px" }}>⚖️</span>
         <h2 style={{ ...s.h2, marginBottom: "10px", textAlign: "center" }}>

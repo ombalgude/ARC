@@ -11,10 +11,10 @@ export default function LandingFooter() {
         flexDirection: "column",
         alignItems: "center",
         fontFamily: "'Space Grotesk', 'Inter', sans-serif",
-        overflow: "hidden", // Prevent 120vw glow from causing scrollbars
+        overflow: "hidden", 
       }}
     >
-      {/* ── Subterranean Glow ── */}
+      
       <div
         aria-hidden
         style={{
@@ -23,14 +23,13 @@ export default function LandingFooter() {
           left: "50%",
           transform: "translateX(-50%)",
           width: "120vw",
-          height: "600px", // Reduced height so it doesn't bleed too far up
+          height: "600px", 
           background: "radial-gradient(ellipse at 50% 100%, rgba(37,99,235, 0.12) 0%, rgba(29,78,216, 0.05) 40%, transparent 70%)",
           pointerEvents: "none",
           zIndex: 0,
         }}
       />
 
-      {/* Top divider */}
       <div
         style={{
           position: "absolute",
@@ -43,7 +42,6 @@ export default function LandingFooter() {
 
       <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: "1160px", padding: "0 2rem" }}>
 
-        {/* ── Top section: Brand + Links ── */}
         <div
           style={{
             display: "flex",
@@ -53,9 +51,9 @@ export default function LandingFooter() {
             marginBottom: "5rem",
           }}
         >
-          {/* ── Brand Side ── */}
+          
           <div style={{ maxWidth: "340px" }}>
-            {/* Logo */}
+            
             <div
               style={{
                 display: "flex", alignItems: "center", gap: "0.6rem",
@@ -96,10 +94,9 @@ export default function LandingFooter() {
                 maxWidth: "300px",
               }}
             >
-              AI-powered training, intelligent habit loops, and macro clarity — built for people who refuse to settle.
+              An AI-powered coach that perfectly connects your workouts, meals, and daily habits into one winning system.
             </p>
 
-            {/* Social icons */}
             <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem" }}>
               {[
                 {
@@ -157,14 +154,13 @@ export default function LandingFooter() {
             </div>
           </div>
 
-          {/* ── Link Columns ── */}
           <div style={{ display: "flex", gap: "4rem", flexWrap: "wrap" }}>
             {[
               {
                 heading: "Platform",
                 links: [
                   { label: "Core Intelligence", href: "#features" },
-                  { label: "Founding Perks", href: "#perks" },
+                  { label: "Early Access Perks", href: "#perks" },
                   { label: "Waitlist Access", href: "#waitlist" },
                 ],
               },
@@ -224,7 +220,6 @@ export default function LandingFooter() {
           </div>
         </div>
 
-        {/* ── Bottom bar ── */}
         <div
           style={{
             display: "flex",
@@ -237,11 +232,11 @@ export default function LandingFooter() {
           }}
         >
           <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.8125rem" }}>
-            © 2026 ARC Fitness. All rights reserved.
+            © 2026 ARC Fitness. All rights reserved. Precision in Motion.
           </p>
 
           <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.8125rem" }}>
-            Built by{" "}
+            Engineered by{" "}
             <a
               href="https://www.ombalgude.app/"
               target="_blank"
