@@ -16,8 +16,9 @@ interface SignupResult {
   totalCount: number;
   alreadyRegistered?: boolean;
 }
+import React from "react";
 
-export default function HeroSection({ initialCount, referralCode }: HeroProps) {
+export default function HeroSection({ initialCount, referralCode }: HeroProps): React.JSX.Element {
   const [count, setCount] = useState(initialCount);
   const [confirmed, setConfirmed] = useState<SignupResult | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -86,7 +87,8 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
         justifyContent: "center",
         minHeight: "100svh",
         padding: "0 1.5rem",
-        overflow: "hidden",
+        overflowX: "clip",
+        overflowY: "visible",
         background: "transparent",
       }}
     >
@@ -372,6 +374,7 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
 
                 <div 
                   className="custom-scrollbar"
+                  data-lenis-prevent
                   style={{ 
                     padding: "48px 16px 20px", 
                     display: "flex", 
@@ -649,20 +652,21 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
           }
           .hero-phone-col { 
             display: flex !important;
-            transform: scale(0.9);
-            margin-top: 20px !important;
+            transform: scale(0.9) perspective(1000px) rotateX(15deg) rotateY(-20deg) rotateZ(2deg);
+            margin-top: 40px !important;
+            filter: drop-shadow(-20px 40px 30px rgba(0,0,0,0.8)) drop-shadow(0 20px 40px rgba(59,130,246,0.25));
           }
         }
         @media (max-width: 600px) {
           .hero-phone-col { 
-            transform: scale(0.7);
-            margin-top: -30px !important;
+            transform: scale(0.7) perspective(1000px) rotateX(15deg) rotateY(-20deg) rotateZ(2deg);
+            margin-top: -10px !important;
           }
         }
         @media (max-width: 400px) {
           .hero-phone-col { 
-            transform: scale(0.6);
-            margin-top: -60px !important;
+            transform: scale(0.6) perspective(1000px) rotateX(15deg) rotateY(-20deg) rotateZ(2deg);
+            margin-top: -40px !important;
           }
           .hero-text-col h1 {
             font-size: 2.25rem !important;

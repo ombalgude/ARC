@@ -7,6 +7,8 @@ import HeroSection from "./coming-soon/HeroSection";
 import LandingNav from "./coming-soon/LandingNav";
 import PerksSection from "./coming-soon/PerksSection";
 import ScrollRevealInit from "./coming-soon/ScrollRevealInit";
+import SmoothScroll from "./coming-soon/SmoothScroll";
+import CustomCursor from "./coming-soon/CustomCursor";
 
 async function getWaitlistStats(): Promise<{ totalCount: number; spotsRemaining: number }> {
   try {
@@ -31,6 +33,8 @@ export default async function Home({ searchParams }: HomeProps): Promise<React.J
 
   return (
     <>
+      <SmoothScroll />
+      <CustomCursor />
 
       <div style={{
         minHeight: "100vh",
