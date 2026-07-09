@@ -184,34 +184,42 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps) {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  background: "rgba(34,197,94,0.04)",
-                  border: "1px solid rgba(34,197,94,0.18)",
+                  background: "rgba(4,5,15,0.8)",
+                  border: "1px solid rgba(34,197,94,0.3)",
+                  boxShadow: "0 8px 32px rgba(34,197,94,0.15), inset 0 1px 2px rgba(255,255,255,0.1)",
+                  backdropFilter: "blur(12px)",
                   borderRadius: "100px",
                   padding: "0.375rem 0.375rem 0.375rem 1.25rem",
                   width: "100%",
+                  maxWidth: "480px",
+                  margin: "0 auto",
+                  animation: "arcScaleUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards"
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                  <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#22C55E" }} />
-                  <span style={{ fontSize: "0.9375rem", fontWeight: 500, color: "#fff" }}>
+                  <div className="animate-pulse-dot" style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#22C55E", boxShadow: "0 0 12px #22C55E" }} />
+                  <span style={{ fontSize: "0.9375rem", fontWeight: 500, color: "#fff", letterSpacing: "0.01em" }}>
                     Spot secured
                   </span>
                 </div>
                 <button
                   onClick={() => setShowModal(true)}
+                  className="btn-primary animate-gradient-shift"
                   style={{
-                    background: "var(--arc-blue)",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "100px",
-                    padding: "0.625rem 1.25rem",
-                    fontSize: "0.8125rem",
-                    fontWeight: 500,
+                    height: "2.75rem",
+                    padding: "0 1.5rem",
+                    fontSize: "0.875rem",
+                    fontWeight: 800,
                     cursor: "pointer",
-                    transition: "opacity 0.2s",
+                    background: "linear-gradient(135deg, rgba(37,99,235,0.9) 0%, rgba(37,99,235,0.9) 42%, rgba(96,165,250,0.8) 50%, rgba(37,99,235,0.9) 58%, rgba(37,99,235,0.9) 100%)",
+                    color: "#FFFFFF",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    boxShadow: "0 6px 20px rgba(37,99,235,0.4), inset 0 1px 1px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.2)",
+                    backdropFilter: "blur(12px)",
+                    WebkitBackdropFilter: "blur(12px)",
+                    borderRadius: "100px",
+                    transition: "transform 0.2s ease"
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
-                  onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
                 >
                   View Ticket
                 </button>

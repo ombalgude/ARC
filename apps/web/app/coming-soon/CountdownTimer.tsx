@@ -76,6 +76,7 @@ const LAUNCH_DATE = new Date(
 export default function CountdownTimer() {
   const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
 
@@ -92,7 +93,9 @@ export default function CountdownTimer() {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) entry.target.classList.add("visible");
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+          }
         });
       },
       { threshold: 0.12 }
@@ -132,7 +135,7 @@ export default function CountdownTimer() {
 
       <div
         ref={innerRef}
-        className="reveal"
+        className={`reveal ${isVisible ? "visible" : ""}`}
         style={{
           display: "flex",
           flexDirection: "column",
