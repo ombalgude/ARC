@@ -5,42 +5,45 @@ import { useEffect, useRef } from "react";
 const perks = [
   {
     icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
+    accentColor: "#3B82F6",
+    accentDim: "rgba(59,130,246,0.08)",
+    accentBorder: "rgba(59,130,246,0.18)",
     badge: "All members",
-    badgeColor: "rgba(59,130,246,0.12)",
-    badgeBorder: "rgba(59,130,246,0.25)",
-    badgeText: "#3B82F6",
     title: "Founding Member Badge",
     desc: "A badge locked to your profile forever — only the first wave gets this. It marks you as an original.",
+    detail: "Permanent · Never offered again",
   },
   {
     icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke="#22C55E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
+    accentColor: "rgba(255,255,255,0.70)",
+    accentDim: "rgba(255,255,255,0.03)",
+    accentBorder: "rgba(255,255,255,0.08)",
     badge: "First 500 only",
-    badgeColor: "rgba(34,197,94,0.10)",
-    badgeBorder: "rgba(34,197,94,0.25)",
-    badgeText: "#22C55E",
     title: "3 Months Pro Free",
     desc: "The full premium experience — AI coaching, advanced analytics, unlimited plans — for 3 months, on us.",
+    detail: "Valued at $89.97",
   },
   {
     icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#F59E0B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
+    accentColor: "rgba(255,255,255,0.70)",
+    accentDim: "rgba(255,255,255,0.03)",
+    accentBorder: "rgba(255,255,255,0.08)",
     badge: "All members",
-    badgeColor: "rgba(245,158,11,0.10)",
-    badgeBorder: "rgba(245,158,11,0.25)",
-    badgeText: "#F59E0B",
     title: "Priority Day-1 Access",
     desc: "Skip the launch queue entirely. You get in on Day 1, before anyone else. No waiting, no delays.",
+    detail: "Day 1 · No queue",
   },
 ];
 
@@ -50,7 +53,9 @@ interface PerksProps {
 
 export default function PerksSection({ spotsRemaining }: PerksProps) {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const headerRef = useRef<HTMLDivElement>(null);
 
+  // Scroll reveal
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -58,104 +63,168 @@ export default function PerksSection({ spotsRemaining }: PerksProps) {
           if (entry.isIntersecting) entry.target.classList.add("visible");
         });
       },
-      { threshold: 0.12 }
+      { threshold: 0.10 }
     );
     cardRefs.current.forEach((el) => el && observer.observe(el));
+    if (headerRef.current) observer.observe(headerRef.current);
     return () => observer.disconnect();
   }, []);
 
-  // Spotlight mouse tracking effect for cards
+  // Spotlight mouse tracking
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      const cards = document.querySelectorAll(".perks-spotlight");
+      const cards = document.querySelectorAll<HTMLElement>(".perk-spotlight");
       cards.forEach((card) => {
-        const rect = (card as HTMLElement).getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        (card as HTMLElement).style.setProperty("--mouse-x", `${x}px`);
-        (card as HTMLElement).style.setProperty("--mouse-y", `${y}px`);
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
+        card.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
       });
     };
-    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
+
+  const pctUsed = Math.round(((500 - spotsRemaining) / 500) * 100);
 
   return (
     <section
       id="perks"
       style={{
-        padding: "4rem 1.5rem",
-        maxWidth: "1100px",
+        padding: "6rem 1.5rem",
+        maxWidth: "1160px",
         margin: "0 auto",
         width: "100%",
+        position: "relative",
       }}
     >
+      <div className="section-divider" style={{ position: "absolute", top: 0, left: 0, right: 0 }} />
+
       {/* Section header */}
-      <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
+      <div ref={headerRef} className="reveal" style={{ textAlign: "center", marginBottom: "4rem" }}>
+
+        {/* Eyebrow */}
         <div
-          className="reveal glass-blue"
+          className="glass-blue"
           style={{
             display: "inline-flex",
             alignItems: "center",
-            gap: "8px",
-            padding: "6px 18px",
+            gap: "6px",
+            padding: "5px 16px",
             borderRadius: "100px",
-            fontSize: "0.75rem",
+            fontSize: "0.6875rem",
             fontWeight: 500,
             letterSpacing: "0.08em",
             textTransform: "uppercase" as const,
             color: "var(--arc-blue)",
-            marginBottom: "1.25rem",
+            marginBottom: "1.5rem",
           }}
         >
+          <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "var(--arc-blue)", display: "inline-block" }} />
           Founding Member Perks
         </div>
 
         <h2
-          className="reveal"
           style={{
-            fontSize: "clamp(2rem, 4vw, 3.5rem)",
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontSize: "clamp(2.25rem, 4vw, 4rem)",
             fontWeight: 500,
-            letterSpacing: "-0.02em",
-            lineHeight: 1.05,
+            letterSpacing: "-0.03em",
+            lineHeight: 1.02,
             color: "#FFFFFF",
             marginBottom: "1.25rem",
           }}
         >
-          Join the waitlist.{" "}
-          <span className="text-gradient-blue">Get rewarded forever.</span>
+          Join early.{" "}
+          <span
+            style={{
+              background: "linear-gradient(130deg, #93C5FD 0%, #3B82F6 60%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            Get rewarded forever.
+          </span>
         </h2>
 
         <p
-          className="reveal"
-          style={{ color: "var(--arc-text-secondary)", fontSize: "1.125rem", maxWidth: "540px", margin: "0 auto 2rem", lineHeight: 1.6 }}
+          style={{
+            color: "#8B96A5",
+            fontSize: "1.0625rem",
+            maxWidth: "480px",
+            margin: "0 auto 2.5rem",
+            lineHeight: 1.65,
+            letterSpacing: "-0.01em",
+          }}
         >
           These perks lock in the moment you join — and disappear the moment we hit capacity.
         </p>
 
-        {/* Spots remaining counter */}
+        {/* Scarcity counter */}
         <div
-          className="reveal"
           style={{
             display: "inline-flex",
+            flexDirection: "column",
             alignItems: "center",
-            gap: "10px",
-            padding: "10px 24px",
-            background: "rgba(245,158,11,0.08)",
-            border: "1px solid rgba(245,158,11,0.22)",
-            borderRadius: "100px",
+            gap: "12px",
+            padding: "20px 32px",
+            background: "rgba(245,158,11,0.05)",
+            border: "1px solid rgba(245,158,11,0.18)",
+            borderRadius: "20px",
+            minWidth: "280px",
           }}
         >
-          <span style={{ color: "#F59E0B", fontSize: "1.25rem", fontWeight: 600 }}>
-            {spotsRemaining}
-          </span>
-          <span style={{ color: "var(--arc-text-secondary)", fontSize: "0.875rem", fontWeight: 500 }}>
-            Pro spots remaining out of 500
-          </span>
+          <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
+            <span style={{
+              fontSize: "2.5rem", fontWeight: 500,
+              color: "#F59E0B", letterSpacing: "-0.035em",
+              fontFamily: "'Space Grotesk', monospace",
+            }}>
+              {spotsRemaining}
+            </span>
+            <span style={{ fontSize: "0.875rem", color: "rgba(255,255,255,0.45)", fontWeight: 400 }}>
+              / 500 Pro spots left
+            </span>
+          </div>
+
+          {/* Progress bar */}
+          <div style={{ width: "100%", height: "3px", background: "rgba(255,255,255,0.07)", borderRadius: "100px", overflow: "hidden" }}>
+            <div
+              style={{
+                height: "100%",
+                width: `${pctUsed}%`,
+                background: "linear-gradient(90deg, #F59E0B, #FCD34D)",
+                borderRadius: "100px",
+                transition: "width 1s ease",
+              }}
+            />
+          </div>
+
+          <p style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.32)", letterSpacing: "0.06em", textTransform: "uppercase" as const }}>
+            {pctUsed}% claimed · closes at 500
+          </p>
         </div>
       </div>
 
-      {/* Perk cards — Google Flow hover dimming + Spotlight */}
+      {/* Surgical Ambient Bleed behind the cards */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          top: "60%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "100%",
+          maxWidth: "1000px",
+          height: "600px",
+          background: "radial-gradient(ellipse at center, rgba(37,99,235,0.05) 0%, transparent 60%)",
+          filter: "blur(80px)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+
+      {/* Perk cards */}
       <div
         className="cards-dim-siblings"
         style={{
@@ -168,53 +237,90 @@ export default function PerksSection({ spotsRemaining }: PerksProps) {
           <div
             key={perk.title}
             ref={(el) => { cardRefs.current[i] = el; }}
-            className="reveal card-spotlight-wrapper perks-spotlight"
+            className={`reveal reveal-delay-${i + 1} perks-spotlight perk-spotlight`}
             style={{
-              padding: "2.5rem 2rem",
-              animationDelay: `${i * 0.15}s`,
+              padding: "2.25rem 2rem",
               display: "flex",
               flexDirection: "column",
-              backdropFilter: "blur(40px)",
-              WebkitBackdropFilter: "blur(40px)"
+              gap: "0",
+              backdropFilter: "blur(48px)",
+              WebkitBackdropFilter: "blur(48px)",
+              minHeight: "260px",
+              justifyContent: "space-between",
             }}
           >
-            {/* Icon */}
             <div style={{ position: "relative", zIndex: 2 }}>
-              <div style={{ marginBottom: "1.5rem" }}>{perk.icon}</div>
+              {/* Icon */}
+              <div
+                style={{
+                  width: "48px", height: "48px", borderRadius: "14px",
+                  background: perk.accentDim,
+                  border: `1px solid ${perk.accentBorder}`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: perk.accentColor,
+                  marginBottom: "1.25rem",
+                }}
+              >
+                {perk.icon}
+              </div>
 
-            {/* Badge */}
-            <div
-              style={{
-                display: "inline-flex",
-                padding: "3px 12px",
-                borderRadius: "100px",
-                background: perk.badgeColor,
-                border: `1px solid ${perk.badgeBorder}`,
-                fontSize: "0.6875rem",
-                fontWeight: 500,
-                letterSpacing: "0.05em",
-                textTransform: "uppercase" as const,
-                color: perk.badgeText,
-                marginBottom: "1rem",
-              }}
-            >
-              {perk.badge}
+              {/* Badge */}
+              <div
+                style={{
+                  display: "inline-flex",
+                  padding: "3px 10px",
+                  borderRadius: "100px",
+                  background: perk.accentDim,
+                  border: `1px solid ${perk.accentBorder}`,
+                  fontSize: "0.625rem",
+                  fontWeight: 600,
+                  letterSpacing: "0.09em",
+                  textTransform: "uppercase" as const,
+                  color: perk.accentColor,
+                  marginBottom: "1rem",
+                }}
+              >
+                {perk.badge}
+              </div>
+
+              <h3
+                style={{
+                  fontSize: "1.25rem",
+                  fontWeight: 500,
+                  color: "#FFFFFF",
+                  marginBottom: "0.625rem",
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1.2,
+                }}
+              >
+                {perk.title}
+              </h3>
+
+              <p
+                style={{
+                  fontSize: "0.875rem",
+                  color: "#8B96A5",
+                  lineHeight: 1.6,
+                  letterSpacing: "-0.005em",
+                }}
+              >
+                {perk.desc}
+              </p>
             </div>
 
-            <h3
+            {/* Bottom detail line */}
+            <div
               style={{
-                fontSize: "1.25rem",
-                fontWeight: 500,
-                color: "#FFFFFF",
-                marginBottom: "0.625rem",
-                letterSpacing: "-0.01em",
+                position: "relative", zIndex: 2,
+                marginTop: "1.75rem",
+                paddingTop: "1rem",
+                borderTop: `1px solid ${perk.accentBorder}`,
+                fontSize: "0.75rem",
+                color: "rgba(255,255,255,0.32)",
+                letterSpacing: "0.03em",
               }}
             >
-              {perk.title}
-            </h3>
-            <p style={{ fontSize: "0.875rem", color: "var(--arc-text-secondary)", lineHeight: 1.6 }}>
-              {perk.desc}
-            </p>
+              {perk.detail}
             </div>
           </div>
         ))}

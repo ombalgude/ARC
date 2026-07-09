@@ -58,7 +58,7 @@ export default function WaitlistForm({ onSuccess, initialCount, referralCode }: 
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {/* Input + button row */}
         <div
-          id="waitlist"
+          id="waitlist-wrapper"
           className="waitlist-pill-wrapper"
           style={{
             display: "flex",
@@ -114,7 +114,7 @@ export default function WaitlistForm({ onSuccess, initialCount, referralCode }: 
           <button
             type="submit"
             disabled={loading}
-            id="waitlist-submit"
+            id="waitlist"
             className="btn-primary"
             style={{
               height: "2.5rem",

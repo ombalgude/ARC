@@ -5,114 +5,126 @@ import { useEffect, useRef } from "react";
 const features = [
   {
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M14 2V8H20M16 13H8M16 17H8M10 9H8" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
     accentColor: "#3B82F6",
+    accentDim: "rgba(59,130,246,0.08)",
+    accentBorder: "rgba(59,130,246,0.18)",
     tag: "AI-Powered",
     title: "AI Workout Engine",
-    desc: "Adaptive workout splits built by your personal AI coach. Adjusts every single week based on your actual performance.",
+    desc: "Adaptive plans built by your personal AI coach. Adjusts every single week based on your actual performance, recovery, and feedback.",
+    stat: { value: "40%", label: "faster progression" },
     isHero: true,
   },
   {
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke="#22C55E" strokeWidth="1.5"/>
-        <path d="M12 6v6l4 2" stroke="#22C55E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke="currentColor" strokeWidth="1.5"/>
+        <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
-    accentColor: "#22C55E",
+    accentColor: "rgba(255,255,255,0.70)",
+    accentDim: "rgba(255,255,255,0.03)",
+    accentBorder: "rgba(255,255,255,0.08)",
     tag: "Science",
     title: "Habit Intelligence",
     desc: "Visual streaks, smart nudges, and 2-day rule protection to build unbreakable consistency.",
+    stat: { value: "3×", label: "habit retention" },
     isHero: false,
   },
   {
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M18 20V10M12 20V4M6 20v-6" stroke="#F59E0B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M18 20V10M12 20V4M6 20v-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
-    accentColor: "#F59E0B",
+    accentColor: "rgba(255,255,255,0.70)",
+    accentDim: "rgba(255,255,255,0.03)",
+    accentBorder: "rgba(255,255,255,0.08)",
     tag: "Nutrition",
     title: "Macro Clarity",
     desc: "Dynamic macro targets that shift with your training intensity and body feedback.",
+    stat: { value: "AI", label: "meal recognition" },
     isHero: false,
   },
   {
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="#8B5CF6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
-    accentColor: "#8B5CF6",
+    accentColor: "rgba(255,255,255,0.70)",
+    accentDim: "rgba(255,255,255,0.03)",
+    accentBorder: "rgba(255,255,255,0.08)",
     tag: "Recovery",
     title: "Readiness Score",
-    desc: "Know exactly when to push your limits and when to take a rest day, powered by biometric analysis.",
+    desc: "Know exactly when to push your limits and when to rest — powered by biometric analysis.",
+    stat: { value: "87%", label: "avg readiness" },
     isHero: true,
-  }
+  },
 ];
 
 export default function FeaturesSection() {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const gridRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
 
-  // Intersection Observer for scroll reveals
+  // Scroll reveal
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-          }
+          if (entry.isIntersecting) entry.target.classList.add("visible");
         });
       },
-      { threshold: 0.15 }
+      { threshold: 0.10 }
     );
     cardRefs.current.forEach((el) => el && observer.observe(el));
     return () => observer.disconnect();
   }, []);
 
-  // Spotlight mouse tracking effect on the grid
+  // Spotlight mouse tracking
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      const cards = document.querySelectorAll(".card-spotlight-wrapper");
+      const cards = document.querySelectorAll<HTMLElement>(".feature-spotlight");
       cards.forEach((card) => {
-        const rect = (card as HTMLElement).getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        (card as HTMLElement).style.setProperty("--mouse-x", `${x}px`);
-        (card as HTMLElement).style.setProperty("--mouse-y", `${y}px`);
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
+        card.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
       });
     };
-    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
   return (
     <section
       id="features"
+      ref={sectionRef}
       style={{
-        padding: "4rem 1.5rem",
-        maxWidth: "1100px",
+        padding: "6rem 1.5rem 8rem",
+        maxWidth: "1160px",
         margin: "0 auto",
         width: "100%",
-        position: "relative"
+        position: "relative",
       }}
     >
       <div className="section-divider" style={{ position: "absolute", top: 0, left: 0, right: 0 }} />
 
       {/* Section header */}
       <div style={{ textAlign: "center", marginBottom: "5rem" }}>
+
+        {/* Eyebrow label */}
         <div
           className="reveal glass-blue"
           style={{
             display: "inline-flex",
-            padding: "8px 20px",
+            alignItems: "center",
+            gap: "6px",
+            padding: "5px 16px",
             borderRadius: "100px",
-            fontSize: "0.75rem",
+            fontSize: "0.6875rem",
             fontWeight: 500,
             letterSpacing: "0.08em",
             textTransform: "uppercase" as const,
@@ -120,67 +132,120 @@ export default function FeaturesSection() {
             marginBottom: "1.5rem",
           }}
         >
+          <span style={{
+            width: "4px", height: "4px", borderRadius: "50%",
+            background: "var(--arc-blue)", display: "inline-block",
+          }} />
           Core Intelligence
         </div>
 
         <h2
-          className="reveal text-section"
+          className="reveal"
           style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontSize: "clamp(2.25rem, 4vw, 4rem)",
+            fontWeight: 500,
+            letterSpacing: "-0.03em",
+            lineHeight: 1.02,
             color: "#FFFFFF",
             marginBottom: "1.25rem",
           }}
         >
           Train smarter.{" "}
-          <span className="text-gradient-blue">Not harder.</span>
+          <span
+            style={{
+              background: "linear-gradient(130deg, #93C5FD 0%, #3B82F6 60%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            Not harder.
+          </span>
         </h2>
 
         <p
           className="reveal"
-          style={{ color: "var(--arc-text-secondary)", fontSize: "1.125rem", maxWidth: "500px", margin: "0 auto", lineHeight: 1.6 }}
+          style={{
+            color: "#8B96A5",
+            fontSize: "1.0625rem",
+            maxWidth: "480px",
+            margin: "0 auto",
+            lineHeight: 1.65,
+            letterSpacing: "-0.01em",
+          }}
         >
           Four pillars of elite performance, unified in one beautifully engineered system.
         </p>
       </div>
 
-      {/* Bento Grid with Spotlight Effect */}
-      <div className="bento-grid cards-dim-siblings" ref={gridRef}>
+      {/* Surgical Ambient Bleed behind the cards */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          top: "60%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "100%",
+          maxWidth: "1000px",
+          height: "600px",
+          background: "radial-gradient(ellipse at center, rgba(37,99,235,0.05) 0%, transparent 60%)",
+          filter: "blur(80px)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+
+      {/* Bento Grid */}
+      <div className="bento-grid cards-dim-siblings">
         {features.map((feature, i) => (
           <div
             key={feature.title}
             ref={(el) => { cardRefs.current[i] = el; }}
-            className={`reveal card-spotlight-wrapper ${feature.isHero ? 'bento-hero' : ''}`}
+            className={`reveal reveal-delay-${i + 1} card-spotlight-wrapper feature-spotlight ${feature.isHero ? "bento-hero" : ""}`}
             style={{
-              padding: "3rem 2.5rem",
+              padding: "clamp(2rem, 3vw, 2.75rem)",
               display: "flex",
               flexDirection: "column",
-              gap: "0",
-              animationDelay: `${i * 0.15}s`,
-              minHeight: "260px",
               justifyContent: "space-between",
-              backdropFilter: "blur(40px)",
-              WebkitBackdropFilter: "blur(40px)"
+              minHeight: feature.isHero ? "300px" : "270px",
+              backdropFilter: "blur(48px)",
+              WebkitBackdropFilter: "blur(48px)",
+              /* background & border come from .card-spotlight-wrapper in CSS */
             }}
           >
+            {/* Content */}
             <div style={{ position: "relative", zIndex: 2 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "2rem" }}>
+              {/* Icon + tag row */}
+              <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                marginBottom: "1.75rem",
+              }}>
+                {/* Icon box */}
                 <div style={{
-                  width: "56px", height: "56px", borderRadius: "16px",
-                  background: `${feature.accentColor}12`,
-                  border: `1px solid ${feature.accentColor}25`,
-                  display: "flex", alignItems: "center", justifyContent: "center"
+                  width: "48px", height: "48px",
+                  borderRadius: "14px",
+                  background: feature.accentDim,
+                  border: `1px solid ${feature.accentBorder}`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: feature.accentColor,
                 }}>
                   {feature.icon}
                 </div>
+
+                {/* Tag pill */}
                 <div
                   style={{
-                    display: "inline-flex",
-                    padding: "6px 14px",
+                    padding: "5px 12px",
                     borderRadius: "100px",
-                    background: `${feature.accentColor}10`,
-                    border: `1px solid ${feature.accentColor}25`,
-                    fontSize: "0.6875rem",
+                    background: feature.accentDim,
+                    border: `1px solid ${feature.accentBorder}`,
+                    fontSize: "0.625rem",
                     fontWeight: 600,
-                    letterSpacing: "0.08em",
+                    letterSpacing: "0.09em",
                     textTransform: "uppercase" as const,
                     color: feature.accentColor,
                   }}
@@ -189,14 +254,66 @@ export default function FeaturesSection() {
                 </div>
               </div>
 
-              <h3 className="text-card-title" style={{ color: "#FFFFFF", marginBottom: "0.75rem", fontSize: "1.375rem" }}>
+              {/* Title */}
+              <h3
+                style={{
+                  fontSize: "1.3125rem",
+                  fontWeight: 500,
+                  color: "#FFFFFF",
+                  marginBottom: "0.625rem",
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1.2,
+                }}
+              >
                 {feature.title}
               </h3>
+
+              {/* Description */}
+              <p
+                style={{
+                  fontSize: "0.875rem",
+                  color: "#8B96A5",
+                  lineHeight: 1.6,
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                {feature.desc}
+              </p>
             </div>
-            
-            <p style={{ position: "relative", zIndex: 2, fontSize: "1rem", color: "rgba(255,255,255,0.65)", lineHeight: 1.65 }}>
-              {feature.desc}
-            </p>
+
+            {/* Stat — bottom of card */}
+            <div
+              style={{
+                position: "relative",
+                zIndex: 2,
+                marginTop: "2rem",
+                paddingTop: "1.25rem",
+                borderTop: `1px solid ${feature.accentBorder}`,
+                display: "flex",
+                alignItems: "baseline",
+                gap: "0.5rem",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "1.5rem",
+                  fontWeight: 500,
+                  color: feature.accentColor,
+                  letterSpacing: "-0.03em",
+                }}
+              >
+                {feature.stat.value}
+              </span>
+              <span
+                style={{
+                  fontSize: "0.75rem",
+                  color: "rgba(255,255,255,0.35)",
+                  letterSpacing: "0.02em",
+                }}
+              >
+                {feature.stat.label}
+              </span>
+            </div>
           </div>
         ))}
       </div>

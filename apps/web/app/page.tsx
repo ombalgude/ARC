@@ -5,22 +5,14 @@ import Footer from "./coming-soon/Footer";
 import HeroSection from "./coming-soon/HeroSection";
 import LandingNav from "./coming-soon/LandingNav";
 import PerksSection from "./coming-soon/PerksSection";
-import MarqueeStrip from "./coming-soon/MarqueeStrip";
 import ScrollRevealInit from "./coming-soon/ScrollRevealInit";
 
-// Fetch live stats server-side
 async function getWaitlistStats(): Promise<{ totalCount: number; spotsRemaining: number }> {
   try {
-    // Use absolute URL when called from server
     const base =
       process.env.NEXT_PUBLIC_APP_URL ??
-      (process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : "http://localhost:3000");
-
-    const res = await fetch(`${base}/api/waitlist/stats`, {
-      next: { revalidate: 60 },
-    });
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+    const res = await fetch(`${base}/api/waitlist/stats`, { next: { revalidate: 60 } });
     if (!res.ok) throw new Error("stats fetch failed");
     return (await res.json()) as { totalCount: number; spotsRemaining: number };
   } catch {
@@ -33,102 +25,148 @@ interface HomeProps {
 }
 
 export default async function Home({ searchParams }: HomeProps) {
-  const [stats, params] = await Promise.all([
-    getWaitlistStats(),
-    searchParams,
-  ]);
-
+  const [stats, params] = await Promise.all([getWaitlistStats(), searchParams]);
   const referralCode = params.ref;
 
   return (
-    <div
-      style={{
+    <>
+      {/* ─────────────────────────────────────────────────────────────
+          PAGE SHELL — pure black base, always.
+          The raah.dev gradient is applied to the HERO WRAPPER only,
+          not as a fixed full-page background.
+          This is exactly how raah.dev does it.
+      ───────────────────────────────────────────────────────────── */}
+      <div style={{
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        background: "transparent",
-        color: "var(--arc-text)",
+        background: "#000000",
+        color: "#FFFFFF",
         position: "relative",
         isolation: "isolate",
-      }}
-    >
-      {/* ── Impeccable High-Fidelity Studio Background ── */}
-      <div 
-        className="fixed inset-0 -z-10 overflow-hidden pointer-events-none"
-        style={{ backgroundColor: "#02040A" }}
-      >
-        {/* 1. Cinematic Film Grain */}
-        <div style={{
-          position: "absolute", inset: 0, zIndex: 1,
-          opacity: 0.035, mixBlendMode: "overlay",
-          backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")"
-        }} />
+      }}>
 
-        {/* 2. Luxury Dot-Matrix Grid */}
-        <div style={{
-          position: "absolute", inset: 0,
-          backgroundImage: "radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)",
-          backgroundSize: "32px 32px",
-          WebkitMaskImage: "radial-gradient(ellipse at 50% 40%, black 10%, transparent 80%)",
-        }} />
+        {/* ── Film grain overlay (fixed, full page) ── */}
+        <div
+          aria-hidden
+          className="fixed inset-0 pointer-events-none"
+          style={{
+            zIndex: 9999,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E")`,
+            backgroundSize: "160px 160px",
+            opacity: 0.022,
+            mixBlendMode: "overlay",
+          }}
+        />
 
-        {/* 3. Deep Left-Side Oceanic Wash (Ambient) */}
-        <div style={{
-          position: "absolute", top: "-10%", left: "-20%", width: "80vw", height: "120vh",
-          background: "radial-gradient(ellipse at center, rgba(16, 42, 82, 0.45) 0%, transparent 70%)",
-          filter: "blur(90px)",
-        }} />
+        {/* Navigation */}
+        <LandingNav />
+        <ScrollRevealInit />
 
-        {/* 4. Sharp Accent Core Behind Phone (Creates 3D Rim Lighting) */}
-        <div style={{
-          position: "absolute", top: "20%", right: "10%", width: "40vw", height: "60vh",
-          background: "radial-gradient(ellipse at center, rgba(59, 130, 246, 0.15) 0%, transparent 60%)",
-          filter: "blur(60px)",
-        }} />
+        {/* ════════════════════════════════════════════════════════════
+            HERO WRAPPER — THIS is where raah.dev puts the gradient.
+            It wraps only the hero section, not the whole page.
 
-        {/* 5. Right-Side Deep Indigo/Navy Bloom (Base Environment) */}
-        <div style={{
-          position: "absolute", top: "5%", right: "-20%", width: "90vw", height: "130vh",
-          background: "radial-gradient(ellipse at center, rgba(17, 28, 78, 0.55) 0%, transparent 70%)",
-          filter: "blur(100px)",
-        }} />
+            Their exact CSS class (decoded from Tailwind arbitrary):
+            background: radial-gradient(
+              125% 125% at 50% 0%,
+              transparent 40%,
+              var(--color-blue-600),   ← #2563EB
+              var(--landing-page-bg) 100%   ← their dark bg (#000 equivalent)
+            )
 
-        {/* 6. Base Foundation Light (Ensures the bottom half of the screen is never dead black) */}
+            How it renders:
+            - Center point: top-center (50% 0%)
+            - 0–40% from center: TRANSPARENT (shows black base)
+            - ~40–70%: transitions through blue-600
+            - 70–100%: fades to their page bg (dark)
+
+            On a 1440px wide, 100vh tall hero:
+            - The gradient ellipse is 125% × 125% = 1800px × 1125px
+            - Center is at top-center
+            - 40% stop = 720px from center horizontally, 450px vertically
+            - So the blue ring appears at ~450px down from the top
+            - Which is roughly halfway down the hero viewport
+        ════════════════════════════════════════════════════════════ */}
         <div style={{
-          position: "absolute", bottom: "-20%", left: "10%", width: "80vw", height: "60vh",
-          background: "radial-gradient(ellipse at center, rgba(16, 32, 64, 0.5) 0%, transparent 70%)",
-          filter: "blur(80px)",
-        }} />
+          position: "relative",
+          overflow: "hidden",
+          background: `radial-gradient(
+            120% 130% at 50% 0%,
+            transparent        40%,
+            rgba(37,99,235,0.85) 58%,
+            rgba(17,24,39,1)   100%
+          )`,
+        }}>
+          {/* Bottom fade overlay inside this wrapper to prevent hard edges on widescreen */}
+          <div
+            aria-hidden
+            style={{
+              pointerEvents: "none",
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              zIndex: 0,
+              height: "10rem",
+              background: "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.9) 65%, rgba(0,0,0,1) 100%)",
+            }}
+          />
+          {/* Raah also has a bottom blur pill to soften the edge */}
+          <div
+            aria-hidden
+            style={{
+              pointerEvents: "none",
+              position: "absolute",
+              bottom: "-2.5rem",
+              left: "2rem",
+              right: "2rem",
+              zIndex: 0,
+              height: "5rem",
+              borderRadius: "9999px",
+              background: "rgba(0,0,0,0.80)",
+              filter: "blur(48px)",
+            }}
+          />
+
+          {/* Dot grid — only inside the hero, masked to the blue zone */}
+          <div
+            aria-hidden
+            style={{
+              pointerEvents: "none",
+              position: "absolute",
+              inset: 0,
+              zIndex: 0,
+              backgroundImage: "radial-gradient(rgba(255,255,255,0.040) 1px, transparent 1px)",
+              backgroundSize: "30px 30px",
+              /* Mask matches the gradient shape — invisible in transparent top,
+                 visible in the blue band, fades out toward edges */
+              WebkitMaskImage: `radial-gradient(
+                125% 125% at 50% 0%,
+                transparent 35%,
+                black       52%,
+                transparent 72%
+              )`,
+              maskImage: `radial-gradient(
+                125% 125% at 50% 0%,
+                transparent 35%,
+                black       52%,
+                transparent 72%
+              )`,
+            }}
+          />
+
+          <HeroSection initialCount={stats.totalCount} referralCode={referralCode} />
+        </div>
+
+        {/* Remaining page sections on plain black */}
+        <Suspense fallback={null}>
+          <CountdownTimer />
+        </Suspense>
+        <PerksSection spotsRemaining={stats.spotsRemaining} />
+        <FeaturesSection />
+        <Footer />
       </div>
-
-      {/* Navigation */}
-      <LandingNav />
-
-      {/* Scroll reveal initializer */}
-      <ScrollRevealInit />
-
-      {/* Hero */}
-      <HeroSection
-        initialCount={stats.totalCount}
-        referralCode={referralCode}
-      />
-
-      {/* Social Proof Marquee */}
-      {/* <MarqueeStrip /> */}
-
-      {/* Countdown */}
-      <Suspense fallback={null}>
-        <CountdownTimer />
-      </Suspense>
-
-      {/* Perks */}
-      <PerksSection spotsRemaining={stats.spotsRemaining} />
-
-      {/* Features - Bento Grid */}
-      <FeaturesSection />
-
-      {/* Footer */}
-      <Footer />
-    </div>
+    </>
   );
 }
