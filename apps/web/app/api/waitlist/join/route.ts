@@ -6,19 +6,7 @@ import { Resend } from "resend";
 const sql = neon(process.env.DATABASE_URL!);
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-async function ensureTable() {
-  await sql`
-    CREATE TABLE IF NOT EXISTS waitlist_entries (
-      id            SERIAL PRIMARY KEY,
-      email         TEXT UNIQUE NOT NULL,
-      referral_code TEXT UNIQUE NOT NULL,
-      referred_by   TEXT,
-      position      INT NOT NULL,
-      referral_count INT DEFAULT 0,
-      created_at    TIMESTAMPTZ DEFAULT NOW()
-    )
-  `;
-}
+
 
 export async function POST(request: Request) {
   try {
@@ -32,7 +20,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
     }
 
-    await ensureTable();
+
 
     const existing = await sql`
       SELECT id, position, referral_code FROM waitlist_entries WHERE email = ${email}
@@ -74,7 +62,7 @@ export async function POST(request: Request) {
 
     try {
       if (process.env.RESEND_API_KEY && !process.env.RESEND_API_KEY.includes("placeholder")) {
-        await resend.emails.send({
+        const { data, error } = await resend.emails.send({
           from: process.env.RESEND_FROM_EMAIL ?? "hello@arcfitness.app",
           to: email,
           subject: `🎉 You're #${position} on the ARC Fitness waitlist!`,
@@ -106,9 +94,15 @@ export async function POST(request: Request) {
             </html>
           `,
         });
+        
+        if (error) {
+          console.error("[Resend Validation Error]:", error);
+        } else {
+          console.log("[Resend Success]:", data);
+        }
       }
     } catch (_emailError) {
-      
+      console.error("[Resend Network Error]:", _emailError);
     }
 
     const totalCount = await sql`SELECT COUNT(*) as count FROM waitlist_entries`;

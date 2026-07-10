@@ -45,7 +45,7 @@ export default function LandingNav(): React.JSX.Element | Promise<React.JSX.Elem
         animate={{
           width: scrolled ? "640px" : "100%",
           borderRadius: scrolled ? "100px" : "0px",
-          background: scrolled ? "rgba(4, 5, 12, 0.75)" : "rgba(0, 0, 0, 0)",
+          background: scrolled ? "rgba(4, 5, 12, 0.65)" : "rgba(0, 0, 0, 0)",
           borderColor: scrolled ? "rgba(59,130,246,0.15)" : "rgba(59,130,246,0)",
           boxShadow: scrolled ? "0 24px 48px rgba(0,0,0,0.8), 0 0 20px rgba(59,130,246,0.1), inset 0 1px 1px rgba(59,130,246,0.2)" : "none",
         }}
