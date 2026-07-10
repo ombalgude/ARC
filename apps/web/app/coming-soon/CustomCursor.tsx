@@ -29,6 +29,7 @@ export default function CustomCursor(): React.JSX.Element | null {
     const style = document.createElement("style");
     style.innerHTML = `
       * { cursor: none !important; }
+      input, textarea, [contenteditable="true"] { cursor: text !important; }
     `;
     document.head.appendChild(style);
 

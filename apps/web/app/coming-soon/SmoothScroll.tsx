@@ -12,9 +12,10 @@ export default function SmoothScroll(): React.JSX.Element | null {
     }
 
     const lenis = new Lenis({
-      lerp: 0.08, // Physical inertia instead of fixed duration
+      duration: 0.7,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Apple-style Expo Ease Out
       smoothWheel: true,
-      wheelMultiplier: 1.2, // Slightly more sensitive for luxurious glide
+      wheelMultiplier: 1,
       touchMultiplier: 2,
       infinite: false,
     });

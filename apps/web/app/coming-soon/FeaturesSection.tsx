@@ -20,6 +20,7 @@ const features = [
     stat: { value: "40%", label: "faster progression" },
     colSpanClass: "md:col-span-8 col-span-12",
     number: "01",
+    image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1470&auto=format&fit=crop",
   },
   {
     icon: (
@@ -37,6 +38,7 @@ const features = [
     stat: { value: "3×", label: "habit retention" },
     colSpanClass: "md:col-span-4 col-span-12",
     number: "02",
+    image: "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?q=80&w=1470&auto=format&fit=crop",
   },
   {
     icon: (
@@ -53,6 +55,7 @@ const features = [
     stat: { value: "100%", label: "macro precision" },
     colSpanClass: "md:col-span-5 col-span-12",
     number: "03",
+    image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=1453&auto=format&fit=crop",
   },
   {
     icon: (
@@ -69,6 +72,7 @@ const features = [
     stat: { value: "24/7", label: "instant guidance" },
     colSpanClass: "md:col-span-7 col-span-12",
     number: "04",
+    image: "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=1470&auto=format&fit=crop",
   },
 ];
 
@@ -132,9 +136,34 @@ function FeatureCard({ feature, index }: { feature: typeof features[0], index: n
               transparent 80%
             )
           `,
+          zIndex: 3,
+        }}
+      />
+      
+      {/* Background Image Layer */}
+      <div 
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: `url(${feature.image})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          opacity: 0.15,
+          filter: "grayscale(100%) contrast(1.2)",
+          zIndex: 0,
+          mixBlendMode: "overlay",
+        }}
+      />
+      {/* Gradient Mask to keep text readable */}
+      <div 
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "linear-gradient(180deg, rgba(3,3,3,1) 0%, rgba(3,3,3,0.7) 40%, rgba(3,3,3,0.2) 100%)",
           zIndex: 1,
         }}
       />
+
       <div style={{ position: "relative", zIndex: 2 }}>
         <div style={{
           display: "flex",

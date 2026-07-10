@@ -58,7 +58,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
     <section
       id="perks"
       style={{
-        padding: "5rem 1.5rem",
+        padding: "1rem 1.5rem 5rem 1.5rem",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",

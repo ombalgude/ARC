@@ -1,6 +1,5 @@
 import React from "react";
 import { Suspense } from "react";
-import CountdownTimer from "./coming-soon/CountdownTimer";
 import FeaturesSection from "./coming-soon/FeaturesSection";
 import Footer from "./coming-soon/Footer";
 import HeroSection from "./coming-soon/HeroSection";
@@ -34,7 +33,7 @@ export default async function Home({ searchParams }: HomeProps): Promise<React.J
   return (
     <>
       <SmoothScroll />
-      <CustomCursor />
+      {/* <CustomCursor /> */}
 
       <div style={{
         minHeight: "100vh",
@@ -130,9 +129,6 @@ export default async function Home({ searchParams }: HomeProps): Promise<React.J
           <HeroSection initialCount={stats.totalCount} referralCode={referralCode} />
         </div>
 
-        <Suspense fallback={null}>
-          <CountdownTimer />
-        </Suspense>
         <PerksSection spotsRemaining={stats.spotsRemaining} />
         <FeaturesSection />
         <Footer />

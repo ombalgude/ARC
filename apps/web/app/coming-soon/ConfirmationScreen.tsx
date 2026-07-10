@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import { CheckCircle, Trophy, Copy, Share2, MessageCircle } from "lucide-react";
 import React from "react";
+import { CountdownTimer } from "../../components/CountdownTimer";
 
 interface ConfirmationScreenProps {
   position: number;
@@ -357,6 +358,10 @@ export default function ConfirmationScreen({
             {copied ? <CheckCircle size={15} strokeWidth={2.5} /> : <Copy size={15} strokeWidth={2.5} />}
             {copied ? "COPIED" : "COPY"}
           </button>
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "2rem" }}>
+          <CountdownTimer targetDate={process.env.NEXT_PUBLIC_LAUNCH_DATE ?? "2026-07-22T00:00:00.000Z"} />
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.25rem" }}>

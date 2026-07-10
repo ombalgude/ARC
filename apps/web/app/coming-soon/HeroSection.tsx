@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Droplets, Moon, Footprints, Dumbbell, Timer, Activity, Flame } from "lucide-react";
 import ConfirmationScreen from "./ConfirmationScreen";
 import WaitlistForm from "./WaitlistForm";
+import { CountdownTimer } from "../../components/CountdownTimer";
 
 interface HeroProps {
   initialCount: number;
@@ -123,24 +124,11 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
           style={{
           display: "flex", flexDirection: "column",
           alignItems: "flex-start", textAlign: "left",
-          marginTop: "10px"
+          marginTop: "40px"
         }}>
 
-          <div
-            className="glass-blue animate-fade-up opacity-0-init"
-            style={{
-              display: "inline-flex", alignItems: "center", gap: "0.5rem",
-              padding: "5px 16px 5px 10px", borderRadius: "100px",
-              fontSize: "0.6875rem", fontWeight: 500,
-              letterSpacing: "0.07em", textTransform: "uppercase" as const,
-              color: "var(--arc-blue)", marginBottom: "2rem", marginTop: "2rem",
-            }}
-          >
-            <span className="animate-pulse-dot" style={{
-              width: "5px", height: "5px", borderRadius: "50%",
-              background: "var(--arc-blue)", display: "inline-block", flexShrink: 0,
-            }} />
-            Early access waitlist open
+          <div className="animate-fade-up opacity-0-init" style={{ animationDelay: "0ms", marginBottom: "2rem" }}>
+            <CountdownTimer targetDate={process.env.NEXT_PUBLIC_LAUNCH_DATE ?? "2026-07-22T00:00:00.000Z"} />
           </div>
 
           <h1
@@ -299,7 +287,7 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
             className="animate-fade-in opacity-0-init delay-1200 hero-stats"
             style={{
               display: "flex", alignItems: "center", gap: "1.5rem",
-              marginTop: "2.5rem",
+              marginTop: "2rem",
               paddingTop: "2rem",
               borderTop: "1px solid rgba(255,255,255,0.07)",
               width: "100%", maxWidth: "460px",
