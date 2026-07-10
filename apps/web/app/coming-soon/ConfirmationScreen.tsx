@@ -23,10 +23,14 @@ export default function ConfirmationScreen({
 }: ConfirmationScreenProps): React.JSX.Element {
   const [copied, setCopied] = useState(false);
 
-  const appUrl =
-    typeof window !== "undefined"
-      ? window.location.origin
-      : "https://arcfitness.app";
+  const [appUrl, setAppUrl] = useState("https://arcfitness.app");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setAppUrl(window.location.origin);
+    }
+  }, []);
+
   const referralLink = `${appUrl}?ref=${referralCode}`;
 
   const twitterText = encodeURIComponent(

@@ -95,16 +95,18 @@ export default function LandingFooter(): React.JSX.Element | Promise<React.JSX.E
           </span>
         </h2>
         <a
-          href="#waitlist"
+          href="/#waitlist"
           className="group animate-gradient-shift"
           onClick={(e) => {
-            e.preventDefault();
-            window.scrollTo({ top: 0, behavior: "smooth" });
-            const el = document.getElementById("waitlist");
-            if (el) {
-              el.classList.remove("pulse-trigger");
-              void el.offsetWidth;
-              el.classList.add("pulse-trigger");
+            if (window.location.pathname === "/") {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+              const el = document.getElementById("waitlist");
+              if (el) {
+                el.classList.remove("pulse-trigger");
+                void el.offsetWidth;
+                el.classList.add("pulse-trigger");
+              }
             }
           }}
           style={{
@@ -185,17 +187,17 @@ export default function LandingFooter(): React.JSX.Element | Promise<React.JSX.E
             {
               title: "Product",
               links: [
-                { label: "Core Intelligence", href: "#features" },
-                { label: "Exclusive Perks", href: "#perks" },
-                { label: "Waitlist", href: "#waitlist" },
+                { label: "Core Intelligence", href: "/#features" },
+                { label: "Exclusive Perks", href: "/#perks" },
+                { label: "Waitlist", href: "/#waitlist" },
               ]
             },
             {
               title: "Legal",
               links: [
-                { label: "Privacy Policy", href: "/legal/privacy" },
-                { label: "Terms of Service", href: "/legal/terms" },
-                { label: "Cookie Policy", href: "/legal/cookies" },
+                { label: "Privacy Policy", href: "/privacy" },
+                { label: "Terms of Service", href: "/terms" },
+                { label: "Cookie Policy", href: "/privacy" },
               ]
             },
             {
@@ -218,13 +220,16 @@ export default function LandingFooter(): React.JSX.Element | Promise<React.JSX.E
                     href={link.href}
                     className="footer-link"
                     onClick={(e) => {
-                      if (link.href === "#waitlist" || link.href === "#features" || link.href === "#perks") {
-                        e.preventDefault();
-                        const el = document.getElementById(link.href.substring(1));
-                        if (el) {
-                          el.scrollIntoView({ behavior: "smooth" });
-                        } else if (link.href === "#waitlist") {
-                          window.scrollTo({ top: 0, behavior: "smooth" });
+                      if (link.href.startsWith("/#")) {
+                        if (window.location.pathname === "/") {
+                          e.preventDefault();
+                          const targetId = link.href.substring(2);
+                          const el = document.getElementById(targetId);
+                          if (el) {
+                            el.scrollIntoView({ behavior: "smooth" });
+                          } else if (targetId === "waitlist") {
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                          }
                         }
                       }
                     }}

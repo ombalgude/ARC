@@ -57,8 +57,6 @@ export default function CustomCursor(): React.JSX.Element | null {
         backgroundPosition: "center",
         x: smoothX,
         y: smoothY,
-        translateX: "-50%",
-        translateY: "-50%",
         rotate: "9deg",
         filter: "brightness(0) invert(1)",
       }}

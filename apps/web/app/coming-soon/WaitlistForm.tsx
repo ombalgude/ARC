@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-
 import { useState } from "react";
 
 interface WaitlistFormProps {
@@ -38,6 +37,7 @@ export default function WaitlistForm({ onSuccess, initialCount, referralCode }: 
 
       if (!res.ok || data.error) {
         setError(data.error ?? "Something went wrong. Please try again.");
+        setFocused(false); // trigger visual shake if error
         return;
       }
 
@@ -49,6 +49,7 @@ export default function WaitlistForm({ onSuccess, initialCount, referralCode }: 
       });
     } catch {
       setError("Network error. Please check your connection.");
+      setFocused(false);
     } finally {
       setLoading(false);
     }
@@ -56,7 +57,27 @@ export default function WaitlistForm({ onSuccess, initialCount, referralCode }: 
 
   return (
     <form onSubmit={handleSubmit} style={{ width: "100%", maxWidth: "480px" }}>
-      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+      <div 
+        style={{ 
+          display: "flex", 
+          flexDirection: "column", 
+          gap: "10px",
+          animation: error ? "shake 0.4s cubic-bezier(.36,.07,.19,.97) both" : "none",
+        }}
+      >
+        <style>{`
+          @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+            40%, 60% { transform: translate3d(3px, 0, 0); }
+          }
+          @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+          }
+        `}</style>
         
         <div
           id="waitlist"
@@ -139,16 +160,22 @@ export default function WaitlistForm({ onSuccess, initialCount, referralCode }: 
           >
             {loading ? (
               <span
-                className="animate-spin"
                 style={{
-                  width: "16px",
-                  height: "16px",
-                  border: "2px solid rgba(255,255,255,0.3)",
-                  borderTopColor: "#fff",
-                  borderRadius: "50%",
-                  display: "inline-block",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontSize: "0.875rem",
+                  animation: "arcFadeIn 0.3s ease",
                 }}
-              />
+              >
+                <div style={{
+                  width: "14px", height: "14px", 
+                  borderRadius: "50%", 
+                  background: "#fff",
+                  animation: "pulseGlow 1.5s infinite"
+                }} />
+                Securing...
+              </span>
             ) : (
               "Claim Early Access →"
             )}

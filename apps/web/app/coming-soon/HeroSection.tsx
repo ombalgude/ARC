@@ -30,16 +30,26 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
   const lerpRef = useRef({ x: 0.5, y: 0.5 });
 
   useEffect(() => {
-    const tick = () => {
-      const delay = Math.random() * 16000 + 8000;
-      const t = setTimeout(() => {
-        countRef.current += 1;
-        setCount(countRef.current);
-        tick();
-      }, delay);
-      return t;
+    let timer: ReturnType<typeof setTimeout>;
+    const fetchStats = async () => {
+      try {
+        const res = await fetch("/api/waitlist/stats");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.totalCount && data.totalCount > countRef.current) {
+            countRef.current = data.totalCount;
+            setCount(data.totalCount);
+          }
+        }
+      } catch (error) {
+        // silently fallback
+      }
+      timer = setTimeout(fetchStats, 15000); // Poll every 15s
     };
-    const timer = tick();
+    
+    // Initial fetch after a short delay
+    timer = setTimeout(fetchStats, 3000);
+    
     return () => clearTimeout(timer);
   }, []);
 

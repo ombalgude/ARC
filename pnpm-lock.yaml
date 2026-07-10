@@ -47,6 +47,9 @@ importers:
       dotenv:
         specifier: ^16.4.7
         version: 16.6.1
+      drizzle-orm:
+        specifier: ^0.39.0
+        version: 0.39.3(@neondatabase/serverless@1.1.0)(@types/pg@8.20.0)(pg@8.22.0)
       express:
         specifier: ^4.21.2
         version: 4.22.2
