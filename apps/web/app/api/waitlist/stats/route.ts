@@ -9,11 +9,11 @@ export async function GET() {
   try {
     const result = await sql`SELECT COUNT(*) as count FROM waitlist_entries`;
     const totalCount = Number((result[0] as { count: string }).count);
-    const spotsRemaining = Math.max(0, 500 - totalCount);
+    const spotsRemaining = Math.max(0, 100 - totalCount);
 
     return NextResponse.json({ totalCount, spotsRemaining });
   } catch {
     
-    return NextResponse.json({ totalCount: 2847, spotsRemaining: 347 });
+    return NextResponse.json({ totalCount: 2847, spotsRemaining: 0 });
   }
 }

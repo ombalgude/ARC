@@ -72,10 +72,9 @@ export default function WaitlistForm({ onSuccess, initialCount, referralCode }: 
             30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
             40%, 60% { transform: translate3d(3px, 0, 0); }
           }
-          @keyframes pulseGlow {
-            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+          @keyframes arcSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
           }
         `}</style>
         
@@ -168,16 +167,19 @@ export default function WaitlistForm({ onSuccess, initialCount, referralCode }: 
                   animation: "arcFadeIn 0.3s ease",
                 }}
               >
-                <div style={{
-                  width: "14px", height: "14px", 
-                  borderRadius: "50%", 
-                  background: "#fff",
-                  animation: "pulseGlow 1.5s infinite"
-                }} />
+                <svg 
+                  width="16" height="16" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  style={{ animation: "arcSpin 0.75s linear infinite", color: "#FFFFFF" }}
+                >
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5" strokeOpacity="0.25" />
+                  <path d="M12 2C6.48 2 2 6.48 2 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
                 Securing...
               </span>
             ) : (
-              "Claim Early Access →"
+              "Claim Your Spot →"
             )}
           </button>
         </div>

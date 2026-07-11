@@ -126,7 +126,7 @@ export default function LandingFooter(): React.JSX.Element | Promise<React.JSX.E
             gap: "8px",
           }}
         >
-          Join the First 500
+          Claim Your Spot Now
           <span 
             style={{ transition: "transform 0.2s ease" }}
             className="group-hover:translate-x-1"
@@ -177,7 +177,7 @@ export default function LandingFooter(): React.JSX.Element | Promise<React.JSX.E
           </div>
           
           <p style={{ color: "#8B96A5", fontSize: "0.9375rem", lineHeight: 1.6, maxWidth: "300px" }}>
-            The definitive AI-powered health and fitness ecosystem. Engineered for those who demand precision.
+            Your all-in-one fitness copilot. Training, nutrition, and habits — unified into one intelligent engine.
           </p>
         </div>
 

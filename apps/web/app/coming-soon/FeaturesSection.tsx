@@ -14,9 +14,9 @@ const features = [
     accentColor: "#3B82F6",
     accentDim: "rgba(59,130,246,0.08)",
     accentBorder: "rgba(59,130,246,0.18)",
-    tag: "AI-Powered",
-    title: "Workouts built just for you",
-    desc: "Leave the guesswork at the door. ARC builds your weekly training plan based on your exact goals and experience. It tells you exactly what to do to build muscle or lose fat. You just show up and put in the work.",
+    tag: "AI Training",
+    title: "Every rep. Planned with precision.",
+    desc: "Random workouts produce random results. ARC builds your exact weekly training plan around your goals, recovery, and progression — then adapts it week by week. No more wasted sessions. No more plateaus.",
     stat: { value: "40%", label: "faster progression" },
     colSpanClass: "md:col-span-8 col-span-12",
     number: "01",
@@ -32,9 +32,9 @@ const features = [
     accentColor: "rgba(255,255,255,0.70)",
     accentDim: "rgba(255,255,255,0.03)",
     accentBorder: "rgba(255,255,255,0.08)",
-    tag: "Science",
-    title: "Unstoppable momentum",
-    desc: "Great results come from daily habits. Log your sleep, water, and steps in seconds. Our smart streak system keeps you hooked.",
+    tag: "Habit Science",
+    title: "The streak you finally keep.",
+    desc: "You've started over enough times. ARC's compound habit system builds momentum that sticks — smart nudges, streak science, and daily signals that keep you locked in.",
     stat: { value: "3×", label: "habit retention" },
     colSpanClass: "md:col-span-4 col-span-12",
     number: "02",
@@ -50,8 +50,8 @@ const features = [
     accentDim: "rgba(255,255,255,0.03)",
     accentBorder: "rgba(255,255,255,0.08)",
     tag: "Nutrition",
-    title: "Perfect your nutrition",
-    desc: "Fuel your body the right way. ARC calculates exactly how many calories, protein, and fats you need to hit your goals. No more guessing—just clear daily targets that actually work.",
+    title: "Stop losing gains to guesswork.",
+    desc: "Missed macros are missed results. ARC calculates exactly what your body needs — calories, protein, fats — to hit your goal. Daily targets. Zero guessing. Every meal moves you forward.",
     stat: { value: "100%", label: "macro precision" },
     colSpanClass: "md:col-span-5 col-span-12",
     number: "03",
@@ -66,9 +66,9 @@ const features = [
     accentColor: "rgba(255,255,255,0.70)",
     accentDim: "rgba(255,255,255,0.03)",
     accentBorder: "rgba(255,255,255,0.08)",
-    tag: "AI Chat",
-    title: "Your 24/7 fitness coach",
-    desc: "Get instant answers to your training and nutrition questions. Our AI companion provides real-time exercise tips and guidance exactly when you need it.",
+    tag: "AI Coach",
+    title: "A coach in your pocket. Always on.",
+    desc: "Your questions don't wait for your trainer's schedule. Ask ARC anything — form, recovery, nutrition, programming — and get an instant, evidence-based answer. It knows your data. It knows your goals.",
     stat: { value: "24/7", label: "instant guidance" },
     colSpanClass: "md:col-span-7 col-span-12",
     number: "04",
@@ -305,7 +305,7 @@ export default function FeaturesSection(): React.JSX.Element | Promise<React.JSX
           }}
         >
           <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--arc-blue)", display: "inline-block" }} />
-          Core Intelligence
+          Built Different
         </motion.div>
 
         <motion.h2
@@ -323,7 +323,7 @@ export default function FeaturesSection(): React.JSX.Element | Promise<React.JSX
             marginBottom: "1.5rem",
           }}
         >
-          Train smarter.{" "}
+          One system.{" "}
           <span
             style={{
               background: "linear-gradient(130deg, #93C5FD 0%, #3B82F6 60%)",
@@ -332,7 +332,7 @@ export default function FeaturesSection(): React.JSX.Element | Promise<React.JSX
               backgroundClip: "text",
             }}
           >
-            Not harder.
+            Zero gaps.
           </span>
         </motion.h2>
 
@@ -350,7 +350,7 @@ export default function FeaturesSection(): React.JSX.Element | Promise<React.JSX
             letterSpacing: "-0.01em",
           }}
         >
-          Four pillars of elite performance, unified in one beautifully engineered system.
+          Every missed workout has a root cause. Every plateau has a fix. ARC finds both.
         </motion.p>
       </motion.div>
 

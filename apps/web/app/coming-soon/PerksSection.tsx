@@ -7,24 +7,13 @@ const perks = [
   {
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    ),
-    accentColor: "#3B82F6",
-    accentDim: "rgba(59,130,246,0.1)",
-    title: "Founding Member Badge",
-    desc: "A permanent marker on your ARC profile.",
-  },
-  {
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
     accentColor: "#F59E0B",
     accentDim: "rgba(245,158,11,0.1)",
-    title: "3 Months Pro Free",
-    desc: "Uncompromised access to all AI features.",
+    title: "3 Months Pro. Zero Cost.",
+    desc: "Full, uncompromised access to every AI feature — workouts, nutrition, habits, coaching. Reserved for the first 100 only. After that, it's gone.",
   },
   {
     icon: (
@@ -34,8 +23,8 @@ const perks = [
     ),
     accentColor: "#10B981",
     accentDim: "rgba(16,185,129,0.1)",
-    title: "Priority App Access",
-    desc: "Skip the queue. Guaranteed day-one access.",
+    title: "Day-One Priority Access",
+    desc: "Skip every queue on launch day. While the general public waits, you're already in. The waitlist is the advantage.",
   },
 ];
 
@@ -44,7 +33,7 @@ interface PerksProps {
 }
 
 export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.Element | Promise<React.JSX.Element> {
-  const pctUsed = Math.round(((500 - spotsRemaining) / 500) * 100);
+  const pctUsed = Math.round(((100 - spotsRemaining) / 100) * 100);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
@@ -164,7 +153,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
                 marginBottom: "1.5rem",
               }}
             >
-              The First 500{" "}
+              The First 100{" "}
               <span
                 style={{
                   background: "linear-gradient(130deg, #FDE68A 0%, #F59E0B 60%)",
@@ -173,7 +162,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
                   backgroundClip: "text",
                 }}
               >
-                Get Pro Free.
+                Get It All.
               </span>
             </h2>
             <p
@@ -184,7 +173,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
                 letterSpacing: "-0.01em",
               }}
             >
-              Lock in your lifetime perks before we hit capacity and launch to the general public.
+              These perks don’t roll over. They close the moment we hit 100. Once they’re gone, they’re gone.
             </p>
           </div>
 
@@ -224,7 +213,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
             </div>
 
             <p style={{ fontSize: "0.75rem", color: "rgba(245,158,11,0.8)", letterSpacing: "0.1em", textTransform: "uppercase" as const, fontWeight: 600 }}>
-              {pctUsed}% claimed · Closes at 500
+              {pctUsed}% claimed · Closes permanently at 100
             </p>
           </div>
         </div>
@@ -284,7 +273,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
               fontWeight: 600,
             }}
           >
-            Included in your pass
+            What early members keep forever
           </h3>
           
           <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>

@@ -35,11 +35,11 @@ export default function ConfirmationScreen({
   const referralLink = `${appUrl}?ref=${referralCode}`;
 
   const twitterText = encodeURIComponent(
-    `I just claimed my spot for ARC Fitness—the ultimate app for people who take training seriously. Use my link to join and we both jump ahead in line! ${referralLink}`
+    `Just secured my spot for ARC Fitness. I'm #${position} in line — the ultimate fitness copilot for people who actually want results. Use my link and we both jump the queue: ${referralLink} #ARCFitness`
   );
 
   const whatsappText = encodeURIComponent(
-    `Just locked in my spot for ARC. It's a massive upgrade that perfectly plans your workouts and meals. Use my link to get in, and we both skip the waitlist: ${referralLink}`
+    `I just locked my spot for ARC — an intelligent engine that plans your progression and removes all guesswork. I'm #${position} in line. Use my link and we both skip 5 spots instantly: ${referralLink}`
   );
 
   async function copyLink() {
@@ -55,7 +55,7 @@ export default function ConfirmationScreen({
       try {
         await navigator.share({
           title: "ARC Fitness",
-          text: `I'm #${position} on the waitlist for ARC Fitness 🔥 Join me:`,
+          text: `I'm #${position} on the ARC waitlist. Invite 3 friends and you can skip 15 spots. Join me:`,
           url: referralLink,
         });
       } catch (err) {}
@@ -75,25 +75,30 @@ export default function ConfirmationScreen({
   }
 
   useEffect(() => {
+    // Lock background scroll while modal is open
+    document.body.style.overflow = "hidden";
+
     const duration = 2500;
     const end = Date.now() + duration;
     const colors = ["#3B82F6", "#60A5FA", "#FFFFFF"];
 
     (function frame() {
       confetti({
-        particleCount: 4,
+        particleCount: 5,
         angle: 60,
         spread: 55,
-        origin: { x: 0 },
+        startVelocity: 55,
+        origin: { x: 0, y: 0.9 },
         colors: colors,
         disableForReducedMotion: true,
         zIndex: 10000,
       });
       confetti({
-        particleCount: 4,
+        particleCount: 5,
         angle: 120,
         spread: 55,
-        origin: { x: 1 },
+        startVelocity: 55,
+        origin: { x: 1, y: 0.9 },
         colors: colors,
         disableForReducedMotion: true,
         zIndex: 10000,
@@ -103,6 +108,10 @@ export default function ConfirmationScreen({
         requestAnimationFrame(frame);
       }
     })();
+
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, []);
 
   useEffect(() => {
@@ -164,16 +173,18 @@ export default function ConfirmationScreen({
         onClick={(e) => e.stopPropagation()}
         style={{
           width: "100%",
-          maxWidth: "460px",
+          maxWidth: "440px",
           display: "flex",
           flexDirection: "column",
           position: "relative",
-          padding: "3rem 2.5rem",
+          padding: "2rem 2rem",
+          maxHeight: "95vh",
+          overflowY: "auto",
           background: "linear-gradient(180deg, rgba(10, 15, 30, 0.7) 0%, rgba(4, 5, 15, 0.9) 100%)",
           backdropFilter: "blur(40px)",
           border: "1px solid rgba(255, 255, 255, 0.12)",
           borderRadius: "32px",
-          boxShadow: "0 40px 100px -20px rgba(0,0,0,1), 0 0 40px rgba(37,99,235,0.15), inset 0 1px 1px rgba(255,255,255,0.2)",
+          boxShadow: "0 40px 100px -20px rgba(0,0,0,1), 0 0 40px rgba(37,99,235,0.15), inset 0 2px 20px rgba(255,255,255,0.05), inset 0 1px 1px rgba(255,255,255,0.2)",
           zIndex: 1,
         }}
       >
@@ -217,19 +228,19 @@ export default function ConfirmationScreen({
           </button>
         )}
 
-        <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
+        <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
           <div style={{ 
-            width: "80px", height: "80px", margin: "0 auto 1.5rem", 
+            width: "64px", height: "64px", margin: "0 auto 1rem", 
             background: "linear-gradient(135deg, rgba(37,99,235,0.2) 0%, rgba(96,165,250,0.05) 100%)",
             border: "1px solid rgba(96,165,250,0.3)",
-            borderRadius: "24px", display: "flex", alignItems: "center", justifyContent: "center",
+            borderRadius: "20px", display: "flex", alignItems: "center", justifyContent: "center",
             boxShadow: "0 0 30px rgba(37,99,235,0.2), inset 0 2px 4px rgba(255,255,255,0.1)",
             transform: "rotate(-5deg)",
           }}>
             {alreadyRegistered ? (
-              <CheckCircle size={40} color="#60A5FA" strokeWidth={1.5} />
+              <CheckCircle size={32} color="#60A5FA" strokeWidth={1.5} />
             ) : (
-              <Trophy size={40} color="#60A5FA" strokeWidth={1.5} />
+              <Trophy size={32} color="#60A5FA" strokeWidth={1.5} />
             )}
           </div>
           
@@ -248,11 +259,11 @@ export default function ConfirmationScreen({
               marginBottom: "1rem",
             }}
           >
-            You're <span style={{ color: "var(--arc-blue)" }}>#{position.toLocaleString()}</span> in line
+            <span style={{ color: "var(--arc-blue)" }}>#{position.toLocaleString()}</span> in line
           </h3>
           
-          <p style={{ color: "var(--arc-text-secondary)", fontSize: "0.9375rem", lineHeight: 1.6, maxWidth: "90%", margin: "0 auto" }}>
-            The first 500 people get 3 months of Pro for free. Share your link to jump <span style={{ color: "#fff", fontWeight: 500 }}>5 spots ahead</span> for every friend who joins.
+          <p style={{ color: "var(--arc-text-secondary)", fontSize: "0.875rem", lineHeight: 1.5, maxWidth: "90%", margin: "0 auto" }}>
+            The first 100 get 3 months Pro free. Every friend you invite skips you <span style={{ color: "#fff", fontWeight: 500 }}>5 spots forward</span>. Invite 3 — skip 15.
           </p>
 
           <div style={{ marginTop: "2rem" }}>
@@ -290,7 +301,7 @@ export default function ConfirmationScreen({
             background: "rgba(0,0,0,0.4)",
             borderRadius: "16px",
             border: "1px solid rgba(255,255,255,0.08)",
-            marginBottom: "2rem",
+            marginBottom: "1.5rem",
             display: "flex",
             alignItems: "center",
             gap: "0.5rem",
@@ -367,7 +378,7 @@ export default function ConfirmationScreen({
         <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.25rem" }}>
           <div style={{ height: "1px", flex: 1, background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.1))" }} />
           <span style={{ fontSize: "0.65rem", fontWeight: 600, color: "rgba(255,255,255,0.3)", letterSpacing: "0.15em", textTransform: "uppercase" }}>
-            Boost Your Rank
+            Skip the Line
           </span>
           <div style={{ height: "1px", flex: 1, background: "linear-gradient(270deg, transparent, rgba(255,255,255,0.1))" }} />
         </div>

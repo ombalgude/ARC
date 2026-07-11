@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { Droplets, Moon, Footprints, Dumbbell, Timer, Activity, Flame } from "lucide-react";
 import ConfirmationScreen from "./ConfirmationScreen";
 import WaitlistForm from "./WaitlistForm";
-import { CountdownTimer } from "../../components/CountdownTimer";
 
 interface HeroProps {
   initialCount: number;
@@ -127,10 +126,6 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
           marginTop: "40px"
         }}>
 
-          <div className="animate-fade-up opacity-0-init" style={{ animationDelay: "0ms", marginBottom: "2rem" }}>
-            <CountdownTimer targetDate={process.env.NEXT_PUBLIC_LAUNCH_DATE ?? "2026-07-22T00:00:00.000Z"} />
-          </div>
-
           <h1
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
@@ -138,16 +133,16 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
               letterSpacing: "-0.035em",
               lineHeight: 1.08,
               color: "#FFFFFF",
-              marginBottom: "1.75rem",
-              marginTop:"-10px",
+              marginBottom: "1rem",
+              marginTop:"5px",
               fontSize: "clamp(3.25rem, 6.5vw, 7rem)",
             }}
           >
             <span className="text-reveal-wrapper" style={{ display: "block" }}>
-              <span className="text-reveal-inner delay-100">Upgrade</span>
+              <span className="text-reveal-inner delay-100">Your ultimate</span>
             </span>
             <span className="text-reveal-wrapper" style={{ display: "block", marginTop: "-0.12em", marginBottom: "0.02em" }}>
-              <span className="text-reveal-inner delay-250">your fitness.</span>
+              <span className="text-reveal-inner delay-250">fitness</span>
             </span>
             <span className="text-reveal-wrapper" style={{ display: "block" }}>
               <span
@@ -157,11 +152,11 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
-                  paddingBottom: "0.15em",
+                  paddingBottom: "0.15",
                   display: "inline-block",
                 }}
               >
-                Forever.
+                copilot.
               </span>
             </span>
           </h1>
@@ -173,16 +168,16 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
               lineHeight: 1.65,
               color: "rgba(255,255,255,0.58)",
               maxWidth: "500px",
-              marginBottom: "2.25rem",
+              marginBottom: "1.5rem",
               letterSpacing: "-0.01em",
             }}
           >
-            ARC doesn't just track your progress—it plans it. Get an AI-powered coach that perfectly connects your workouts, meals, and daily habits into one winning system.
+            Generic trackers just log data. ARC unifies your training, nutrition, and habits into one intelligent engine that plans your progression and removes all guesswork.
           </p>
 
           <div
             className="animate-fade-up opacity-0-init delay-800 waitlist-wrapper"
-            style={{ width: "100%", maxWidth: "460px", marginBottom: "1.5rem" }}
+            style={{ width: "100%", maxWidth: "460px", marginBottom: "1.75rem" }}
           >
             {confirmed ? (
               <div
@@ -250,16 +245,16 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
               
               <div style={{ display: "flex", alignItems: "center" }}>
                 {[
-                  { bg: "#3B82F6", label: "A" },
-                  { bg: "#22C55E", label: "J" },
-                  { bg: "#F59E0B", label: "S" },
-                  { bg: "#8B5CF6", label: "M" },
-                  { bg: "#EF4444", label: "K" },
+                  { bg: "#1E3A8A", label: "M" },
+                  { bg: "#2563EB", label: "A" },
+                  { bg: "#3B82F6", label: "J" },
+                  { bg: "#60A5FA", label: "S" },
+                  { bg: "#1F2937", label: "K" },
                 ].map((av, i) => (
                   <div
                     key={i}
                     style={{
-                      width: "26px", height: "26px", borderRadius: "50%",
+                      width: "24px", height: "24px", borderRadius: "50%",
                       background: av.bg,
                       border: "2px solid #000",
                       marginLeft: i > 0 ? "-8px" : "0",
@@ -274,11 +269,10 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
               </div>
 
               <span>
-                Join{" "}
-                <strong style={{ color: "rgba(255,255,255,0.80)", fontWeight: 500 }}>
+                Join <strong style={{ color: "rgba(255,255,255,0.80)", fontWeight: 500 }}>
                   {(12500 + count).toLocaleString()}+
                 </strong>
-                {" "}top performers already in line
+                {" "}high-performers on the waitlist
               </span>
             </div>
           )}
@@ -287,15 +281,15 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
             className="animate-fade-in opacity-0-init delay-1200 hero-stats"
             style={{
               display: "flex", alignItems: "center", gap: "1.5rem",
-              marginTop: "2rem",
-              paddingTop: "2rem",
+              marginTop: "1.5rem",
+              paddingTop: "1.5rem",
               borderTop: "1px solid rgba(255,255,255,0.07)",
               width: "100%", maxWidth: "460px",
             }}
           >
             {[
-              { value: "100%", label: "Custom Plans" },
-              { value: "24/7", label: "AI Guidance" },
+              { value: "100%", label: "Personalised" },
+              { value: "24/7", label: "Copilot" },
               { value: "0", label: "Guesswork" },
             ].map((stat, i) => (
               <div key={i} style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
@@ -328,6 +322,8 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
             filter: "blur(40px)",
             pointerEvents: "none",
           }} />
+
+          {/* Removed Floating Widgets */}
 
           <div className="phone-parallax-container animate-scale-up opacity-0-init delay-500">
             <div

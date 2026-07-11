@@ -65,31 +65,34 @@ export async function POST(request: Request) {
         const { data, error } = await resend.emails.send({
           from: process.env.RESEND_FROM_EMAIL ?? "hello@arcfitness.app",
           to: email,
-          subject: `🎉 You're #${position} on the ARC Fitness waitlist!`,
+          subject: `You are #${position} in line for ARC Fitness.`,
           html: `
             <!DOCTYPE html>
             <html>
-            <body style="background:#0A0A0F;color:#F1F1F3;font-family:Inter,sans-serif;max-width:520px;margin:0 auto;padding:40px 24px;">
-              <h1 style="font-size:28px;font-weight:900;margin-bottom:8px;">
-                You're <span style="color:#3B82F6">#${position}</span> on the waitlist! 🚀
+            <body style="background-color:#0A0A0F;color:#F1F1F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;max-width:520px;margin:0 auto;padding:40px 24px;">
+              <h1 style="font-size:28px;font-weight:900;margin-bottom:8px;letter-spacing:-0.03em;color:#FFFFFF;">
+                You are <span style="color:#3B82F6;">#${position}</span> in line.
               </h1>
-              <p style="color:#9CA3AF;margin-bottom:24px;">
-                Welcome to ARC Fitness. You're one of the early access members getting into the most intelligent fitness app ever built.
+              <p style="color:#9CA3AF;margin-bottom:24px;line-height:1.6;font-size:16px;">
+                Welcome to ARC Fitness. You just locked in your spot for the only fitness system that actually adapts to your progress daily. No more guesswork.
               </p>
-              <div style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:12px;padding:20px;margin-bottom:24px;">
-                <p style="font-weight:700;margin-bottom:8px;">🔗 Your referral link</p>
-                <p style="font-size:13px;color:#9CA3AF;margin-bottom:12px;">Share this link to move up the waitlist. Each referral = +5 positions.</p>
-                <a href="${referralLink}" style="color:#3B82F6;word-break:break-all;">${referralLink}</a>
+              
+              <div style="background-color:#12182B;border:1px solid #1E3A8A;border-radius:12px;padding:24px;margin-bottom:24px;">
+                <p style="font-weight:700;margin-top:0;margin-bottom:8px;text-transform:uppercase;font-size:12px;letter-spacing:0.05em;color:#60A5FA;">Skip the Line</p>
+                <p style="font-size:14px;color:#D1D5DB;margin-top:0;margin-bottom:20px;line-height:1.5;">Every friend you invite skips you <strong>5 spots forward</strong>. Invite 3 friends, skip 15 spots.</p>
+                <a href="${referralLink}" style="display:inline-block;background-color:#3B82F6;color:#FFFFFF;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">Copy your referral link</a>
+                <p style="font-size:12px;color:#6B7280;margin-top:16px;margin-bottom:0;">Or forward this link: <a href="${referralLink}" style="color:#3B82F6;text-decoration:none;">${referralLink}</a></p>
               </div>
-              <div style="margin-bottom:24px;">
-                <p style="font-weight:700;margin-bottom:12px;">🎁 Your early access perks:</p>
-                <ul style="color:#9CA3AF;padding-left:20px;line-height:2;">
-                  <li>🏅 Early Access Badge — locked forever</li>
-                  <li>⚡ 3 Months Pro Free (first 500 members)</li>
-                  <li>🚀 Priority Access on launch day</li>
+
+              <div style="margin-bottom:24px;background-color:#111116;border:1px solid #1F1F2E;border-radius:12px;padding:24px;">
+                <p style="font-weight:700;margin-top:0;margin-bottom:16px;text-transform:uppercase;font-size:12px;letter-spacing:0.05em;color:#9CA3AF;">Your early access perks</p>
+                <ul style="color:#9CA3AF;padding-left:20px;line-height:1.8;font-size:14px;margin:0;">
+                  <li style="margin-bottom:8px;"><strong style="color:#F1F1F3;">3 Months Pro Free</strong> — Reserved for the first 100 only. After that, it's gone.</li>
+                  <li><strong style="color:#F1F1F3;">Day-One Priority Access</strong> — Skip every queue on launch day.</li>
                 </ul>
               </div>
-              <p style="color:#6B7280;font-size:13px;">— The ARC Fitness Team</p>
+
+              <p style="color:#6B7280;font-size:13px;margin-top:32px;">— The ARC Fitness Team</p>
             </body>
             </html>
           `,

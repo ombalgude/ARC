@@ -3,6 +3,7 @@ import React from "react";
 
 import { useState } from "react";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
+import { CountdownTimer } from "../../components/CountdownTimer";
 
 export default function LandingNav(): React.JSX.Element | Promise<React.JSX.Element> {
   const { scrollY } = useScroll();
@@ -43,7 +44,7 @@ export default function LandingNav(): React.JSX.Element | Promise<React.JSX.Elem
       <motion.nav
         initial={false}
         animate={{
-          width: scrolled ? "640px" : "100%",
+          width: scrolled ? "680px" : "100%",
           borderRadius: scrolled ? "100px" : "0px",
           background: scrolled ? "rgba(4, 5, 12, 0.65)" : "rgba(0, 0, 0, 0)",
           borderColor: scrolled ? "rgba(59,130,246,0.15)" : "rgba(59,130,246,0)",
@@ -124,6 +125,23 @@ export default function LandingNav(): React.JSX.Element | Promise<React.JSX.Elem
             </span>
           </a>
 
+          <div 
+            className="hidden md:flex" 
+            style={{ 
+              position: "absolute", 
+              left: "50%", 
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              transformOrigin: "center center",
+              opacity: scrolled ? 0 : 1,
+              pointerEvents: scrolled ? "none" : "auto",
+              scale: scrolled ? "0.9" : "1",
+              transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
+            }}
+          >
+            <CountdownTimer targetDate={process.env.NEXT_PUBLIC_LAUNCH_DATE ?? "2026-07-22T00:00:00.000Z"} />
+          </div>
+
           <div
             className="arc-nav-links"
             style={{ display: "flex", gap: "1rem", alignItems: "center" }}
@@ -193,7 +211,7 @@ export default function LandingNav(): React.JSX.Element | Promise<React.JSX.Elem
                 target.style.transform = "translateY(0px)";
               }}
             >
-              Get Access 
+              Claim Your Spot
             </a>
           </div>
 
@@ -212,7 +230,7 @@ export default function LandingNav(): React.JSX.Element | Promise<React.JSX.Elem
                 textDecoration: "none",
               }}
             >
-              Access
+              Claim Spot
             </a>
           </div>
         </div>
