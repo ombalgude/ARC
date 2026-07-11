@@ -36,7 +36,7 @@ export default function LandingFooter(): React.JSX.Element {
     <footer
       style={{
         width: "100%",
-        background: "radial-gradient(100% 100% at 50% 100%, rgba(37,99,235,0.06) 0%, #000000 100%)",
+        background: "radial-gradient(100% 100% at 50% 100%, rgba(37,99,235,0.08) 0%, #000000 100%)",
         backgroundColor: "#000000",
         borderTop: "1px solid rgba(255,255,255,0.08)",
         color: "#FFFFFF",
@@ -46,7 +46,7 @@ export default function LandingFooter(): React.JSX.Element {
       <style>{`
         .footer-link {
           color: #8B96A5;
-          font-size: 0.8125rem;
+          font-size: 0.875rem;
           text-decoration: none;
           transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
           display: inline-block;
@@ -69,11 +69,11 @@ export default function LandingFooter(): React.JSX.Element {
         }
       `}</style>
       
-      {/* Top CTA Banner - Tighter Spacing */}
+      {/* Top CTA Banner */}
       <div
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-          padding: "2.5rem 1.5rem",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          padding: "4rem 1.5rem",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -90,10 +90,10 @@ export default function LandingFooter(): React.JSX.Element {
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: "100%",
-            maxWidth: "600px",
-            height: "250px",
-            background: "radial-gradient(ellipse at center, rgba(37,99,235,0.12) 0%, transparent 70%)",
-            filter: "blur(50px)",
+            maxWidth: "800px",
+            height: "400px",
+            background: "radial-gradient(ellipse at center, rgba(37,99,235,0.15) 0%, transparent 70%)",
+            filter: "blur(60px)",
             pointerEvents: "none",
             zIndex: 0,
           }}
@@ -101,10 +101,10 @@ export default function LandingFooter(): React.JSX.Element {
 
         <h2
           style={{
-            fontSize: "clamp(1.5rem, 3vw, 2.25rem)",
+            fontSize: "clamp(2rem, 3.5vw, 3.25rem)",
             fontWeight: 500,
-            letterSpacing: "-0.03em",
-            marginBottom: "1.25rem",
+            letterSpacing: "-0.04em",
+            marginBottom: "2rem",
             fontFamily: "'Space Grotesk', sans-serif",
             color: "#FFFFFF",
             position: "relative",
@@ -130,12 +130,12 @@ export default function LandingFooter(): React.JSX.Element {
           style={{
             position: "relative",
             zIndex: 1,
-            padding: "0.75rem 2rem",
+            padding: "1rem 2.5rem",
             background: "linear-gradient(135deg, rgba(37,99,235,0.9) 0%, rgba(37,99,235,0.9) 42%, rgba(96,165,250,0.8) 50%, rgba(37,99,235,0.9) 58%, rgba(37,99,235,0.9) 100%)",
             color: "#FFFFFF",
             borderRadius: "100px",
             fontWeight: 600,
-            fontSize: "0.9375rem",
+            fontSize: "1rem",
             textDecoration: "none",
             letterSpacing: "-0.01em",
             border: "1px solid rgba(255,255,255,0.15)",
@@ -154,39 +154,39 @@ export default function LandingFooter(): React.JSX.Element {
         </a>
       </div>
 
-      {/* Main Grid - Tighter Spacing */}
+      {/* Main Grid */}
       <div
         style={{
-          maxWidth: "1200px",
+          maxWidth: "1400px",
           margin: "0 auto",
-          padding: "2.5rem 1.5rem",
+          padding: "4rem 1.5rem",
           display: "flex",
           flexWrap: "wrap",
-          gap: "2.5rem",
+          gap: "4rem",
           justifyContent: "space-between",
         }}
       >
         {/* Col 1: Brand */}
-        <div style={{ flex: "1.5 1 260px", display: "flex", flexDirection: "column", gap: "1rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <div style={{ flex: "2 1 300px", display: "flex", flexDirection: "column", gap: "2rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
             <div
               style={{
-                width: "24px", height: "24px",
-                borderRadius: "6px",
+                width: "28px", height: "28px",
+                borderRadius: "8px",
                 background: "linear-gradient(145deg, #3B82F6 0%, #1D4ED8 100%)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 2px 6px rgba(59,130,246,0.3)"
+                boxShadow: "0 2px 8px rgba(59,130,246,0.4), inset 0 1px 1px rgba(255,255,255,0.3)"
               }}
             >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
                 <path d="M2 9 Q6 2 10 9" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
               </svg>
             </div>
             <span
               style={{
-                fontSize: "1.125rem",
+                fontSize: "1.25rem",
                 fontWeight: 600,
-                letterSpacing: "0.12em",
+                letterSpacing: "0.15em",
                 fontFamily: "'Space Grotesk', sans-serif",
               }}
             >
@@ -194,13 +194,13 @@ export default function LandingFooter(): React.JSX.Element {
             </span>
           </div>
           
-          <p style={{ color: "#8B96A5", fontSize: "0.875rem", lineHeight: 1.5, maxWidth: "280px" }}>
-            Your all-in-one fitness copilot. Training, nutrition, and habits unified into one intelligent engine.
+          <p style={{ color: "#8B96A5", fontSize: "0.9375rem", lineHeight: 1.6, maxWidth: "300px" }}>
+            Your all-in-one fitness copilot. Training, nutrition, and habits — unified into one intelligent engine.
           </p>
         </div>
 
-        {/* Links Columns - Compact Gaps */}
-        <div style={{ flex: "2 1 480px", display: "flex", flexWrap: "wrap", gap: "2rem", justifyContent: "space-between" }}>
+        {/* Links Columns */}
+        <div style={{ flex: "1 1 600px", display: "flex", flexWrap: "wrap", gap: "4rem", justifyContent: "space-between" }}>
           {[
             {
               title: "Product",
@@ -227,11 +227,11 @@ export default function LandingFooter(): React.JSX.Element {
               ]
             }
           ].map((column) => (
-            <div key={column.title} style={{ display: "flex", flexDirection: "column", gap: "1rem", minWidth: "120px" }}>
-              <h4 style={{ color: "#FFFFFF", fontSize: "0.8125rem", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+            <div key={column.title} style={{ display: "flex", flexDirection: "column", gap: "1.5rem", minWidth: "140px" }}>
+              <h4 style={{ color: "#FFFFFF", fontSize: "0.875rem", fontWeight: 500 }}>
                 {column.title}
               </h4>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                 {column.links.map((link) => (
                   <a
                     key={link.label}
@@ -248,25 +248,25 @@ export default function LandingFooter(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Bottom Bar - Tighter Padding */}
-      <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "1.25rem 0" }}>
+      {/* Bottom Bar */}
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", padding: "2rem 0" }}>
         <div
           style={{
-            maxWidth: "1200px",
+            maxWidth: "1400px",
             margin: "0 auto",
-            padding: "0 1.5rem",
+            padding: "0 2rem",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             flexWrap: "wrap",
-            gap: "0.75rem",
+            gap: "1rem",
           }}
         >
-          <p style={{ color: "#8B96A5", fontSize: "0.75rem" }}>
+          <p style={{ color: "#8B96A5", fontSize: "0.875rem" }}>
             © 2026 ARC Fitness. All rights reserved.
           </p>
 
-          <p style={{ color: "#8B96A5", fontSize: "0.75rem" }}>
+          <p style={{ color: "#8B96A5", fontSize: "0.875rem" }}>
             Engineered by{" "}
             <a
               href="https://www.ombalgude.app/"
