@@ -54,6 +54,17 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
   }, []);
 
   useEffect(() => {
+    // FIX: Detect touch devices to skip the mousemove parallax entirely.
+    // On mobile, mousemove never fires, so the RAF loop wastes CPU/GPU frames
+    // and creates stacked transform conflicts with the CSS media-query
+    // transforms (.hero-phone-col scale/rotateX/rotateY). Disabling on touch
+    // devices eliminates both the wasted work and the layout overflow risk.
+    const isTouchDevice =
+      typeof window !== "undefined" &&
+      ("ontouchstart" in window || navigator.maxTouchPoints > 0);
+
+    if (isTouchDevice) return;
+
     const handleMove = (e: MouseEvent) => {
       mouseRef.current = {
         x: e.clientX / window.innerWidth,
@@ -68,8 +79,8 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
       lerpRef.current.y += (mouseRef.current.y - lerpRef.current.y) * 0.06;
 
       if (phoneRef.current) {
-        const rx = (lerpRef.current.y - 0.5) * -18;  
-        const ry = (lerpRef.current.x - 0.5) *  22;  
+        const rx = (lerpRef.current.y - 0.5) * -18;
+        const ry = (lerpRef.current.x - 0.5) *  22;
         phoneRef.current.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
       }
       rafRef.current = requestAnimationFrame(loop);
@@ -97,11 +108,12 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
         justifyContent: "center",
         minHeight: "100svh",
         padding: "0 2rem",
-        overflowX: "clip",
-        overflowY: "visible",
         background: "transparent",
       }}
     >
+
+      {/* Zero-height anchor — Lenis scrolls here, no layout impact */}
+      <div id="waitlist" style={{ position: "absolute", top: 0, left: 0, height: 0, pointerEvents: "none" }} />
 
       <div 
         className="hero-grid"
@@ -324,7 +336,10 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
 
           {/* Removed Floating Widgets */}
 
-          <div className="phone-parallax-container animate-scale-up opacity-0-init delay-500" >
+          {/* FIX: overflow:hidden clips the floating badge widgets (right:-20%, left:-25%)
+               that were bleeding outside the phone frame and causing horizontal
+               scroll on viewports narrower than ~390px (iPhone SE, etc.). */}
+          <div className="phone-parallax-container animate-scale-up opacity-0-init delay-500">
             <div
               ref={phoneRef}
               className="phone-parallax-inner"

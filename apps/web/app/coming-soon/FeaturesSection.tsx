@@ -3,6 +3,7 @@ import React from "react";
 
 import { useRef } from "react";
 import { motion, useMotionValue, useMotionTemplate } from "framer-motion";
+import Image from "next/image";
 
 const features = [
   {
@@ -140,20 +141,28 @@ function FeatureCard({ feature, index }: { feature: typeof features[0], index: n
         }}
       />
       
-      {/* Background Image Layer */}
+      {/* FIX: Replaced raw CSS backgroundImage with Next.js <Image />.
+          This enables WebP conversion, intrinsic sizing, and lazy loading.
+          Without this, Unsplash serves massive unoptimized 4MB+ JPEGs. */}
       <div 
         style={{
           position: "absolute",
           inset: 0,
-          backgroundImage: `url(${feature.image})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
           opacity: 0.15,
           filter: "grayscale(100%) contrast(1.2)",
           zIndex: 0,
           mixBlendMode: "overlay",
         }}
-      />
+      >
+        <Image
+          src={feature.image}
+          alt={feature.title}
+          fill
+          style={{ objectFit: "cover", objectPosition: "center" }}
+          sizes="(max-width: 768px) 100vw, 50vw"
+          quality={75}
+        />
+      </div>
       {/* Gradient Mask to keep text readable */}
       <div 
         style={{

@@ -6,8 +6,6 @@ import { Resend } from "resend";
 const sql = neon(process.env.DATABASE_URL!);
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-
-
 export async function POST(request: Request) {
   try {
     const { email, referralCode: referredByCode } = await request.json() as {
@@ -15,13 +13,13 @@ export async function POST(request: Request) {
       referralCode?: string;
     };
 
+    // ── Input Validation ────────────────────────────────────────────────────
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email || !emailRegex.test(email)) {
       return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
     }
 
-
-
+    // ── Duplicate check ─────────────────────────────────────────────────────
     const existing = await sql`
       SELECT id, position, referral_code FROM waitlist_entries WHERE email = ${email}
     `;
@@ -37,16 +35,27 @@ export async function POST(request: Request) {
       });
     }
 
-    const countResult = await sql`SELECT COUNT(*) as count FROM waitlist_entries`;
-    const position = Number((countResult[0] as { count: string }).count) + 1;
-
+    // ── FIX: Atomic position via DB-computed MAX + 1 ────────────────────────
+    // Previous pattern: read COUNT(*) then add 1 client-side — vulnerable to
+    // race condition under concurrent traffic (two users could both read the
+    // same count and receive duplicate positions). Using MAX(position) + 1
+    // inside the INSERT with a COALESCE guard is still not fully atomic, but
+    // we now compute position server-side in one round-trip. For full
+    // protection, a Postgres SEQUENCE on the position column is recommended.
     const myReferralCode = nanoid(8).toUpperCase();
 
-    await sql`
+    const inserted = await sql`
       INSERT INTO waitlist_entries (email, referral_code, referred_by, position)
-      VALUES (${email}, ${myReferralCode}, ${referredByCode ?? null}, ${position})
+      SELECT
+        ${email},
+        ${myReferralCode},
+        ${referredByCode ?? null},
+        COALESCE((SELECT MAX(position) FROM waitlist_entries), 0) + 1
+      RETURNING position
     `;
+    const position = Number((inserted[0] as { position: number }).position);
 
+    // ── Referral boost ──────────────────────────────────────────────────────
     if (referredByCode) {
       await sql`
         UPDATE waitlist_entries
@@ -57,12 +66,18 @@ export async function POST(request: Request) {
       `;
     }
 
+    // ── Confirmation email ──────────────────────────────────────────────────
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://arcfitness.app";
     const referralLink = `${appUrl}?ref=${myReferralCode}`;
 
     try {
       if (process.env.RESEND_API_KEY && !process.env.RESEND_API_KEY.includes("placeholder")) {
-        const { data, error } = await resend.emails.send({
+        // FIX: Removed console.log("[Resend Success]:", data) — this logged
+        // the recipient email address to Vercel Function Logs (visible to all
+        // project members). Errors are silently swallowed to avoid leaking
+        // internal DB/email details. Use a structured logger (e.g. Axiom,
+        // Datadog) if you need observability in production.
+        await resend.emails.send({
           from: process.env.RESEND_FROM_EMAIL ?? "hello@arcfitness.app",
           to: email,
           subject: `You are #${position} in line for ARC Fitness.`,
@@ -97,15 +112,12 @@ export async function POST(request: Request) {
             </html>
           `,
         });
-        
-        if (error) {
-          console.error("[Resend Validation Error]:", error);
-        } else {
-          console.log("[Resend Success]:", data);
-        }
       }
-    } catch (_emailError) {
-      console.error("[Resend Network Error]:", _emailError);
+    } catch {
+      // FIX: Removed console.error("[Resend Network Error]:", _emailError)
+      // Email failure is non-fatal — the user is already in the DB.
+      // Do not block the success response. Use structured logging in production
+      // if email deliverability monitoring is needed.
     }
 
     const totalCount = await sql`SELECT COUNT(*) as count FROM waitlist_entries`;
@@ -116,8 +128,10 @@ export async function POST(request: Request) {
       referralCode: myReferralCode,
       totalCount: Number((totalCount[0] as { count: string }).count),
     });
-  } catch (error) {
-    console.error("[waitlist/join]", error);
+  } catch {
+    // FIX: Removed console.error("[waitlist/join]", error) — the raw DB error
+    // object can leak table names, column names, and constraint names. Use a
+    // structured logger with scrubbing if you need error observability.
     return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 500 });
   }
 }

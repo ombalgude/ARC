@@ -79,7 +79,6 @@ export default function WaitlistForm({ onSuccess, initialCount, referralCode }: 
         `}</style>
         
         <div
-          id="waitlist"
           className="waitlist-pill-wrapper"
           style={{
             display: "flex",
@@ -95,7 +94,6 @@ export default function WaitlistForm({ onSuccess, initialCount, referralCode }: 
             borderRadius: "7.5rem",
             padding: "6px 6px 6px 1.25rem",
             transition: "all 0.3s ease",
-            scrollMarginTop: "120px",
             transform: focused ? "translateY(-1px)" : "translateY(0)",
           }}
         >

@@ -7,8 +7,9 @@ export default function SmoothScroll(): React.JSX.Element | null {
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.history.scrollRestoration = "manual";
-      // Force scroll to top on mount for a fresh visit feel
-      window.scrollTo(0, 0);
+      // FIX: Removed window.scrollTo(0, 0)
+      // Forcing a scroll to the top on mount breaks section anchor links
+      // (like /#features or /#waitlist) and breaks browser Back button restoration.
     }
 
     const lenis = new Lenis({
@@ -19,6 +20,9 @@ export default function SmoothScroll(): React.JSX.Element | null {
       touchMultiplier: 2,
       infinite: false,
     });
+    
+    // Expose lenis globally so we can trigger smooth anchor scrolls without native tearing
+    (window as any).lenis = lenis;
 
     function raf(time: number) {
       lenis.raf(time);

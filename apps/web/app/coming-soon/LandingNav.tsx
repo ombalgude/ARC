@@ -16,12 +16,19 @@ export default function LandingNav(): React.JSX.Element | Promise<React.JSX.Elem
 
   const handleGetAccess = (e: React.MouseEvent) => {
     e.preventDefault();
-    window.scrollTo({ top: 0, behavior: "smooth" });
     const el = document.getElementById("waitlist");
     if (el) {
-      el.classList.remove("pulse-trigger");
-      void el.offsetWidth;
-      el.classList.add("pulse-trigger");
+      if ((window as any).lenis) {
+        (window as any).lenis.scrollTo(el, { offset: -120 });
+      } else {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      
+      const form = el.closest("form")?.querySelector(".waitlist-pill-wrapper") as HTMLElement | null;
+      const target = form ?? el;
+      target.classList.remove("pulse-trigger");
+      void target.offsetWidth;
+      target.classList.add("pulse-trigger");
     }
   };
 
@@ -160,8 +167,12 @@ export default function LandingNav(): React.JSX.Element | Promise<React.JSX.Elem
                     e.preventDefault();
                     const el = document.getElementById(link.toLowerCase());
                     if (el) {
-                      const y = el.getBoundingClientRect().top + window.scrollY - 100;
-                      window.scrollTo({ top: y, behavior: "smooth" });
+                      if ((window as any).lenis) {
+                        (window as any).lenis.scrollTo(el, { offset: -100 });
+                      } else {
+                        const y = el.getBoundingClientRect().top + window.scrollY - 100;
+                        window.scrollTo({ top: y, behavior: "smooth" });
+                      }
                     }
                   }
                 }}

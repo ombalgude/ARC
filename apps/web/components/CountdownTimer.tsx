@@ -37,7 +37,32 @@ export function CountdownTimer({ targetDate }: { targetDate: string }) {
     return () => clearInterval(interval);
   }, [targetDate]);
 
-  if (!isMounted) return null;
+  // FIX: Replaced `return null` with a dimensionally-identical skeleton.
+  // Returning null caused a layout shift (CLS) in the navbar and
+  // ConfirmationScreen — the pill went from zero-size to full-size after
+  // hydration. The skeleton occupies the same space so the layout is stable.
+  if (!isMounted) {
+    return (
+      <div
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          padding: "0.5rem 1.25rem",
+          background: "rgba(0,0,0,0.5)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: "100px",
+          boxShadow: "inset 0 1px 4px rgba(255,255,255,0.05), 0 10px 30px -10px rgba(0,0,0,0.8)",
+          backdropFilter: "blur(12px)",
+          margin: "0 auto",
+          // Match the exact height & approx width so there is no layout shift
+          minWidth: "180px",
+          height: "36px",
+          opacity: 0.4,
+        }}
+        aria-hidden
+      />
+    );
+  }
 
   const format = (num: number) => num.toString().padStart(2, "0");
 

@@ -1,15 +1,43 @@
 "use client";
 import React from "react";
 
-import { motion } from "framer-motion";
+export default function LandingFooter(): React.JSX.Element {
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith("/#")) {
+      e.preventDefault();
+      
+      if (window.location.pathname !== "/") {
+        window.location.href = href;
+        return;
+      }
+      
+      const targetId = href.substring(2);
+      const el = document.getElementById(targetId);
+      if (el) {
+        if ((window as any).lenis) {
+          (window as any).lenis.scrollTo(el, { offset: targetId === "waitlist" ? -120 : -100 });
+        } else {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
 
-export default function LandingFooter(): React.JSX.Element | Promise<React.JSX.Element> {
+        if (targetId === "waitlist") {
+          const form = document.querySelector(".waitlist-pill-wrapper") as HTMLElement | null;
+          if (form) {
+            form.classList.remove("pulse-trigger");
+            void form.offsetWidth;
+            form.classList.add("pulse-trigger");
+          }
+        }
+      }
+    }
+  };
+
   return (
     <footer
       style={{
         width: "100%",
-        background: "radial-gradient(100% 100% at 50% 100%, rgba(37,99,235,0.08) 0%, #000000 100%)",
-        backgroundColor: "#000000", // Fallback
+        background: "radial-gradient(100% 100% at 50% 100%, rgba(37,99,235,0.06) 0%, #000000 100%)",
+        backgroundColor: "#000000",
         borderTop: "1px solid rgba(255,255,255,0.08)",
         color: "#FFFFFF",
         fontFamily: "'Inter', sans-serif",
@@ -18,7 +46,7 @@ export default function LandingFooter(): React.JSX.Element | Promise<React.JSX.E
       <style>{`
         .footer-link {
           color: #8B96A5;
-          font-size: 0.875rem;
+          font-size: 0.8125rem;
           text-decoration: none;
           transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
           display: inline-block;
@@ -40,11 +68,12 @@ export default function LandingFooter(): React.JSX.Element | Promise<React.JSX.E
           border-bottom-color: #3B82F6;
         }
       `}</style>
-      {/* Top CTA Banner */}
+      
+      {/* Top CTA Banner - Tighter Spacing */}
       <div
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
-          padding: "4rem 1.5rem",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          padding: "2.5rem 1.5rem",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -61,10 +90,10 @@ export default function LandingFooter(): React.JSX.Element | Promise<React.JSX.E
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: "100%",
-            maxWidth: "800px",
-            height: "400px",
-            background: "radial-gradient(ellipse at center, rgba(37,99,235,0.15) 0%, transparent 70%)",
-            filter: "blur(60px)",
+            maxWidth: "600px",
+            height: "250px",
+            background: "radial-gradient(ellipse at center, rgba(37,99,235,0.12) 0%, transparent 70%)",
+            filter: "blur(50px)",
             pointerEvents: "none",
             zIndex: 0,
           }}
@@ -72,10 +101,10 @@ export default function LandingFooter(): React.JSX.Element | Promise<React.JSX.E
 
         <h2
           style={{
-            fontSize: "clamp(2rem, 3.5vw, 3.25rem)",
+            fontSize: "clamp(1.5rem, 3vw, 2.25rem)",
             fontWeight: 500,
-            letterSpacing: "-0.04em",
-            marginBottom: "2rem",
+            letterSpacing: "-0.03em",
+            marginBottom: "1.25rem",
             fontFamily: "'Space Grotesk', sans-serif",
             color: "#FFFFFF",
             position: "relative",
@@ -95,29 +124,18 @@ export default function LandingFooter(): React.JSX.Element | Promise<React.JSX.E
           </span>
         </h2>
         <a
-          href="/#waitlist"
+          href="/"
           className="group animate-gradient-shift"
-          onClick={(e) => {
-            if (window.location.pathname === "/") {
-              e.preventDefault();
-              window.scrollTo({ top: 0, behavior: "smooth" });
-              const el = document.getElementById("waitlist");
-              if (el) {
-                el.classList.remove("pulse-trigger");
-                void el.offsetWidth;
-                el.classList.add("pulse-trigger");
-              }
-            }
-          }}
+          onClick={(e) => handleLinkClick(e, "/#waitlist")}
           style={{
             position: "relative",
             zIndex: 1,
-            padding: "1rem 2.5rem",
+            padding: "0.75rem 2rem",
             background: "linear-gradient(135deg, rgba(37,99,235,0.9) 0%, rgba(37,99,235,0.9) 42%, rgba(96,165,250,0.8) 50%, rgba(37,99,235,0.9) 58%, rgba(37,99,235,0.9) 100%)",
             color: "#FFFFFF",
             borderRadius: "100px",
             fontWeight: 600,
-            fontSize: "1rem",
+            fontSize: "0.9375rem",
             textDecoration: "none",
             letterSpacing: "-0.01em",
             border: "1px solid rgba(255,255,255,0.15)",
@@ -136,39 +154,39 @@ export default function LandingFooter(): React.JSX.Element | Promise<React.JSX.E
         </a>
       </div>
 
-      {/* Main Grid */}
+      {/* Main Grid - Tighter Spacing */}
       <div
         style={{
-          maxWidth: "1400px",
+          maxWidth: "1200px",
           margin: "0 auto",
-          padding: "4rem 1.5rem",
+          padding: "2.5rem 1.5rem",
           display: "flex",
           flexWrap: "wrap",
-          gap: "4rem",
+          gap: "2.5rem",
           justifyContent: "space-between",
         }}
       >
         {/* Col 1: Brand */}
-        <div style={{ flex: "2 1 300px", display: "flex", flexDirection: "column", gap: "2rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        <div style={{ flex: "1.5 1 260px", display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <div
               style={{
-                width: "28px", height: "28px",
-                borderRadius: "8px",
+                width: "24px", height: "24px",
+                borderRadius: "6px",
                 background: "linear-gradient(145deg, #3B82F6 0%, #1D4ED8 100%)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 2px 8px rgba(59,130,246,0.4), inset 0 1px 1px rgba(255,255,255,0.3)"
+                boxShadow: "0 2px 6px rgba(59,130,246,0.3)"
               }}
             >
-              <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                 <path d="M2 9 Q6 2 10 9" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
               </svg>
             </div>
             <span
               style={{
-                fontSize: "1.25rem",
+                fontSize: "1.125rem",
                 fontWeight: 600,
-                letterSpacing: "0.15em",
+                letterSpacing: "0.12em",
                 fontFamily: "'Space Grotesk', sans-serif",
               }}
             >
@@ -176,20 +194,20 @@ export default function LandingFooter(): React.JSX.Element | Promise<React.JSX.E
             </span>
           </div>
           
-          <p style={{ color: "#8B96A5", fontSize: "0.9375rem", lineHeight: 1.6, maxWidth: "300px" }}>
-            Your all-in-one fitness copilot. Training, nutrition, and habits — unified into one intelligent engine.
+          <p style={{ color: "#8B96A5", fontSize: "0.875rem", lineHeight: 1.5, maxWidth: "280px" }}>
+            Your all-in-one fitness copilot. Training, nutrition, and habits unified into one intelligent engine.
           </p>
         </div>
 
-        {/* Links Columns */}
-        <div style={{ flex: "1 1 600px", display: "flex", flexWrap: "wrap", gap: "4rem", justifyContent: "space-between" }}>
+        {/* Links Columns - Compact Gaps */}
+        <div style={{ flex: "2 1 480px", display: "flex", flexWrap: "wrap", gap: "2rem", justifyContent: "space-between" }}>
           {[
             {
               title: "Product",
               links: [
-                { label: "Core Intelligence", href: "/#features" },
-                { label: "Exclusive Perks", href: "/#perks" },
-                { label: "Waitlist", href: "/#waitlist" },
+                { label: "Features", href: "/#features" },
+                { label: "Perks", href: "/#perks" },
+                { label: "Join Waitlist", href: "/#waitlist" },
               ]
             },
             {
@@ -209,30 +227,17 @@ export default function LandingFooter(): React.JSX.Element | Promise<React.JSX.E
               ]
             }
           ].map((column) => (
-            <div key={column.title} style={{ display: "flex", flexDirection: "column", gap: "1.5rem", minWidth: "140px" }}>
-              <h4 style={{ color: "#FFFFFF", fontSize: "0.875rem", fontWeight: 500 }}>
+            <div key={column.title} style={{ display: "flex", flexDirection: "column", gap: "1rem", minWidth: "120px" }}>
+              <h4 style={{ color: "#FFFFFF", fontSize: "0.8125rem", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
                 {column.title}
               </h4>
-              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
                 {column.links.map((link) => (
                   <a
                     key={link.label}
                     href={link.href}
                     className="footer-link"
-                    onClick={(e) => {
-                      if (link.href.startsWith("/#")) {
-                        if (window.location.pathname === "/") {
-                          e.preventDefault();
-                          const targetId = link.href.substring(2);
-                          const el = document.getElementById(targetId);
-                          if (el) {
-                            el.scrollIntoView({ behavior: "smooth" });
-                          } else if (targetId === "waitlist") {
-                            window.scrollTo({ top: 0, behavior: "smooth" });
-                          }
-                        }
-                      }
-                    }}
+                    onClick={(e) => handleLinkClick(e, link.href)}
                   >
                     {link.label}
                   </a>
@@ -243,25 +248,25 @@ export default function LandingFooter(): React.JSX.Element | Promise<React.JSX.E
         </div>
       </div>
 
-      {/* Bottom Bar */}
-      <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", padding: "2rem 0" }}>
+      {/* Bottom Bar - Tighter Padding */}
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "1.25rem 0" }}>
         <div
           style={{
-            maxWidth: "1400px",
+            maxWidth: "1200px",
             margin: "0 auto",
-            padding: "0 2rem",
+            padding: "0 1.5rem",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             flexWrap: "wrap",
-            gap: "1rem",
+            gap: "0.75rem",
           }}
         >
-          <p style={{ color: "#8B96A5", fontSize: "0.875rem" }}>
+          <p style={{ color: "#8B96A5", fontSize: "0.75rem" }}>
             © 2026 ARC Fitness. All rights reserved.
           </p>
 
-          <p style={{ color: "#8B96A5", fontSize: "0.875rem" }}>
+          <p style={{ color: "#8B96A5", fontSize: "0.75rem" }}>
             Engineered by{" "}
             <a
               href="https://www.ombalgude.app/"

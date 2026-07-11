@@ -13,7 +13,11 @@ const geistMono = localFont({
   variable: "--font-geist-mono",
 });
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://arcfitness.app";
+
 export const metadata: Metadata = {
+  // ── Core ──────────────────────────────────────────────────────────────────
+  metadataBase: new URL(APP_URL),
   title: "ARC Fitness — AI-Powered Fitness. Launching Soon.",
   description:
     "Join the waitlist for ARC Fitness — the AI fitness coach that tracks workouts, habits, and nutrition in one beautiful app. iOS & Android. Coming July 2026.",
@@ -25,19 +29,56 @@ export const metadata: Metadata = {
     "ARC Fitness",
     "iOS Android fitness",
   ],
+
+  // ── Canonical ─────────────────────────────────────────────────────────────
+  alternates: {
+    canonical: "/",
+  },
+
+  // ── OpenGraph (Facebook / LinkedIn) ───────────────────────────────────────
   openGraph: {
     type: "website",
+    url: APP_URL,
+    siteName: "ARC Fitness",
     title: "ARC Fitness is launching soon 🚀",
     description:
       "Be first. Get 3 months Pro free. Join thousands of founding members waiting for the most intelligent fitness app ever built.",
-    siteName: "ARC Fitness",
+    images: [
+      {
+        url: "/og-image.png", // resolved to APP_URL/og-image.png via metadataBase
+        width: 1200,
+        height: 630,
+        alt: "ARC Fitness — AI-Powered Fitness Copilot",
+      },
+    ],
   },
+
+  // ── Twitter Card ──────────────────────────────────────────────────────────
   twitter: {
     card: "summary_large_image",
+    site: "@arcfitnessapp",
+    creator: "@arcfitnessapp",
     title: "ARC Fitness — AI-Powered Fitness. Launching Soon.",
     description:
       "Join the waitlist for ARC Fitness — AI coaching for workouts, habits & nutrition. iOS & Android.",
-    creator: "@arcfitnessapp",
+    images: [
+      {
+        url: "/og-image.png", // resolved to APP_URL/og-image.png via metadataBase
+        alt: "ARC Fitness — AI-Powered Fitness Copilot",
+      },
+    ],
+  },
+
+  // ── Robots ────────────────────────────────────────────────────────────────
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
@@ -52,8 +93,14 @@ export default function RootLayout({
         <head>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+          {/*
+            FIX: Changed display=block → display=swap.
+            'block' causes FOIT (invisible text) if Google Fonts is slow.
+            'swap' ensures text is visible with a system font while the custom
+            font loads — then swaps in. Much better for LCP and user experience.
+          */}
           <link
-            href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=block"
+            href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
             rel="stylesheet"
           />
         </head>
