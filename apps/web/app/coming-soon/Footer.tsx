@@ -159,7 +159,7 @@ export default function LandingFooter(): React.JSX.Element {
         style={{
           maxWidth: "1400px",
           margin: "0 auto",
-          padding: "4rem 1.5rem",
+          padding: "4rem 2rem",
           display: "flex",
           flexWrap: "wrap",
           gap: "4rem",
@@ -196,7 +196,7 @@ export default function LandingFooter(): React.JSX.Element {
           
           <p style={{ color: "#8B96A5", fontSize: "0.9375rem", lineHeight: 1.6, maxWidth: "300px" }}>
             Your all-in-one fitness copilot. Training, nutrition, and habits — unified into one intelligent engine.
-          </p>
+          </p>  
         </div>
 
         {/* Links Columns */}
@@ -249,7 +249,7 @@ export default function LandingFooter(): React.JSX.Element {
       </div>
 
       {/* Bottom Bar */}
-      <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", padding: "2rem 0" }}>
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", padding: "2rem 0rem" }}>
         <div
           style={{
             maxWidth: "1400px",
@@ -273,6 +273,7 @@ export default function LandingFooter(): React.JSX.Element {
               target="_blank"
               rel="noopener noreferrer"
               className="creator-link"
+              style={{ marginRight: "3.5rem" }}  
             >
               Om Balgude
             </a>
