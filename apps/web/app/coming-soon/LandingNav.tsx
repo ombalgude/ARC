@@ -154,7 +154,17 @@ export default function LandingNav(): React.JSX.Element | Promise<React.JSX.Elem
             {navLinks.map((link) => (
               <a
                 key={link}
-                href={`#${link.toLowerCase()}`}
+                href={`/#${link.toLowerCase()}`}
+                onClick={(e) => {
+                  if (window.location.pathname === "/") {
+                    e.preventDefault();
+                    const el = document.getElementById(link.toLowerCase());
+                    if (el) {
+                      const y = el.getBoundingClientRect().top + window.scrollY - 100;
+                      window.scrollTo({ top: y, behavior: "smooth" });
+                    }
+                  }
+                }}
                 onMouseEnter={() => setActiveLink(link)}
                 onMouseLeave={() => setActiveLink(null)}
                 style={{

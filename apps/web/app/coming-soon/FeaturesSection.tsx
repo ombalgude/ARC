@@ -95,11 +95,11 @@ function FeatureCard({ feature, index }: { feature: typeof features[0], index: n
       transition={{ duration: 0.8, delay: index * 0.15, ease: [0.16, 1, 0.3, 1] }}
       className={`card-spotlight-wrapper feature-spotlight ${feature.colSpanClass}`}
       style={{
-        padding: "clamp(2.5rem, 4vw, 3.5rem)",
+        padding: "clamp(1.5rem, 3vw, 2rem)",
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        minHeight: "380px",
+        minHeight: "340px",
         backdropFilter: "blur(48px)",
         WebkitBackdropFilter: "blur(48px)",
         position: "relative",
@@ -112,9 +112,9 @@ function FeatureCard({ feature, index }: { feature: typeof features[0], index: n
       <div 
         style={{ 
           position: "absolute", 
-          top: "-20px", 
-          right: "-10px", 
-          fontSize: "12rem", 
+          top: "-15px", 
+          right: "-5px", 
+          fontSize: "10rem", 
           fontWeight: 700, 
           color: "rgba(255,255,255,0.02)",
           fontFamily: "'Space Grotesk', sans-serif",
@@ -199,25 +199,25 @@ function FeatureCard({ feature, index }: { feature: typeof features[0], index: n
         </div>
         <h3
           style={{
-            fontSize: "clamp(1.5rem, 2.5vw, 2rem)",
+            fontSize: "1.5rem",
             fontWeight: 500,
             color: "#FFFFFF",
-            marginBottom: "1rem",
+            marginBottom: "0.875rem",
             letterSpacing: "-0.03em",
-            lineHeight: 1.1,
+            lineHeight: 1.15,
             fontFamily: "'Space Grotesk', sans-serif",
-            maxWidth: "90%",
+            maxWidth: "95%",
           }}
         >
           {feature.title}
         </h3>
         <p
           style={{
-            fontSize: "1rem",
+            fontSize: "0.9375rem",
             color: "#8B96A5",
-            lineHeight: 1.7,
+            lineHeight: 1.65,
             letterSpacing: "-0.01em",
-            maxWidth: "90%",
+            maxWidth: "95%",
           }}
         >
           {feature.desc}
@@ -237,7 +237,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0], index: n
       >
         <span
           style={{
-            fontSize: "2rem",
+            fontSize: "1.75rem",
             fontWeight: 500,
             color: feature.accentColor,
             letterSpacing: "-0.04em",
@@ -265,7 +265,7 @@ export default function FeaturesSection(): React.JSX.Element | Promise<React.JSX
     <section
       id="features"
       style={{
-        padding: "5rem 1.5rem 8rem",
+        padding: "4rem 1.5rem 6rem",
         maxWidth: "1400px",
         margin: "0 auto",
         width: "100%",
@@ -282,7 +282,7 @@ export default function FeaturesSection(): React.JSX.Element | Promise<React.JSX
           visible: { transition: { staggerChildren: 0.15 } },
           hidden: {}
         }}
-        style={{ textAlign: "center", marginBottom: "6rem" }}
+        style={{ textAlign: "center", marginBottom: "4rem" }}
       >
         <motion.div
           variants={{
@@ -315,10 +315,10 @@ export default function FeaturesSection(): React.JSX.Element | Promise<React.JSX
           }}
           style={{
             fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: "clamp(3rem, 5vw, 5.5rem)",
+            fontSize: "clamp(2rem, 3.5vw, 3.25rem)",
             fontWeight: 500,
             letterSpacing: "-0.04em",
-            lineHeight: 1.02,
+            lineHeight: 1.05,
             color: "#FFFFFF",
             marginBottom: "1.5rem",
           }}
@@ -343,8 +343,8 @@ export default function FeaturesSection(): React.JSX.Element | Promise<React.JSX
           }}
           style={{
             color: "#8B96A5",
-            fontSize: "1.25rem",
-            maxWidth: "600px",
+            fontSize: "1.0625rem",
+            maxWidth: "560px",
             margin: "0 auto",
             lineHeight: 1.6,
             letterSpacing: "-0.01em",

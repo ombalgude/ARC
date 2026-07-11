@@ -47,7 +47,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
     <section
       id="perks"
       style={{
-        padding: "1rem 1.5rem 5rem 1.5rem",
+        padding: "0rem 1.5rem 4rem 1.5rem",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -112,13 +112,13 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
         <div 
           style={{ 
             flex: "1 1 450px", 
-            padding: "clamp(3rem, 5vw, 5rem)", 
+            padding: "clamp(2rem, 4vw, 3.5rem)", 
             position: "relative", 
             zIndex: 2, 
             display: "flex", 
             flexDirection: "column", 
             justifyContent: "space-between",
-            gap: "4rem",
+            gap: "2.5rem",
           }}
         >
           <div>
@@ -145,7 +145,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
             <h2
               style={{
                 fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: "clamp(2.5rem, 4vw, 3.5rem)",
+                fontSize: "clamp(2rem, 3vw, 2.75rem)",
                 fontWeight: 500,
                 letterSpacing: "-0.03em",
                 lineHeight: 1.05,
@@ -168,7 +168,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
             <p
               style={{
                 color: "#8B96A5",
-                fontSize: "1.125rem",
+                fontSize: "1rem",
                 lineHeight: 1.6,
                 letterSpacing: "-0.01em",
               }}

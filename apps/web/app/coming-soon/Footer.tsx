@@ -44,7 +44,7 @@ export default function LandingFooter(): React.JSX.Element | Promise<React.JSX.E
       <div
         style={{
           borderBottom: "1px solid rgba(255,255,255,0.08)",
-          padding: "5rem 1.5rem",
+          padding: "4rem 1.5rem",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -72,10 +72,10 @@ export default function LandingFooter(): React.JSX.Element | Promise<React.JSX.E
 
         <h2
           style={{
-            fontSize: "clamp(2.5rem, 5vw, 4.5rem)",
+            fontSize: "clamp(2rem, 3.5vw, 3.25rem)",
             fontWeight: 500,
             letterSpacing: "-0.04em",
-            marginBottom: "2.5rem",
+            marginBottom: "2rem",
             fontFamily: "'Space Grotesk', sans-serif",
             color: "#FFFFFF",
             position: "relative",

@@ -96,7 +96,7 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
         alignItems: "center",
         justifyContent: "center",
         minHeight: "100svh",
-        padding: "0 1.5rem",
+        padding: "0 2rem",
         overflowX: "clip",
         overflowY: "visible",
         background: "transparent",
@@ -109,13 +109,12 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
         position: "relative", zIndex: 1,
         display: "grid",
         gridTemplateColumns: "1fr 1fr",
-        gap: "clamp(3rem, 5vw, 6rem)",
+        gap: "clamp(3rem, 5vw, 5rem)",
         alignItems: "center",
-        maxWidth: "1240px",
+        maxWidth: "1200px",
         width: "100%",
-        margin: "0 auto",
-        marginTop: "-4vh",
-        padding: "clamp(5rem, 10vh, 8rem) 0 clamp(4rem, 8vh, 6rem)",
+        margin: "20px auto",
+        padding: "clamp(5rem, 10vh, 7rem) 0 clamp(3rem, 5vh, 4rem)",
       }}>
         
         <div 
@@ -123,7 +122,6 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
           style={{
           display: "flex", flexDirection: "column",
           alignItems: "flex-start", textAlign: "left",
-          marginTop: "40px"
         }}>
 
           <h1
@@ -131,17 +129,17 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
               fontFamily: "'Space Grotesk', sans-serif",
               fontWeight: 500,
               letterSpacing: "-0.035em",
-              lineHeight: 1.08,
+              lineHeight: 1.1,
               color: "#FFFFFF",
-              marginBottom: "1rem",
-              marginTop:"5px",
-              fontSize: "clamp(3.25rem, 6.5vw, 7rem)",
+              marginBottom: "1.5rem",
+              marginTop: "0",
+              fontSize: "clamp(2.5rem, 4.5vw, 4.5rem)",
             }}
           >
             <span className="text-reveal-wrapper" style={{ display: "block" }}>
               <span className="text-reveal-inner delay-100">Your ultimate</span>
             </span>
-            <span className="text-reveal-wrapper" style={{ display: "block", marginTop: "-0.12em", marginBottom: "0.02em" }}>
+            <span className="text-reveal-wrapper" style={{ display: "block", marginTop: "-0.1em", marginBottom: "0.02em" }}>
               <span className="text-reveal-inner delay-250">fitness</span>
             </span>
             <span className="text-reveal-wrapper" style={{ display: "block" }}>
@@ -164,12 +162,12 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
           <p
             className="animate-fade-in opacity-0-init delay-600"
             style={{
-              fontSize: "clamp(1rem, 1.4vw, 1.175rem)",
-              lineHeight: 1.65,
-              color: "rgba(255,255,255,0.58)",
-              maxWidth: "500px",
-              marginBottom: "1.5rem",
-              letterSpacing: "-0.01em",
+              fontSize: "clamp(0.9rem, 1.2vw, 1.05rem)",
+              lineHeight: 1.7,
+              color: "rgba(255,255,255,0.5)",
+              maxWidth: "420px",
+              marginBottom: "2rem",
+              letterSpacing: "-0.005em",
             }}
           >
             Generic trackers just log data. ARC unifies your training, nutrition, and habits into one intelligent engine that plans your progression and removes all guesswork.
@@ -177,7 +175,7 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
 
           <div
             className="animate-fade-up opacity-0-init delay-800 waitlist-wrapper"
-            style={{ width: "100%", maxWidth: "460px", marginBottom: "1.75rem" }}
+            style={{ width: "100%", maxWidth: "440px", marginBottom: "1.75rem" }}
           >
             {confirmed ? (
               <div
@@ -238,8 +236,9 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
             <div
               className="animate-fade-in opacity-0-init delay-1000"
               style={{
-                display: "flex", alignItems: "center", gap: "1rem",
+                display: "flex", alignItems: "center", gap: "0.75rem",
                 fontSize: "0.8rem", color: "rgba(255,255,255,0.35)",
+                marginBottom: "1.5rem",
               }}
             >
               
@@ -280,11 +279,11 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
           <div
             className="animate-fade-in opacity-0-init delay-1200 hero-stats"
             style={{
-              display: "flex", alignItems: "center", gap: "1.5rem",
-              marginTop: "1.5rem",
+              display: "flex", alignItems: "center", gap: "2.5rem",
+              marginTop: "1.75rem",
               paddingTop: "1.5rem",
-              borderTop: "1px solid rgba(255,255,255,0.07)",
-              width: "100%", maxWidth: "460px",
+              borderTop: "1px solid rgba(255,255,255,0.06)",
+              width: "100%", maxWidth: "440px",
             }}
           >
             {[
@@ -294,11 +293,11 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
             ].map((stat, i) => (
               <div key={i} style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                 <span style={{
-                  fontSize: "1.25rem", fontWeight: 500,
+                  fontSize: "1.125rem", fontWeight: 600,
                   color: i === 2 ? "var(--arc-blue)" : "#FFFFFF",
                   letterSpacing: "-0.03em",
                 }}>{stat.value}</span>
-                <span style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.38)", letterSpacing: "0.04em", textTransform: "uppercase" as const }}>{stat.label}</span>
+                <span style={{ fontSize: "0.625rem", color: "rgba(255,255,255,0.35)", letterSpacing: "0.05em", textTransform: "uppercase" as const }}>{stat.label}</span>
               </div>
             ))}
           </div>
@@ -311,7 +310,7 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
             justifyContent: "center",
             alignItems: "center",
             position: "relative",
-            marginTop: "-80px"
+            marginTop: "-20px",
           }}
         >
           
@@ -325,7 +324,7 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
 
           {/* Removed Floating Widgets */}
 
-          <div className="phone-parallax-container animate-scale-up opacity-0-init delay-500">
+          <div className="phone-parallax-container animate-scale-up opacity-0-init delay-500" >
             <div
               ref={phoneRef}
               className="phone-parallax-inner"
@@ -588,41 +587,44 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
       </div>
 
       <style>{`
-        .waitlist-wrapper { width: 100%; max-width: 460px; margin-bottom: 1.5rem; }
+        .waitlist-wrapper { width: 100%; max-width: 440px; }
         .hero-stats {
-          display: flex; align-items: center; gap: 1.5rem;
-          margin-top: 2.5rem; padding-top: 2rem;
+          display: flex; align-items: center; gap: 2rem;
+          margin-top: 1.25rem; padding-top: 1.25rem;
           border-top: 1px solid rgba(255,255,255,0.07);
-          width: 100%; max-width: 460px;
+          width: 100%; max-width: 440px;
         }
         @media (max-width: 950px) {
           .hero-grid { 
             grid-template-columns: 1fr !important; 
-            gap: 2rem !important;
-            padding-top: clamp(3rem, 5vh, 6rem) !important;
-            margin-top: 0vh !important;
+            gap: 1.5rem !important;
+            padding-top: clamp(3rem, 6vh, 5rem) !important;
+            margin-top: 0 !important;
+            padding-bottom: 2rem !important;
           }
           .hero-text-col {
             align-items: center !important;
             text-align: center !important;
+            margin-top: 0 !important;
           }
           .hero-text-col h1 {
-            font-size: clamp(2.5rem, 8vw, 4rem) !important;
-            margin-bottom: 1rem !important;
+            font-size: clamp(2.25rem, 7vw, 3.5rem) !important;
+            margin-bottom: 0.75rem !important;
             line-height: 1.1 !important;
           }
           .hero-text-col p {
             margin-left: auto;
             margin-right: auto;
             font-size: 0.9375rem !important;
-            padding: 0 1rem;
+            padding: 0 0.5rem;
+            margin-bottom: 1rem !important;
           }
           .waitlist-wrapper {
             margin-left: auto;
             margin-right: auto;
             display: flex;
             justify-content: center;
-            padding: 0 1rem;
+            margin-bottom: 1rem !important;
           }
           .waitlist-pill-wrapper {
             padding: 4px 4px 4px 1rem !important;
@@ -635,38 +637,35 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
             font-size: 0.8125rem !important;
           }
           .hero-stats {
-            justify-content: space-around !important;
+            justify-content: center !important;
             margin-left: auto;
             margin-right: auto;
-            padding: 1.5rem 1rem 0 !important;
-            gap: 0.5rem !important;
-          }
-          .hero-stats span:first-child {
-            font-size: 1.125rem !important;
+            padding-top: 1rem !important;
+            margin-top: 1rem !important;
+            gap: 1.5rem !important;
           }
           .hero-phone-col { 
             display: flex !important;
-            transform: scale(0.9) perspective(1000px) rotateX(15deg) rotateY(-20deg) rotateZ(2deg);
-            margin-top: 40px !important;
+            transform: scale(0.85) perspective(1000px) rotateX(15deg) rotateY(-20deg) rotateZ(2deg);
+            margin-top: 20px !important;
             filter: drop-shadow(-20px 40px 30px rgba(0,0,0,0.8)) drop-shadow(0 20px 40px rgba(59,130,246,0.25));
           }
         }
         @media (max-width: 600px) {
           .hero-phone-col { 
             transform: scale(0.7) perspective(1000px) rotateX(15deg) rotateY(-20deg) rotateZ(2deg);
-            margin-top: -10px !important;
+            margin-top: -20px !important;
           }
         }
         @media (max-width: 400px) {
           .hero-phone-col { 
-            transform: scale(0.6) perspective(1000px) rotateX(15deg) rotateY(-20deg) rotateZ(2deg);
-            margin-top: -40px !important;
+            transform: scale(0.58) perspective(1000px) rotateX(15deg) rotateY(-20deg) rotateZ(2deg);
+            margin-top: -50px !important;
           }
           .hero-text-col h1 {
-            font-size: 2.25rem !important;
+            font-size: 2rem !important;
           }
           .hero-stats {
-            flex-direction: column !important;
             gap: 1.25rem !important;
           }
         }
