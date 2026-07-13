@@ -13,7 +13,7 @@ const perks = [
     accentColor: "#F59E0B",
     accentDim: "rgba(245,158,11,0.1)",
     title: "3 Months Pro. Zero Cost.",
-    desc: "Full, uncompromised access to every AI feature — workouts, nutrition, habits, coaching. Reserved for the first 100 only. After that, it's gone.",
+    desc: "Full access to ARC's intelligent training engine. Reserved for the first 100 users.",
   },
   {
     icon: (
@@ -23,8 +23,8 @@ const perks = [
     ),
     accentColor: "#10B981",
     accentDim: "rgba(16,185,129,0.1)",
-    title: "Day-One Priority Access",
-    desc: "Skip every queue on launch day. While the general public waits, you're already in. The waitlist is the advantage.",
+    title: "Priority Waitlist Access",
+    desc: "Every friend you invite moves you 5 spots up the waitlist. Get early access before the general public.",
   },
 ];
 
@@ -33,7 +33,8 @@ interface PerksProps {
 }
 
 export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.Element | Promise<React.JSX.Element> {
-  const pctUsed = Math.round(((100 - spotsRemaining) / 100) * 100);
+  const passesLeft = Math.min(100, Math.max(0, spotsRemaining));
+  const pctUsed = Math.min(100, Math.max(0, Math.round(((100 - passesLeft) / 100) * 100)));
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
@@ -48,7 +49,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
       id="perks"
       className="perks-section"
       style={{
-        padding: "0rem 1.5rem 4rem 1.5rem",
+        padding: "1rem 1.5rem 5rem 1.5rem",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -120,13 +121,13 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
         <div 
           style={{ 
             flex: "1 1 450px", 
-            padding: "clamp(1.25rem, 4vw, 3.5rem)", 
+            padding: "clamp(3rem, 5vw, 5rem)", 
             position: "relative", 
             zIndex: 2, 
             display: "flex", 
             flexDirection: "column", 
             justifyContent: "space-between",
-            gap: "2.5rem",
+            gap: "4rem",
           }}
         >
           <div>
@@ -147,13 +148,13 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
               }}
             >
               <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--arc-blue)", display: "inline-block" }} />
-              Exclusive Pass
+              Early Access
             </div>
 
             <h2
               style={{
                 fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: "clamp(2rem, 3vw, 2.75rem)",
+                fontSize: "clamp(2.5rem, 4vw, 3.5rem)",
                 fontWeight: 500,
                 letterSpacing: "-0.03em",
                 lineHeight: 1.05,
@@ -176,12 +177,12 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
             <p
               style={{
                 color: "#8B96A5",
-                fontSize: "1rem",
+                fontSize: "1.125rem",
                 lineHeight: 1.6,
                 letterSpacing: "-0.01em",
               }}
             >
-              These perks don’t roll over. They close the moment we hit 100. Once they’re gone, they’re gone.
+              We are giving 3 months of Pro access for free to our first 100 users. Secure your spot on the waitlist now.
             </p>
           </div>
 
@@ -201,7 +202,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
                 fontFamily: "'Space Grotesk', monospace",
                 lineHeight: 0.9,
               }}>
-                {spotsRemaining}
+                {passesLeft}
               </span>
               <span style={{ fontSize: "1rem", color: "rgba(255,255,255,0.4)", fontWeight: 500, letterSpacing: "-0.01em" }}>
                 spots left
@@ -221,7 +222,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
             </div>
 
             <p style={{ fontSize: "0.75rem", color: "rgba(245,158,11,0.8)", letterSpacing: "0.1em", textTransform: "uppercase" as const, fontWeight: 600 }}>
-              {pctUsed}% claimed · Closes permanently at 100
+              {pctUsed}% claimed · Closes permanently at 100 spots
             </p>
           </div>
         </div>

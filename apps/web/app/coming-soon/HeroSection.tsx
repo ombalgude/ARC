@@ -278,7 +278,7 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
 
               <span>
                 Join <strong style={{ color: "rgba(255,255,255,0.80)", fontWeight: 500 }}>
-                  {(12500 + count).toLocaleString()}+
+                  {count.toLocaleString()}
                 </strong>
                 {" "}high-performers on the waitlist
               </span>

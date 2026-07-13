@@ -102,8 +102,8 @@ export async function POST(request: Request) {
               <div style="margin-bottom:24px;background-color:#111116;border:1px solid #1F1F2E;border-radius:12px;padding:24px;">
                 <p style="font-weight:700;margin-top:0;margin-bottom:16px;text-transform:uppercase;font-size:12px;letter-spacing:0.05em;color:#9CA3AF;">Your early access perks</p>
                 <ul style="color:#9CA3AF;padding-left:20px;line-height:1.8;font-size:14px;margin:0;">
-                  <li style="margin-bottom:8px;"><strong style="color:#F1F1F3;">3 Months Pro Free</strong> — Reserved for the first 100 only. After that, it's gone.</li>
-                  <li><strong style="color:#F1F1F3;">Day-One Priority Access</strong> — Skip every queue on launch day.</li>
+                  <li style="margin-bottom:8px;"><strong style="color:#F1F1F3;">3 Months Pro Free</strong> — Reserved for the first 100 users. Secure your spot on the waitlist.</li>
+                  <li><strong style="color:#F1F1F3;">Priority Waitlist Access</strong> — Skip the queue. Every friend you refer moves you 5 spots up.</li>
                 </ul>
               </div>
 

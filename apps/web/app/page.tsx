@@ -18,7 +18,7 @@ async function getWaitlistStats(): Promise<{ totalCount: number; spotsRemaining:
     if (!res.ok) throw new Error("stats fetch failed");
     return (await res.json()) as { totalCount: number; spotsRemaining: number };
   } catch {
-    return { totalCount: 2847, spotsRemaining: 347 };
+    return { totalCount: 2847, spotsRemaining: 28 };
   }
 }
 
