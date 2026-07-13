@@ -126,7 +126,7 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
         maxWidth: "1200px",
         width: "100%",
         margin: "20px auto",
-        padding: "clamp(5rem, 10vh, 7rem) 0 clamp(3rem, 5vh, 4rem)",
+        padding: "clamp(6.5rem, 10vh, 8.5rem) 0 clamp(3rem, 5vh, 4rem)",
       }}>
         
         <div 
@@ -215,21 +215,18 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
                 </div>
                 <button
                   onClick={() => setShowModal(true)}
-                  className="btn-primary animate-gradient-shift"
+                  className="btn-primary view-ticket-btn"
                   style={{
-                    height: "2.75rem",
+                    height: "3rem",
                     padding: "0 1.5rem",
                     fontSize: "0.875rem",
-                    fontWeight: 800,
+                    fontWeight: 500,
                     cursor: "pointer",
-                    background: "linear-gradient(135deg, rgba(37,99,235,0.9) 0%, rgba(37,99,235,0.9) 42%, rgba(96,165,250,0.8) 50%, rgba(37,99,235,0.9) 58%, rgba(37,99,235,0.9) 100%)",
+                    background: "#3B82F6",
                     color: "#FFFFFF",
-                    border: "1px solid rgba(255,255,255,0.15)",
-                    boxShadow: "0 6px 20px rgba(37,99,235,0.4), inset 0 1px 1px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.2)",
-                    backdropFilter: "blur(12px)",
-                    WebkitBackdropFilter: "blur(12px)",
+                    border: "none",
                     borderRadius: "100px",
-                    transition: "transform 0.2s ease"
+                    transition: "background 0.2s ease, opacity 0.2s ease"
                   }}
                 >
                   View Ticket
@@ -554,7 +551,7 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
               }} />
 
               <div
-                className="animate-fade-up opacity-0-init delay-1000"
+                className="animate-fade-up opacity-0-init delay-1000 hero-phone-badge-right"
                 style={{
                   position: "absolute",
                   top: "15%",
@@ -577,7 +574,7 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
               </div>
 
               <div
-                className="animate-fade-up opacity-0-init delay-1200"
+                className="animate-fade-up opacity-0-init delay-1200 hero-phone-badge-left"
                 style={{
                   position: "absolute",
                   bottom: "20%",
@@ -600,9 +597,11 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
 
         </div>
       </div>
-
       <style>{`
         .waitlist-wrapper { width: 100%; max-width: 440px; }
+        .view-ticket-btn:hover {
+          background: #2563EB !important;
+        }
         .hero-stats {
           display: flex; align-items: center; gap: 2rem;
           margin-top: 1.25rem; padding-top: 1.25rem;
@@ -613,7 +612,7 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
           .hero-grid { 
             grid-template-columns: 1fr !important; 
             gap: 1.5rem !important;
-            padding-top: clamp(3rem, 6vh, 5rem) !important;
+            padding-top: clamp(6.5rem, 10vh, 8.5rem) !important;
             margin-top: 0 !important;
             padding-bottom: 2rem !important;
           }
@@ -638,7 +637,7 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
             margin-left: auto;
             margin-right: auto;
             display: flex;
-            justify-content: center;
+            justifyContent: center;
             margin-bottom: 1rem !important;
           }
           .waitlist-pill-wrapper {
@@ -661,27 +660,45 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
           }
           .hero-phone-col { 
             display: flex !important;
-            transform: scale(0.85) perspective(1000px) rotateX(15deg) rotateY(-20deg) rotateZ(2deg);
-            margin-top: 20px !important;
-            filter: drop-shadow(-20px 40px 30px rgba(0,0,0,0.8)) drop-shadow(0 20px 40px rgba(59,130,246,0.25));
+            transform: scale(0.9) perspective(1000px) rotateX(5deg) rotateY(-8deg) rotateZ(1deg) !important;
+            margin-top: 2.5rem !important;
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.6)) !important;
           }
         }
         @media (max-width: 600px) {
           .hero-phone-col { 
-            transform: scale(0.7) perspective(1000px) rotateX(15deg) rotateY(-20deg) rotateZ(2deg);
-            margin-top: -20px !important;
+            transform: scale(0.95) perspective(1000px) rotateX(0deg) rotateY(0deg) rotateZ(0deg) !important;
+            margin-top: 2rem !important;
+          }
+          .hero-phone-badge-right {
+            right: -5% !important;
+            transform: scale(0.9) !important;
+          }
+          .hero-phone-badge-left {
+            left: -5% !important;
+            transform: scale(0.9) !important;
           }
         }
         @media (max-width: 400px) {
           .hero-phone-col { 
-            transform: scale(0.58) perspective(1000px) rotateX(15deg) rotateY(-20deg) rotateZ(2deg);
-            margin-top: -50px !important;
+            transform: scale(0.85) perspective(1000px) rotateX(0deg) rotateY(0deg) rotateZ(0deg) !important;
+            margin-top: 1.5rem !important;
           }
           .hero-text-col h1 {
             font-size: 2rem !important;
           }
           .hero-stats {
             gap: 1.25rem !important;
+          }
+          .hero-phone-badge-right {
+            right: 0 !important;
+            transform: scale(0.8) !important;
+            top: 18% !important;
+          }
+          .hero-phone-badge-left {
+            left: 0 !important;
+            transform: scale(0.8) !important;
+            bottom: 23% !important;
           }
         }
       `}</style>

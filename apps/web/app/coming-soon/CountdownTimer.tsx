@@ -41,6 +41,7 @@ function FlipDigit({ value, label }: FlipDigitProps) {
             animate={{ y: "0%", opacity: 1, rotateX: 0 }}
             exit={{ y: "-40%", opacity: 0, rotateX: 45 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="countdown-flip-digit"
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
               fontVariantNumeric: "tabular-nums",
@@ -104,6 +105,38 @@ export default function CountdownTimer(): React.JSX.Element {
         borderTop: "1px solid rgba(255,255,255,0.05)",
       }}
     >
+      <style>{`
+        .countdown-header {
+          display: flex !important;
+          justify-content: space-between !important;
+          align-items: flex-end !important;
+          width: 100% !important;
+        }
+        .countdown-digits-wrapper {
+          display: flex !important;
+          justify-content: center !important;
+          align-items: center !important;
+          gap: clamp(1.5rem, 5vw, 6rem) !important;
+          width: 100% !important;
+        }
+        @media (max-width: 640px) {
+          .countdown-header {
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
+            gap: 1.5rem !important;
+            margin-bottom: 2rem !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .countdown-digits-wrapper {
+            gap: clamp(0.5rem, 3vw, 6rem) !important;
+          }
+          .countdown-flip-digit {
+            font-size: clamp(2rem, 8vw, 12rem) !important;
+          }
+        }
+      `}</style>
       <div
         aria-hidden
         style={{
@@ -137,6 +170,7 @@ export default function CountdownTimer(): React.JSX.Element {
       >
         <motion.div 
           variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } } }}
+          className="countdown-header"
           style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "4rem", paddingBottom: "2rem", borderBottom: "1px solid rgba(255,255,255,0.07)" }}
         >
           <div>
@@ -164,6 +198,7 @@ export default function CountdownTimer(): React.JSX.Element {
 
         <motion.div
           variants={{ hidden: { opacity: 0, scale: 0.95 }, visible: { opacity: 1, scale: 1, transition: { duration: 1, ease: [0.16, 1, 0.3, 1] } } }}
+          className="countdown-digits-wrapper"
           style={{
             display: "flex",
             justifyContent: "center",

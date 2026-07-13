@@ -67,6 +67,47 @@ export default function LandingFooter(): React.JSX.Element {
           color: #3B82F6;
           border-bottom-color: #3B82F6;
         }
+        .footer-cta-btn:hover {
+          background: #2563EB !important;
+        }
+        .footer-links-container {
+          display: flex !important;
+          flex-wrap: wrap !important;
+          gap: 4rem !important;
+          justify-content: space-between !important;
+        }
+        @media (max-width: 768px) {
+          .footer-links-container {
+            gap: 2rem 1rem !important;
+          }
+          .footer-col-product {
+            width: calc(50% - 0.5rem) !important;
+            min-width: 0 !important;
+            order: 1 !important;
+          }
+          .footer-col-legal {
+            width: calc(50% - 0.5rem) !important;
+            min-width: 0 !important;
+            order: 2 !important;
+          }
+          .footer-col-connect {
+            width: 100% !important;
+            min-width: 0 !important;
+            order: 3 !important;
+            margin-top: 1rem !important;
+          }
+          .footer-bottom-container {
+            flex-direction: column !important;
+            text-align: center !important;
+            gap: 0.75rem !important;
+          }
+          .footer-bottom-container p {
+            margin: 0 !important;
+          }
+          .footer-bottom-container a {
+            margin-right: 0 !important;
+          }
+        }
       `}</style>
       
       {/* Top CTA Banner */}
@@ -125,23 +166,26 @@ export default function LandingFooter(): React.JSX.Element {
         </h2>
         <a
           href="/"
-          className="group animate-gradient-shift"
+          className="group footer-cta-btn"
           onClick={(e) => handleLinkClick(e, "/#waitlist")}
           style={{
             position: "relative",
             zIndex: 1,
-            padding: "1rem 2.5rem",
-            background: "linear-gradient(135deg, rgba(37,99,235,0.9) 0%, rgba(37,99,235,0.9) 42%, rgba(96,165,250,0.8) 50%, rgba(37,99,235,0.9) 58%, rgba(37,99,235,0.9) 100%)",
+            height: "3rem",
+            padding: "0 2.5rem",
+            background: "#3B82F6",
             color: "#FFFFFF",
             borderRadius: "100px",
             fontWeight: 600,
             fontSize: "1rem",
             textDecoration: "none",
             letterSpacing: "-0.01em",
-            border: "1px solid rgba(255,255,255,0.15)",
+            border: "none",
             display: "inline-flex",
             alignItems: "center",
+            justifyContent: "center",
             gap: "8px",
+            transition: "background 0.2s ease, opacity 0.2s ease"
           }}
         >
           Claim Your Spot Now
@@ -200,7 +244,7 @@ export default function LandingFooter(): React.JSX.Element {
         </div>
 
         {/* Links Columns */}
-        <div style={{ flex: "1 1 600px", display: "flex", flexWrap: "wrap", gap: "4rem", justifyContent: "space-between" }}>
+        <div className="footer-links-container" style={{ flex: "1 1 600px", display: "flex", flexWrap: "wrap", gap: "4rem", justifyContent: "space-between" }}>
           {[
             {
               title: "Product",
@@ -227,7 +271,11 @@ export default function LandingFooter(): React.JSX.Element {
               ]
             }
           ].map((column) => (
-            <div key={column.title} style={{ display: "flex", flexDirection: "column", gap: "1.5rem", minWidth: "140px" }}>
+            <div 
+              key={column.title} 
+              className={`footer-col-${column.title.toLowerCase()}`}
+              style={{ display: "flex", flexDirection: "column", gap: "1.5rem", minWidth: "140px" }}
+            >
               <h4 style={{ color: "#FFFFFF", fontSize: "0.875rem", fontWeight: 500 }}>
                 {column.title}
               </h4>
@@ -251,6 +299,7 @@ export default function LandingFooter(): React.JSX.Element {
       {/* Bottom Bar */}
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", padding: "2rem 0rem" }}>
         <div
+          className="footer-bottom-container"
           style={{
             maxWidth: "1400px",
             margin: "0 auto",

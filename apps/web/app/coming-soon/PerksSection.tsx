@@ -46,6 +46,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
   return (
     <section
       id="perks"
+      className="perks-section"
       style={{
         padding: "0rem 1.5rem 4rem 1.5rem",
         display: "flex",
@@ -55,6 +56,13 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
         background: "#000000",
       }}
     >
+      <style>{`
+        @media (max-width: 768px) {
+          .perks-section {
+            padding: 4rem 1rem !important;
+          }
+        }
+      `}</style>
       <div
         aria-hidden
         style={{
@@ -112,7 +120,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
         <div 
           style={{ 
             flex: "1 1 450px", 
-            padding: "clamp(2rem, 4vw, 3.5rem)", 
+            padding: "clamp(1.25rem, 4vw, 3.5rem)", 
             position: "relative", 
             zIndex: 2, 
             display: "flex", 
@@ -254,7 +262,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
         <div 
           style={{ 
             flex: "1 1 450px", 
-            padding: "clamp(3rem, 5vw, 5rem)", 
+            padding: "clamp(1.5rem, 5vw, 5rem)", 
             position: "relative", 
             zIndex: 2, 
             background: "rgba(255,255,255,0.02)",

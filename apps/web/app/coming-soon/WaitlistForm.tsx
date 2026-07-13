@@ -76,6 +76,46 @@ export default function WaitlistForm({ onSuccess, initialCount, referralCode }: 
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
           }
+          .waitlist-submit-btn:hover:not(:disabled) {
+            background: #2563EB !important;
+          }
+          @media (max-width: 640px) {
+            .waitlist-pill-wrapper {
+              flex-direction: column !important;
+              background: transparent !important;
+              backdrop-filter: none !important;
+              -webkit-backdrop-filter: none !important;
+              border: none !important;
+              box-shadow: none !important;
+              padding: 0 !important;
+              gap: 12px !important;
+              border-radius: 0 !important;
+              transform: none !important;
+            }
+            .waitlist-input-container {
+              display: flex !important;
+              align-items: center !important;
+              gap: 8px !important;
+              width: 100% !important;
+              height: 3rem !important; /* 48px */
+              background: rgba(4,5,15,0.7) !important;
+              backdrop-filter: blur(24px) !important;
+              -webkit-backdrop-filter: blur(24px) !important;
+              border: 1px solid rgba(255,255,255,0.15) !important;
+              border-radius: 7.5rem !important;
+              padding: 0 1.25rem !important;
+              transition: all 0.3s ease !important;
+              box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 2px 10px rgba(0,0,0,0.8) !important;
+            }
+            .waitlist-input-container-focused {
+              border-color: rgba(255,255,255,0.3) !important;
+              box-shadow: 0 0 0 1px rgba(255,255,255,0.3), 0 24px 40px rgba(0,0,0,0.6), inset 0 2px 10px rgba(0,0,0,1) !important;
+            }
+            .waitlist-submit-btn {
+              width: 100% !important;
+              height: 3rem !important; /* 48px */
+            }
+          }
         `}</style>
         
         <div
@@ -97,62 +137,68 @@ export default function WaitlistForm({ onSuccess, initialCount, referralCode }: 
             transform: focused ? "translateY(-1px)" : "translateY(0)",
           }}
         >
-          
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            style={{ flexShrink: 0, color: focused ? "var(--arc-blue)" : "rgba(255,255,255,0.35)", transition: "color 0.2s" }}
-          >
-            <path
-              d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z"
-              fill="currentColor"
-            />
-          </svg>
-
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-            placeholder="Enter your email"
-            required
-            id="waitlist-email"
-            autoComplete="email"
+          <div
+            className={`waitlist-input-container ${focused ? "waitlist-input-container-focused" : ""}`}
             style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
               flex: 1,
-              background: "none",
-              border: "none",
-              outline: "none",
-              fontSize: "0.9375rem",
-              color: "#FFFFFF",
-              padding: "0.75rem 0",
-              fontFamily: "'Space Grotesk', system-ui, sans-serif",
             }}
-          />
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              style={{ flexShrink: 0, color: focused ? "var(--arc-blue)" : "rgba(255,255,255,0.35)", transition: "color 0.2s" }}
+            >
+              <path
+                d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z"
+                fill="currentColor"
+              />
+            </svg>
+
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              placeholder="Enter your email"
+              required
+              id="waitlist-email"
+              autoComplete="email"
+              style={{
+                flex: 1,
+                background: "none",
+                border: "none",
+                outline: "none",
+                fontSize: "0.9375rem",
+                color: "#FFFFFF",
+                padding: "0.75rem 0",
+                fontFamily: "'Space Grotesk', system-ui, sans-serif",
+              }}
+            />
+          </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="btn-primary animate-gradient-shift"
+            className="btn-primary waitlist-submit-btn"
             style={{
               height: "2.75rem",
               padding: "0 1.5rem",
               fontSize: "0.875rem",
-              fontWeight: 800,
+              fontWeight: 500,
               flexShrink: 0,
               opacity: loading ? 0.6 : 1,
               cursor: loading ? "not-allowed" : "pointer",
-              background: "linear-gradient(135deg, rgba(37,99,235,0.9) 0%, rgba(37,99,235,0.9) 42%, rgba(96,165,250,0.8) 50%, rgba(37,99,235,0.9) 58%, rgba(37,99,235,0.9) 100%)",
+              background: "#3B82F6",
               color: "#FFFFFF",
-              border: "1px solid rgba(255,255,255,0.15)",
-              boxShadow: "0 6px 20px rgba(37,99,235,0.4), inset 0 1px 1px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.2)",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
+              border: "none",
               borderRadius: "100px",
-              transition: "transform 0.2s ease"
+              transition: "background 0.2s ease, opacity 0.2s ease"
             }}
           >
             {loading ? (

@@ -51,7 +51,7 @@ export default function LandingNav(): React.JSX.Element | Promise<React.JSX.Elem
       <motion.nav
         initial={false}
         animate={{
-          width: scrolled ? "680px" : "100%",
+          width: scrolled ? "min(680px, calc(100% - 2rem))" : "100%",
           borderRadius: scrolled ? "100px" : "0px",
           background: scrolled ? "rgba(4, 5, 12, 0.65)" : "rgba(0, 0, 0, 0)",
           borderColor: scrolled ? "rgba(59,130,246,0.15)" : "rgba(59,130,246,0)",
@@ -246,9 +246,13 @@ export default function LandingNav(): React.JSX.Element | Promise<React.JSX.Elem
                 color: "#3B82F6",
                 fontSize: "0.8125rem",
                 fontWeight: 600,
-                padding: "0.5rem 1.125rem",
+                height: "3rem",
+                padding: "0 1.25rem",
                 borderRadius: "100px",
                 textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
               Claim Spot
