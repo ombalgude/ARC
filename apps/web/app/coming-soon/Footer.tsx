@@ -239,7 +239,7 @@ export default function LandingFooter(): React.JSX.Element {
           </div>
           
           <p style={{ color: "#8B96A5", fontSize: "0.9375rem", lineHeight: 1.6, maxWidth: "300px" }}>
-            Your all-in-one fitness copilot. Training, nutrition, and habits — unified into one intelligent engine.
+            Your all in one fitness copilot. Training, nutrition, and habits unified into one intelligent engine.
           </p>  
         </div>
 
@@ -259,7 +259,7 @@ export default function LandingFooter(): React.JSX.Element {
               links: [
                 { label: "Privacy Policy", href: "/privacy" },
                 { label: "Terms of Service", href: "/terms" },
-                { label: "Cookie Policy", href: "/privacy" },
+                { label: "Cookie Policy", href: "/cookies" },
               ]
             },
             {

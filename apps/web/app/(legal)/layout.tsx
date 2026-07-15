@@ -1,3 +1,4 @@
+import Link from "next/link";
 import LandingNav from "../coming-soon/LandingNav";
 import LandingFooter from "../coming-soon/Footer";
 import SmoothScroll from "../coming-soon/SmoothScroll";

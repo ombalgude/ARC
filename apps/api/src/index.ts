@@ -29,6 +29,10 @@ app.use(
 app.use(express.json());
 app.use(clerkMiddleware());
 
+app.get("/health", (_req, res) => {
+  res.status(200).json({ status: "healthy", timestamp: new Date() });
+});
+
 app.get("/api/v1/health", (_req, res) => {
   res.json({ status: "healthy", timestamp: new Date() });
 });
