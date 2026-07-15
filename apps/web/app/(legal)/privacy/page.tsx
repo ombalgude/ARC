@@ -67,7 +67,7 @@ export default function PrivacyPolicyPage(): React.JSX.Element {
         <p style={s.subtext}>
           We are committed to protecting your privacy. This policy outlines our data processing practices.
         </p>
-        <p style={s.effectiveDate}>Effective Date: <strong>[Effective Date]</strong></p>
+        <p style={s.effectiveDate}>Effective Date: <strong>July 15, 2026</strong></p>
       </div>
 
       <div style={s.warningCard}>
@@ -135,7 +135,7 @@ export default function PrivacyPolicyPage(): React.JSX.Element {
       <div style={s.contactCard}>
         <h2 style={{ ...s.h2, marginBottom: "10px", textAlign: "center" }}>Questions?</h2>
         <p style={{ ...s.p, textAlign: "center" }}>Contact our privacy team at:</p>
-        <p style={{ textAlign: "center", fontWeight: 700, fontSize: "16px", color: "var(--accent2)" }}>[Privacy Contact Email]</p>
+        <p style={{ textAlign: "center", fontWeight: 700, fontSize: "16px", color: "var(--accent2)" }}>Contact email coming soon</p>
       </div>
     </div>
   );

@@ -19,6 +19,13 @@ export const metadata: Metadata = {
   // ── Core ──────────────────────────────────────────────────────────────────
   metadataBase: new URL(APP_URL),
   title: "ARC Fitness — AI-Powered Fitness. Launching Soon.",
+
+  // ── Favicons & Touch Icons ────────────────────────────────────────────────
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/apple-touch-icon.png",
+  },
   description:
     "Join the waitlist for ARC Fitness — the AI fitness coach that tracks workouts, habits, and nutrition in one beautiful app. iOS & Android. Coming July 2026.",
   keywords: [

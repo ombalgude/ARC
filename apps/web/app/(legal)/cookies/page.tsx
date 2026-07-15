@@ -59,7 +59,7 @@ export default function CookiePolicyPage(): React.JSX.Element {
         <p style={s.subtext}>
           How we use cookies and local storage to provide and improve the ARC Fitness experience.
         </p>
-        <p style={s.effectiveDate}>Effective Date: <strong>[Effective Date]</strong></p>
+        <p style={s.effectiveDate}>Effective Date: <strong>July 15, 2026</strong></p>
       </div>
 
       <SectionCard title="1. What Are Cookies and Local Storage?">
@@ -95,7 +95,7 @@ export default function CookiePolicyPage(): React.JSX.Element {
       <div style={s.contactCard}>
         <h2 style={{ ...s.h2, marginBottom: "10px", textAlign: "center" }}>Questions?</h2>
         <p style={{ ...s.p, textAlign: "center" }}>If you have any questions about this policy, contact us at:</p>
-        <p style={{ textAlign: "center", fontWeight: 700, fontSize: "16px", color: "var(--accent2)" }}>[Privacy Contact Email]</p>
+        <p style={{ textAlign: "center", fontWeight: 700, fontSize: "16px", color: "var(--accent2)" }}>Contact email coming soon</p>
       </div>
     </div>
   );

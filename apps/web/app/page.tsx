@@ -30,8 +30,39 @@ export default async function Home({ searchParams }: HomeProps): Promise<React.J
   const [stats, params] = await Promise.all([getWaitlistStats(), searchParams]);
   const referralCode = params.ref;
 
+  // ── JSON-LD Structured Data ─────────────────────────────────────────────
+  // Tells Google this is a SoftwareApplication (health/fitness, iOS + Android).
+  // Enables rich search cards and improves indexing accuracy.
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "ARC Fitness",
+    applicationCategory: "HealthApplication",
+    operatingSystem: "iOS, Android",
+    description:
+      "The AI fitness coach that tracks workouts, habits, and nutrition in one beautiful app. Personalized training plans, macro tracking, habit science, and 24/7 AI coaching.",
+    url: process.env.NEXT_PUBLIC_APP_URL ?? "https://arcfitness.app",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/PreOrder",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "ARC Fitness",
+      url: process.env.NEXT_PUBLIC_APP_URL ?? "https://arcfitness.app",
+    },
+  };
+
   return (
     <>
+      {/* JSON-LD structured data for Google rich results */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <SmoothScroll />
       {/* <CustomCursor /> */}
 
