@@ -77,6 +77,11 @@ export default function ConfirmationScreen({
   useEffect(() => {
     // Lock background scroll while modal is open
     document.body.style.overflow = "hidden";
+    
+    // Stop Lenis smooth scroll if it exists
+    if (typeof window !== "undefined" && (window as any).lenis) {
+      (window as any).lenis.stop();
+    }
 
     const duration = 2500;
     const end = Date.now() + duration;
@@ -111,6 +116,9 @@ export default function ConfirmationScreen({
 
     return () => {
       document.body.style.overflow = "";
+      if (typeof window !== "undefined" && (window as any).lenis) {
+        (window as any).lenis.start();
+      }
     };
   }, []);
 
