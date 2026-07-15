@@ -175,11 +175,12 @@ export default function ConfirmationScreen({
         .waitlist-copy-btn {
           flex-shrink: 0;
           display: flex;
-          alignItems: center;
+          align-items: center;
           justify-content: center;
           gap: 0.4rem;
           height: 3rem !important; /* 48px */
           padding: 0 1.5rem !important;
+          min-width: 110px; /* Prevent jitter when text changes to COPIED */
           background: #3B82F6;
           border: none;
           border-radius: 12px;

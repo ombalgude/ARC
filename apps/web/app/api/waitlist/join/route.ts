@@ -6,8 +6,36 @@ import { Resend } from "resend";
 const sql = neon(process.env.DATABASE_URL!);
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// ── Rate Limiter (in-memory, per function instance) ────────────────────────
+// Limits each IP to 5 submissions per 15-minute window.
+// Resets on cold starts. For distributed rate limiting use Upstash Redis.
+const rateLimit = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+
 export async function POST(request: Request) {
   try {
+    // ── Rate limiting ────────────────────────────────────────────────────────
+    const ip =
+      request.headers.get("x-real-ip") ??
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      "unknown";
+
+    const now = Date.now();
+    const rlEntry = rateLimit.get(ip);
+
+    if (rlEntry && now < rlEntry.resetAt) {
+      if (rlEntry.count >= RATE_LIMIT_MAX) {
+        return NextResponse.json(
+          { error: "Too many requests. Please wait 15 minutes and try again." },
+          { status: 429 }
+        );
+      }
+      rlEntry.count++;
+    } else {
+      rateLimit.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    }
+
     const { email, referralCode: referredByCode } = await request.json() as {
       email: string;
       referralCode?: string;

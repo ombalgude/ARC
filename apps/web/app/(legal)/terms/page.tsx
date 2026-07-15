@@ -69,13 +69,13 @@ export default function TermsAndConditionsPage(): React.JSX.Element {
         <p style={s.subtext}>
           These terms govern your access to and use of ARC Fitness. Please read them carefully.
         </p>
-        <p style={s.effectiveDate}>Effective Date: <strong>[Effective Date]</strong></p>
+        <p style={s.effectiveDate}>Effective Date: <strong>July 15, 2026</strong></p>
       </div>
 
       <div style={s.criticalCard}>
         <p style={s.criticalTitle}>⚠ Medical &amp; Fitness Disclaimer</p>
         <p style={s.criticalText}>
-          ARC Fitness provides information for educational purposes only and is <strong>not a substitute for professional medical advice, diagnosis, or treatment.</strong> Always consult a physician before beginning any exercise or diet program. By using ARC, you acknowledge that physical exercise carries inherent risks of injury, and you voluntarily assume all such risks. [Company Name] shall not be liable for any physical injury or health issue arising from your use of the Service.
+          ARC Fitness provides information for educational purposes only and is <strong>not a substitute for professional medical advice, diagnosis, or treatment.</strong> Always consult a physician before beginning any exercise or diet program. By using ARC, you acknowledge that physical exercise carries inherent risks of injury, and you voluntarily assume all such risks. Om Balgude shall not be liable for any physical injury or health issue arising from your use of the Service.
         </p>
       </div>
 
@@ -120,26 +120,26 @@ export default function TermsAndConditionsPage(): React.JSX.Element {
 
       <SectionCard title="6. Intellectual Property">
         <p style={s.p}>
-          All rights to the Service, including the app design, proprietary algorithms, and content, are owned by [Company Name]. We grant you a limited, non-transferable license to use the app for personal, non-commercial purposes.
+          All rights to the Service, including the app design, proprietary algorithms, and content, are owned by Om Balgude. We grant you a limited, non-transferable license to use the app for personal, non-commercial purposes.
         </p>
       </SectionCard>
 
       <SectionCard title="7. Limitation of Liability">
         <p style={s.p}>
-          THE SERVICE IS PROVIDED "AS IS". TO THE MAXIMUM EXTENT PERMITTED BY LAW, [COMPANY NAME] SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES (INCLUDING PHYSICAL INJURY, LOSS OF DATA, OR SERVICE DOWNTIME). OUR TOTAL AGGREGATE LIABILITY SHALL NOT EXCEED THE AMOUNT YOU PAID TO US IN THE 12 MONTHS PRECEDING THE CLAIM.
+          THE SERVICE IS PROVIDED "AS IS". TO THE MAXIMUM EXTENT PERMITTED BY LAW, OM BALGUDE SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES (INCLUDING PHYSICAL INJURY, LOSS OF DATA, OR SERVICE DOWNTIME). OUR TOTAL AGGREGATE LIABILITY SHALL NOT EXCEED THE AMOUNT YOU PAID TO US IN THE 12 MONTHS PRECEDING THE CLAIM.
         </p>
       </SectionCard>
 
       <SectionCard title="8. Governing Law">
         <p style={s.p}>
-          These Terms are governed by the laws of [Governing Jurisdiction], without regard to conflict of law principles.
+          These Terms are governed by the laws of the State of Maharashtra, India, without regard to conflict of law principles. Any disputes shall be subject to the exclusive jurisdiction of the courts located in Maharashtra, India.
         </p>
       </SectionCard>
 
       <div style={s.contactCard}>
         <h2 style={{ ...s.h2, marginBottom: "10px", textAlign: "center" }}>Contact Us</h2>
         <p style={{ ...s.p, textAlign: "center" }}>For any legal inquiries, please reach out to:</p>
-        <p style={{ textAlign: "center", fontWeight: 700, fontSize: "16px", color: "var(--accent2)" }}>[Legal Contact Email]</p>
+        <p style={{ textAlign: "center", fontWeight: 700, fontSize: "16px", color: "var(--accent2)" }}>Contact email coming soon</p>
       </div>
     </div>
   );
