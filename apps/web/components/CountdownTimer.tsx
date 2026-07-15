@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
-export function CountdownTimer({ targetDate }: { targetDate: string }) {
+export function CountdownTimer({ targetDate }: { targetDate: string }): React.JSX.Element {
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
