@@ -35,11 +35,11 @@ export default function ConfirmationScreen({
   const referralLink = `${appUrl}?ref=${referralCode}`;
 
   const twitterText = encodeURIComponent(
-    `Just secured my spot for ARC Fitness. I'm #${position} in line — the ultimate fitness copilot for people who actually want results. Use my link and we both jump the queue: ${referralLink} #ARCFitness`
+    `got early access to ARC before the general drop. it's an AI copilot for your fitness. training, nutrition, habits in one app, zero guesswork. i'm #${position} in line. grab a spot with my link: ${referralLink} #ARC`
   );
 
   const whatsappText = encodeURIComponent(
-    `I just locked my spot for ARC — an intelligent engine that plans your progression and removes all guesswork. I'm #${position} in line. Use my link and we both skip 5 spots instantly: ${referralLink}`
+    `Hey! I just joined the waitlist for ARC. It's an AI copilot that handles your workouts, nutrition, and habits all in one app. I'm #${position} in line. Join with my link: ${referralLink}`
   );
 
   async function copyLink() {
@@ -54,8 +54,8 @@ export default function ConfirmationScreen({
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share({
-          title: "ARC Fitness",
-          text: `I'm #${position} on the ARC waitlist. Invite 3 friends and you can skip 15 spots. Join me:`,
+          title: "ARC",
+          text: `on the waitlist for ARC. an AI copilot for training, nutrition and habits built into one. I'm #${position} in line, join with my link:`,
           url: referralLink,
         });
       } catch (err) {}
@@ -366,7 +366,7 @@ export default function ConfirmationScreen({
           </h3>
           
           <p style={{ color: "var(--arc-text-secondary)", fontSize: "0.875rem", lineHeight: 1.5, maxWidth: "90%", margin: "0 auto" }}>
-            The first 100 get 3 months Pro free. Every friend you invite skips you <span style={{ color: "#fff", fontWeight: 500 }}>5 spots forward</span>. Invite 3 — skip 15.
+            The first 100 get 3 months Pro free. Every friend you invite skips you <span style={{ color: "#fff", fontWeight: 500 }}>5 spots forward</span>. Invite 3, skip 15.
           </p>
 
           <div className="modal-progress-block" style={{ marginTop: "2rem" }}>

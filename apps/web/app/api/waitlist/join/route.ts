@@ -108,34 +108,134 @@ export async function POST(request: Request) {
         await resend.emails.send({
           from: process.env.RESEND_FROM_EMAIL ?? "hello@arcfitness.app",
           to: email,
-          subject: `You are #${position} in line for ARC Fitness.`,
+          subject: `You are #${position} in line for ARC.`,
           html: `
             <!DOCTYPE html>
-            <html>
-            <body style="background-color:#0A0A0F;color:#F1F1F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;max-width:520px;margin:0 auto;padding:40px 24px;">
-              <h1 style="font-size:28px;font-weight:900;margin-bottom:8px;letter-spacing:-0.03em;color:#FFFFFF;">
-                You are <span style="color:#3B82F6;">#${position}</span> in line.
-              </h1>
-              <p style="color:#9CA3AF;margin-bottom:24px;line-height:1.6;font-size:16px;">
-                Welcome to ARC Fitness. You just locked in your spot for the only fitness system that actually adapts to your progress daily. No more guesswork.
-              </p>
-              
-              <div style="background-color:#12182B;border:1px solid #1E3A8A;border-radius:12px;padding:24px;margin-bottom:24px;">
-                <p style="font-weight:700;margin-top:0;margin-bottom:8px;text-transform:uppercase;font-size:12px;letter-spacing:0.05em;color:#60A5FA;">Skip the Line</p>
-                <p style="font-size:14px;color:#D1D5DB;margin-top:0;margin-bottom:20px;line-height:1.5;">Every friend you invite skips you <strong>5 spots forward</strong>. Invite 3 friends, skip 15 spots.</p>
-                <a href="${referralLink}" style="display:inline-block;background-color:#3B82F6;color:#FFFFFF;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">Copy your referral link</a>
-                <p style="font-size:12px;color:#6B7280;margin-top:16px;margin-bottom:0;">Or forward this link: <a href="${referralLink}" style="color:#3B82F6;text-decoration:none;">${referralLink}</a></p>
-              </div>
+            <html lang="en">
+            <head>
+              <meta charset="UTF-8" />
+              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+              <title>You're #${position} in line for ARC</title>
+            </head>
+            <body style="margin:0;padding:0;background-color:#04050F;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
 
-              <div style="margin-bottom:24px;background-color:#111116;border:1px solid #1F1F2E;border-radius:12px;padding:24px;">
-                <p style="font-weight:700;margin-top:0;margin-bottom:16px;text-transform:uppercase;font-size:12px;letter-spacing:0.05em;color:#9CA3AF;">Your early access perks</p>
-                <ul style="color:#9CA3AF;padding-left:20px;line-height:1.8;font-size:14px;margin:0;">
-                  <li style="margin-bottom:8px;"><strong style="color:#F1F1F3;">3 Months Pro Free</strong> — Reserved for the first 100 users. Secure your spot on the waitlist.</li>
-                  <li><strong style="color:#F1F1F3;">Priority Waitlist Access</strong> — Skip the queue. Every friend you refer moves you 5 spots up.</li>
-                </ul>
-              </div>
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#04050F;padding:48px 16px 64px;">
+                <tr>
+                  <td align="center">
+                    <table width="100%" style="max-width:480px;">
 
-              <p style="color:#6B7280;font-size:13px;margin-top:32px;">— The ARC Fitness Team</p>
+                      <!-- Logo -->
+                      <tr>
+                        <td style="padding-bottom:48px;">
+                          <table cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="background:linear-gradient(145deg,#3B82F6,#1D4ED8);width:28px;height:28px;border-radius:8px;text-align:center;vertical-align:middle;">
+                                <span style="color:#fff;font-size:13px;font-weight:800;line-height:28px;display:block;">A</span>
+                              </td>
+                              <td style="padding-left:10px;color:#FFFFFF;font-size:15px;font-weight:700;letter-spacing:0.18em;">ARC</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+
+                      <!-- Headline -->
+                      <tr>
+                        <td style="padding-bottom:16px;">
+                          <p style="margin:0;font-size:12px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#3B82F6;">Spot Secured</p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding-bottom:24px;">
+                          <h1 style="margin:0;font-size:38px;font-weight:600;letter-spacing:-0.04em;color:#FFFFFF;line-height:1.08;">
+                            You are <span style="color:#3B82F6;">#${position}</span><br/>in line.
+                          </h1>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding-bottom:48px;">
+                          <p style="margin:0;font-size:15px;line-height:1.75;color:rgba(255,255,255,0.45);max-width:380px;">
+                            Welcome to ARC. The AI copilot that unifies your training, nutrition, and habits. No more guesswork. We'll let you know the moment you're in.
+                          </p>
+                        </td>
+                      </tr>
+
+                      <!-- Divider -->
+                      <tr>
+                        <td style="padding-bottom:40px;">
+                          <div style="height:1px;background:rgba(255,255,255,0.07);"></div>
+                        </td>
+                      </tr>
+
+                      <!-- Referral -->
+                      <tr>
+                        <td style="padding-bottom:12px;">
+                          <p style="margin:0;font-size:12px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.3);">Skip the line</p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding-bottom:28px;">
+                          <p style="margin:0;font-size:15px;line-height:1.75;color:rgba(255,255,255,0.45);">
+                            Every friend you invite moves you <span style="color:#FFFFFF;font-weight:500;">5 spots forward</span>. Invite 3 friends, skip 15 spots instantly.
+                          </p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding-bottom:16px;">
+                          <a href="${referralLink}" style="display:inline-block;background:#3B82F6;color:#FFFFFF;padding:14px 32px;border-radius:100px;text-decoration:none;font-weight:600;font-size:14px;letter-spacing:-0.01em;">
+                            Share Your Link →
+                          </a>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding-bottom:48px;">
+                          <p style="margin:0;font-size:13px;color:rgba(255,255,255,0.4);word-break:break-all;">
+                            <a href="${referralLink}" style="color:#60A5FA;text-decoration:underline;">${referralLink}</a>
+                          </p>
+                        </td>
+                      </tr>
+
+                      <!-- Divider -->
+                      <tr>
+                        <td style="padding-bottom:40px;">
+                          <div style="height:1px;background:rgba(255,255,255,0.07);"></div>
+                        </td>
+                      </tr>
+
+                      <!-- Perks, plain text, no cards -->
+                      <tr>
+                        <td style="padding-bottom:12px;">
+                          <p style="margin:0;font-size:12px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.3);">What you get</p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding-bottom:12px;">
+                          <p style="margin:0;font-size:15px;line-height:1.75;color:rgba(255,255,255,0.45);">
+                            <span style="color:#FFFFFF;font-weight:500;">3 months Pro free</span>. Reserved for the first 100 users.
+                          </p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding-bottom:48px;">
+                          <p style="margin:0;font-size:15px;line-height:1.75;color:rgba(255,255,255,0.45);">
+                            <span style="color:#FFFFFF;font-weight:500;">Priority access</span>. Every referral moves you 5 spots up.
+                          </p>
+                        </td>
+                      </tr>
+
+                      <!-- Footer -->
+                      <tr>
+                        <td>
+                          <p style="margin:0;font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7;">
+                            You signed up at <a href="${appUrl}" style="color:#60A5FA;text-decoration:none;font-weight:500;">arcfitness.app</a>. The ARC Team
+                          </p>
+                        </td>
+                      </tr>
+
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
             </body>
             </html>
           `,
