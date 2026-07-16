@@ -109,8 +109,10 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
         minHeight: "100svh",
         padding: "0 2rem",
         background: "transparent",
+        overflow: "hidden",
       }}
     >
+      <div className="hero-edge-glow" />
 
       {/* Zero-height anchor — Lenis scrolls here, no layout impact */}
       <div id="waitlist" style={{ position: "absolute", top: 0, left: 0, height: 0, pointerEvents: "none" }} />
@@ -174,7 +176,7 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
           <p
             className="animate-fade-in opacity-0-init delay-600"
             style={{
-              fontSize: "clamp(0.9rem, 1.2vw, 1.05rem)",
+              fontSize: "clamp(0.875rem, 4vw, 1.05rem)",
               lineHeight: 1.7,
               color: "rgba(255,255,255,0.5)",
               maxWidth: "420px",
@@ -323,13 +325,7 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
           }}
         >
           
-          <div style={{
-            position: "absolute",
-            inset: "-30%",
-            background: "radial-gradient(ellipse at 50% 55%, rgba(37,99,235,0.30) 0%, rgba(29,78,216,0.10) 45%, transparent 72%)",
-            filter: "blur(40px)",
-            pointerEvents: "none",
-          }} />
+          <div className="hero-radial-glow" />
 
           {/* Removed Floating Widgets */}
 
@@ -602,6 +598,16 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
         .view-ticket-btn:hover {
           background: #2563EB !important;
         }
+        .hero-radial-glow {
+          position: absolute;
+          inset: -30%;
+          background: radial-gradient(ellipse at 50% 55%, rgba(37,99,235,0.30) 0%, rgba(29,78,216,0.10) 45%, transparent 72%);
+          filter: blur(40px);
+          pointer-events: none;
+        }
+        .hero-edge-glow {
+          display: none;
+        }
         .hero-stats {
           display: flex; align-items: center; gap: 2rem;
           margin-top: 1.25rem; padding-top: 1.25rem;
@@ -657,6 +663,22 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
             padding-top: 1rem !important;
             margin-top: 1rem !important;
             gap: 1.5rem !important;
+          }
+          .hero-radial-glow {
+            display: none !important;
+          }
+          .hero-edge-glow {
+            display: block;
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(37,99,235,0.12) 0%, rgba(37,99,235,0) 15%, rgba(37,99,235,0) 85%, rgba(37,99,235,0.12) 100%);
+            pointer-events: none;
+            z-index: 0;
+          }
+          /* Hide floating badges on mobile — phone looks cleaner without them */
+          .hero-phone-badge-right,
+          .hero-phone-badge-left {
+            display: none !important;
           }
           .hero-phone-col { 
             display: flex !important;

@@ -233,6 +233,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0], index: n
         </p>
       </div>
       <div
+        className="feature-stat-block"
         style={{
           position: "relative",
           zIndex: 2,
@@ -281,6 +282,16 @@ export default function FeaturesSection(): React.JSX.Element | Promise<React.JSX
         position: "relative",
       }}
     >
+      <style>{`
+        @media (max-width: 768px) {
+          .feature-spotlight {
+            min-height: 280px !important;
+          }
+          .feature-stat-block {
+            margin-top: 1.5rem !important;
+          }
+        }
+      `}</style>
       <div className="section-divider" style={{ position: "absolute", top: 0, left: 0, right: 0 }} />
 
       <motion.div 

@@ -60,7 +60,20 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
       <style>{`
         @media (max-width: 768px) {
           .perks-section {
-            padding: 4rem 1rem !important;
+            padding: 3rem 1rem !important;
+          }
+          .perks-left-panel {
+            padding: 2rem !important;
+            gap: 2rem !important;
+          }
+          .perks-spot-count {
+            font-size: 2.5rem !important;
+          }
+          .perks-right-panel {
+            padding: 2rem !important;
+          }
+          .perks-right-header {
+            margin-bottom: 1.5rem !important;
           }
         }
       `}</style>
@@ -119,6 +132,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
 
         {/* Left Side: The Hook & Scarcity */}
         <div 
+          className="perks-left-panel"
           style={{ 
             flex: "1 1 450px", 
             padding: "clamp(3rem, 5vw, 5rem)", 
@@ -195,7 +209,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
             }}
           >
             <div style={{ display: "flex", alignItems: "baseline", gap: "12px", marginBottom: "1rem" }}>
-              <span style={{
+              <span className="perks-spot-count" style={{
                 fontSize: "3.5rem", fontWeight: 500,
                 color: "#F59E0B",
                 letterSpacing: "-0.05em",
@@ -261,6 +275,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
 
         {/* Right Side: The Perks List */}
         <div 
+          className="perks-right-panel"
           style={{ 
             flex: "1 1 450px", 
             padding: "clamp(1.5rem, 5vw, 5rem)", 
@@ -273,6 +288,7 @@ export default function PerksSection({ spotsRemaining }: PerksProps): React.JSX.
           }}
         >
           <h3 
+            className="perks-right-header"
             style={{ 
               textTransform: "uppercase", 
               letterSpacing: "0.15em", 

@@ -107,11 +107,19 @@ export default function LandingFooter(): React.JSX.Element {
           .footer-bottom-container a {
             margin-right: 0 !important;
           }
+          .footer-cta-banner {
+            padding: 2.5rem 1.25rem !important;
+          }
+          .footer-main-grid {
+            padding: 2.5rem 1.25rem !important;
+            gap: 2rem !important;
+          }
         }
       `}</style>
       
       {/* Top CTA Banner */}
       <div
+        className="footer-cta-banner"
         style={{
           borderBottom: "1px solid rgba(255,255,255,0.08)",
           padding: "4rem 1.5rem",
@@ -200,6 +208,7 @@ export default function LandingFooter(): React.JSX.Element {
 
       {/* Main Grid */}
       <div
+        className="footer-main-grid"
         style={{
           maxWidth: "1400px",
           margin: "0 auto",

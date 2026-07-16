@@ -157,6 +157,7 @@ export default function ConfirmationScreen({
           backdropFilter: "blur(60px) saturate(180%)",
           WebkitBackdropFilter: "blur(60px) saturate(180%)",
         }}
+        className="modal-overlay-inner"
       >
       <style>{`
         .modal-close-btn {
@@ -248,14 +249,31 @@ export default function ConfirmationScreen({
         }
         @media (max-width: 480px) {
           .modal-card {
-            padding: 1.5rem 1.25rem !important;
-            max-height: 85vh !important;
+            padding: 1.25rem 1rem !important;
+            max-height: 88vh !important;
           }
           .modal-card h3 {
-            font-size: 1.75rem !important;
+            font-size: 1.6rem !important;
           }
           .share-buttons-grid {
             grid-template-columns: 1fr !important;
+          }
+          .share-btn {
+            height: 2.75rem !important;
+          }
+          .modal-progress-block {
+            margin-top: 1.25rem !important;
+          }
+          .modal-timer-block {
+            margin-bottom: 1.25rem !important;
+          }
+          .modal-header-block {
+            margin-bottom: 1rem !important;
+          }
+        }
+        @media (max-width: 380px) {
+          .modal-overlay-inner {
+            padding: 0.5rem !important;
           }
         }
       `}</style>
@@ -313,7 +331,7 @@ export default function ConfirmationScreen({
           </button>
         )}
 
-        <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+        <div className="modal-header-block" style={{ textAlign: "center", marginBottom: "1.5rem" }}>
           <div style={{ 
             width: "64px", height: "64px", margin: "0 auto 1rem", 
             background: "linear-gradient(135deg, rgba(37,99,235,0.2) 0%, rgba(96,165,250,0.05) 100%)",
@@ -351,7 +369,7 @@ export default function ConfirmationScreen({
             The first 100 get 3 months Pro free. Every friend you invite skips you <span style={{ color: "#fff", fontWeight: 500 }}>5 spots forward</span>. Invite 3 — skip 15.
           </p>
 
-          <div style={{ marginTop: "2rem" }}>
+          <div className="modal-progress-block" style={{ marginTop: "2rem" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem", padding: "0 4px" }}>
               <span style={{ fontSize: "0.75rem", color: "var(--arc-text-muted)", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>Current Status</span>
               <span style={{ fontSize: "0.75rem", color: "var(--arc-blue)", fontWeight: 600 }}>Top {Math.round(positionPercent)}%</span>
@@ -432,7 +450,7 @@ export default function ConfirmationScreen({
           </button>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: "2rem" }}>
+        <div className="modal-timer-block" style={{ display: "flex", justifyContent: "center", marginBottom: "1.25rem" }}>
           <CountdownTimer targetDate={process.env.NEXT_PUBLIC_LAUNCH_DATE ?? "2026-07-22T00:00:00.000Z"} />
         </div>
 

@@ -91,16 +91,29 @@ export default async function Home({ searchParams }: HomeProps): Promise<React.J
         <LandingNav />
         <ScrollRevealInit />
 
-        <div style={{
-          position: "relative",
-          overflow: "hidden",
-          background: `radial-gradient(
-            120% 130% at 50% 0%,
-            transparent        40%,
-            rgba(37,99,235,0.85) 58%,
-            rgba(17,24,39,1)   100%
-          )`,
-        }}>
+        <style>{`
+          .hero-wrapper {
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(
+              120% 130% at 50% 0%,
+              transparent        40%,
+              rgba(37,99,235,0.85) 58%,
+              rgba(17,24,39,1)   100%
+            );
+          }
+          @media (max-width: 950px) {
+            .hero-wrapper {
+              background: linear-gradient(90deg,
+                rgba(37,99,235,0.25) 0%,
+                rgba(37,99,235,0) 20%,
+                rgba(37,99,235,0) 80%,
+                rgba(37,99,235,0.25) 100%
+              );
+            }
+          }
+        `}</style>
+        <div className="hero-wrapper">
           
           <div
             aria-hidden
