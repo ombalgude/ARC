@@ -106,8 +106,8 @@ export default async function Home({ searchParams }: HomeProps): Promise<React.J
             .hero-wrapper {
               background: linear-gradient(90deg,
                 rgba(37,99,235,0.25) 0%,
-                rgba(37,99,235,0) 20%,
-                rgba(37,99,235,0) 80%,
+                rgba(37,99,235,0) 25%,
+                rgba(37,99,235,0) 75%,
                 rgba(37,99,235,0.25) 100%
               );
             }
