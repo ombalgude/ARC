@@ -100,6 +100,7 @@ export default function LandingFooter(): React.JSX.Element {
             flex-direction: column !important;
             text-align: center !important;
             gap: 0.75rem !important;
+            padding: 0 1.5rem !important;
           }
           .footer-bottom-container p {
             margin: 0 !important;
@@ -108,10 +109,10 @@ export default function LandingFooter(): React.JSX.Element {
             margin-right: 0 !important;
           }
           .footer-cta-banner {
-            padding: 2.5rem 1.25rem !important;
+            padding: 2.5rem 2rem !important;
           }
           .footer-main-grid {
-            padding: 2.5rem 1.25rem !important;
+            padding: 2.5rem 2rem !important;
             gap: 2rem !important;
           }
         }
