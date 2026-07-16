@@ -249,6 +249,10 @@ export default function ConfirmationScreen({
         @media (max-width: 480px) {
           .modal-card {
             padding: 1.5rem 1.25rem !important;
+            max-height: 85vh !important;
+          }
+          .modal-card h3 {
+            font-size: 1.75rem !important;
           }
           .share-buttons-grid {
             grid-template-columns: 1fr !important;

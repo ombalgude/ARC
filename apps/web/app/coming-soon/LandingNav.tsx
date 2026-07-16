@@ -15,6 +15,9 @@ export default function LandingNav(): React.JSX.Element | Promise<React.JSX.Elem
   });
 
   const handleGetAccess = (e: React.MouseEvent) => {
+    if (window.location.pathname !== "/") {
+      return;
+    }
     e.preventDefault();
     const el = document.getElementById("waitlist");
     if (el) {
@@ -196,7 +199,7 @@ export default function LandingNav(): React.JSX.Element | Promise<React.JSX.Elem
             ))}
 
             <a
-              href="#waitlist"
+              href="/#waitlist"
               onClick={handleGetAccess}
               className="group"
               style={{
@@ -238,7 +241,7 @@ export default function LandingNav(): React.JSX.Element | Promise<React.JSX.Elem
 
           <div className="arc-nav-mobile" style={{ display: "none" }}>
             <a
-              href="#waitlist"
+              href="/#waitlist"
               onClick={handleGetAccess}
               style={{
                 background: "rgba(59,130,246,0.1)",

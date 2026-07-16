@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   description:
-    "Join the waitlist for ARC Fitness — the AI fitness coach that tracks workouts, habits, and nutrition in one beautiful app. iOS & Android. Coming July 2026.",
+    "Join the waitlist for ARC the AI fitness coach that tracks workouts, habits, and nutrition in one beautiful app. iOS & Android. Coming July 2026.",
   keywords: [
     "fitness app",
     "AI workout",
@@ -46,8 +46,8 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: APP_URL,
-    siteName: "ARC Fitness",
-    title: "ARC Fitness is launching soon 🚀",
+    siteName: "ARC",
+    title: "ARC is launching soon",
     description:
       "Be first. Get 3 months Pro free. Join thousands of founding members waiting for the most intelligent fitness app ever built.",
     images: [
@@ -65,13 +65,13 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@arcfitnessapp",
     creator: "@arcfitnessapp",
-    title: "ARC Fitness — AI-Powered Fitness. Launching Soon.",
+    title: "ARC AI-Powered Fitness. Launching Soon.",
     description:
-      "Join the waitlist for ARC Fitness — AI coaching for workouts, habits & nutrition. iOS & Android.",
+      "Join the waitlist for ARC — AI coaching for workouts, habits & nutrition. iOS & Android.",
     images: [
       {
         url: "/og-image.png", // resolved to APP_URL/og-image.png via metadataBase
-        alt: "ARC Fitness — AI-Powered Fitness Copilot",
+        alt: "ARC AI-Powered Fitness Copilot",
       },
     ],
   },

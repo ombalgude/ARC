@@ -16,7 +16,7 @@ const features = [
     accentDim: "rgba(59,130,246,0.08)",
     accentBorder: "rgba(59,130,246,0.18)",
     tag: "AI Training",
-    title: "Every rep. Planned with precision.",
+    title: "Every repetition. Planned with precision.",
     desc: "Random workouts produce random results. ARC builds your exact weekly training plan around your goals, recovery, and progression, then adapts it week by week. No more wasted sessions. No more plateaus.",
     stat: { value: "40%", label: "faster progression" },
     colSpanClass: "md:col-span-8 col-span-12",

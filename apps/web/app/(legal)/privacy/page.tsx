@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 const s = {
-  page: { maxWidth: "860px", margin: "0 auto", padding: "72px 24px 100px" } as React.CSSProperties,
+  page: { maxWidth: "860px", margin: "0 auto", padding: "clamp(60px, 10vw, 72px) clamp(16px, 5vw, 24px) 100px" } as React.CSSProperties,
   heroSection: { textAlign: "center" as const, marginBottom: "64px" },
   badge: {
     display: "inline-block", padding: "5px 14px", fontSize: "12px", fontWeight: 600,
@@ -31,7 +31,7 @@ const s = {
   warningText: { fontSize: "14px", lineHeight: 1.65, color: "#fca5a5" },
   sectionCard: {
     background: "var(--bg-card)", border: "1px solid var(--border)",
-    borderRadius: "var(--radius)", padding: "32px 36px", marginBottom: "24px",
+    borderRadius: "var(--radius)", padding: "clamp(24px, 5vw, 32px) clamp(20px, 5vw, 36px)", marginBottom: "24px",
   } as React.CSSProperties,
   h2: { fontSize: "22px", fontWeight: 800, color: "var(--text)", marginBottom: "18px" },
   h3: { fontSize: "15px", fontWeight: 700, color: "var(--text)", marginBottom: "8px", marginTop: "20px" },

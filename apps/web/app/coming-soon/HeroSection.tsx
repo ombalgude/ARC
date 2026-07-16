@@ -667,16 +667,16 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
         }
         @media (max-width: 600px) {
           .hero-phone-col { 
-            transform: scale(0.95) perspective(1000px) rotateX(0deg) rotateY(0deg) rotateZ(0deg) !important;
-            margin-top: 2rem !important;
+            transform: scale(0.85) perspective(1000px) rotateX(0deg) rotateY(0deg) rotateZ(0deg) !important;
+            margin-top: 1.5rem !important;
           }
           .hero-phone-badge-right {
-            right: -5% !important;
-            transform: scale(0.9) !important;
+            right: 0 !important;
+            transform: scale(0.8) !important;
           }
           .hero-phone-badge-left {
-            left: -5% !important;
-            transform: scale(0.9) !important;
+            left: 0 !important;
+            transform: scale(0.8) !important;
           }
         }
         @media (max-width: 400px) {

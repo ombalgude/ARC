@@ -486,12 +486,7 @@ body::before {
     transform  0.30s ease;
 }
 
-/* When ANY child is hovered → dim siblings */
-.cards-dim-siblings:has(> *:hover) > *:not(:hover) {
-  filter:  blur(3px) saturate(0.4);
-  opacity: 0.30;
-  transform: scale(0.98);
-}
+/* When ANY child is hovered → dim siblings (REMOVED per user request) */
 
 /* Hovered card — pop up slightly */
 .cards-dim-siblings > *:hover {
