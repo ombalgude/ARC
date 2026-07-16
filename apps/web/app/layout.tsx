@@ -18,7 +18,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://arcfitness.app";
 export const metadata: Metadata = {
   // ── Core ──────────────────────────────────────────────────────────────────
   metadataBase: new URL(APP_URL),
-  title: "ARC Fitness — AI-Powered Fitness. Launching Soon.",
+  title: "ARC Your AI Fitness Copilot",
 
   // ── Favicons & Touch Icons ────────────────────────────────────────────────
   icons: {
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   description:
-    "Join the waitlist for ARC the AI fitness coach that tracks workouts, habits, and nutrition in one beautiful app. iOS & Android. Coming July 2026.",
+    "Join the waitlist for ARC. Your AI copilot for fitness. Training plans, nutrition targets, and habit tracking built around you.",
   keywords: [
     "fitness app",
     "AI workout",
@@ -47,15 +47,15 @@ export const metadata: Metadata = {
     type: "website",
     url: APP_URL,
     siteName: "ARC",
-    title: "ARC is launching soon",
+    title: "ARC Your AI Fitness Copilot",
     description:
-      "Be first. Get 3 months Pro free. Join thousands of founding members waiting for the most intelligent fitness app ever built.",
+      "Join the waitlist for ARC. The first 100 users get 3 months of Pro free.",
     images: [
       {
         url: "/og-image.png", // resolved to APP_URL/og-image.png via metadataBase
         width: 1200,
         height: 630,
-        alt: "ARC Fitness — AI-Powered Fitness Copilot",
+        alt: "ARC Your AI Fitness Copilot",
       },
     ],
   },
@@ -65,9 +65,9 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@arcfitnessapp",
     creator: "@arcfitnessapp",
-    title: "ARC AI-Powered Fitness. Launching Soon.",
+    title: "ARC Your AI Fitness Copilot",
     description:
-      "Join the waitlist for ARC — AI coaching for workouts, habits & nutrition. iOS & Android.",
+      "Join the waitlist for ARC an AI copilot for training, nutrition, and habits.",
     images: [
       {
         url: "/og-image.png", // resolved to APP_URL/og-image.png via metadataBase
