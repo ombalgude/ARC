@@ -88,26 +88,41 @@ export default function ConfirmationScreen({
     const colors = ["#3B82F6", "#60A5FA", "#FFFFFF"];
 
     (function frame() {
-      confetti({
-        particleCount: 5,
-        angle: 60,
-        spread: 55,
-        startVelocity: 55,
-        origin: { x: 0, y: 0.9 },
-        colors: colors,
-        disableForReducedMotion: true,
-        zIndex: 10000,
-      });
-      confetti({
-        particleCount: 5,
-        angle: 120,
-        spread: 55,
-        startVelocity: 55,
-        origin: { x: 1, y: 0.9 },
-        colors: colors,
-        disableForReducedMotion: true,
-        zIndex: 10000,
-      });
+      const isMobile = window.innerWidth <= 768;
+
+      if (isMobile) {
+        confetti({
+          particleCount: 3,
+          angle: 270,
+          spread: 90,
+          startVelocity: 30,
+          origin: { x: Math.random(), y: -0.1 },
+          colors: colors,
+          disableForReducedMotion: true,
+          zIndex: 10000,
+        });
+      } else {
+        confetti({
+          particleCount: 5,
+          angle: 60,
+          spread: 55,
+          startVelocity: 55,
+          origin: { x: 0, y: 0.9 },
+          colors: colors,
+          disableForReducedMotion: true,
+          zIndex: 10000,
+        });
+        confetti({
+          particleCount: 5,
+          angle: 120,
+          spread: 55,
+          startVelocity: 55,
+          origin: { x: 1, y: 0.9 },
+          colors: colors,
+          disableForReducedMotion: true,
+          zIndex: 10000,
+        });
+      }
 
       if (Date.now() < end) {
         requestAnimationFrame(frame);
