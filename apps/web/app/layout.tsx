@@ -52,7 +52,7 @@ export const metadata: Metadata = {
       "Join the waitlist for ARC. The first 100 users get 3 months of Pro free.",
     images: [
       {
-        url: "/og-image.png", // resolved to APP_URL/og-image.png via metadataBase
+        url: "/arc-preview-v2.png", // resolved to APP_URL/arc-preview-v2.png via metadataBase
         width: 1200,
         height: 630,
         alt: "ARC Your AI Fitness Copilot",
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
       "Join the waitlist for ARC an AI copilot for training, nutrition, and habits.",
     images: [
       {
-        url: "/og-image.png", // resolved to APP_URL/og-image.png via metadataBase
+        url: "/arc-preview-v2.png", // resolved to APP_URL/arc-preview-v2.png via metadataBase
         alt: "ARC AI-Powered Fitness Copilot",
       },
     ],
