@@ -83,25 +83,23 @@ export default function ConfirmationScreen({
       (window as any).lenis.stop();
     }
 
-    const duration = 2500;
-    const end = Date.now() + duration;
     const colors = ["#3B82F6", "#60A5FA", "#FFFFFF"];
+    const isMobile = window.innerWidth <= 768;
 
-    (function frame() {
-      const isMobile = window.innerWidth <= 768;
-
-      if (isMobile) {
-        confetti({
-          particleCount: 3,
-          angle: 270,
-          spread: 90,
-          startVelocity: 30,
-          origin: { x: Math.random(), y: -0.1 },
-          colors: colors,
-          disableForReducedMotion: true,
-          zIndex: 10000,
-        });
-      } else {
+    if (isMobile) {
+      confetti({
+        particleCount: 60,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: colors,
+        disableForReducedMotion: true,
+        zIndex: 10000,
+      });
+    } else {
+      const duration = 2500;
+      const end = Date.now() + duration;
+      
+      (function frame() {
         confetti({
           particleCount: 5,
           angle: 60,
@@ -122,12 +120,12 @@ export default function ConfirmationScreen({
           disableForReducedMotion: true,
           zIndex: 10000,
         });
-      }
 
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
-    })();
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      })();
+    }
 
     return () => {
       document.body.style.overflow = "";
@@ -294,6 +292,7 @@ export default function ConfirmationScreen({
       `}</style>
 
       <div
+        className="hidden md:block"
         style={{
           position: "absolute",
           top: "50%",

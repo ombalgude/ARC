@@ -32,6 +32,12 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
     const fetchStats = async () => {
+      // Pause if tab is hidden
+      if (document.hidden) {
+        timer = setTimeout(fetchStats, 15000);
+        return;
+      }
+      
       try {
         const res = await fetch("/api/waitlist/stats");
         if (res.ok) {
@@ -418,8 +424,8 @@ export default function HeroSection({ initialCount, referralCode }: HeroProps): 
                     
                     <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px)", backgroundSize: "16px 16px", opacity: 0.8 }} />
                     
-                    <div style={{ position: "absolute", right: "-30px", top: "-30px", width: "100px", height: "100px", borderRadius: "50%", background: "rgba(59,130,246,0.2)", filter: "blur(40px)", pointerEvents: "none" }} />
-                    <div style={{ position: "absolute", left: "-20px", bottom: "-20px", width: "80px", height: "80px", borderRadius: "50%", background: "rgba(59,130,246,0.1)", filter: "blur(30px)", pointerEvents: "none" }} />
+                    <div className="hidden md:block" style={{ position: "absolute", right: "-30px", top: "-30px", width: "100px", height: "100px", borderRadius: "50%", background: "rgba(59,130,246,0.2)", filter: "blur(40px)", pointerEvents: "none" }} />
+                    <div className="hidden md:block" style={{ position: "absolute", left: "-20px", bottom: "-20px", width: "80px", height: "80px", borderRadius: "50%", background: "rgba(59,130,246,0.1)", filter: "blur(30px)", pointerEvents: "none" }} />
                     
                     <div style={{ position: "relative", zIndex: 10 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>

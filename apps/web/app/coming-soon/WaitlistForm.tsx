@@ -98,9 +98,9 @@ export default function WaitlistForm({ onSuccess, initialCount, referralCode }: 
               gap: 8px !important;
               width: 100% !important;
               height: 3rem !important; /* 48px */
-              background: rgba(4,5,15,0.7) !important;
-              backdrop-filter: blur(24px) !important;
-              -webkit-backdrop-filter: blur(24px) !important;
+              background: rgba(10, 14, 23, 0.98) !important;
+              backdrop-filter: none !important;
+              -webkit-backdrop-filter: none !important;
               border: 1px solid rgba(255,255,255,0.15) !important;
               border-radius: 7.5rem !important;
               padding: 0 1.25rem !important;

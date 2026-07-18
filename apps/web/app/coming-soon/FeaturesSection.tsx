@@ -82,6 +82,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0], index: n
   const mouseY = useMotionValue(0);
 
   function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+    if (typeof window !== "undefined" && window.matchMedia("(hover: none)").matches) return;
     const { left, top } = currentTarget.getBoundingClientRect();
     mouseX.set(clientX - left);
     mouseY.set(clientY - top);
@@ -128,7 +129,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0], index: n
       </div>
 
       <motion.div
-        className="pointer-events-none absolute -inset-px opacity-0 transition duration-500 group-hover:opacity-100"
+        className="hidden md:block pointer-events-none absolute -inset-px opacity-0 transition duration-500 group-hover:opacity-100"
         style={{
           background: useMotionTemplate`
             radial-gradient(

@@ -12,6 +12,11 @@ export default function SmoothScroll(): React.JSX.Element | null {
       // (like /#features or /#waitlist) and breaks browser Back button restoration.
     }
 
+    // Abort Lenis on touch devices. Native OS scroll is 100% hardware-accelerated.
+    if (typeof window !== "undefined" && window.matchMedia("(hover: none)").matches) {
+      return;
+    }
+
     const lenis = new Lenis({
       duration: 0.7,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Apple-style Expo Ease Out

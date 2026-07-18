@@ -660,4 +660,57 @@ input:-webkit-autofill:active {
   animation: gradientShift 6s ease-in-out infinite;
 }
 
+/* ─── MOBILE GRACEFUL DEGRADATION ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Kill the grain filter on mobile - huge GPU save */
+  body::before {
+    display: none !important;
+  }
 
+  /* Strip blurs from all cards on mobile */
+  .card-glass,
+  .card-gradient-border,
+  .glass-blue,
+  .glass,
+  .feature-spotlight,
+  .perks-spotlight,
+  .hero-phone-badge-right,
+  .hero-phone-badge-left,
+  .modal-overlay-inner,
+  .modal-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(10, 14, 23, 0.98) !important;
+  }
+
+  /* Optimize expensive box-shadows on mobile */
+  .hero-phone-col > div > div {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
+  }
+
+  /* Disable scroll reveal blur animations on mobile */
+  .reveal {
+    filter: blur(0) !important;
+    will-change: transform, opacity;
+  }
+
+  /* Convert expensive box-shadow pulses to transform scales on mobile */
+  .pulse-trigger {
+    animation: waitlistTargetPulseMobile 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+  .btn-primary.pulse-trigger {
+    animation: buttonTargetPulseMobile 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+}
+
+@keyframes waitlistTargetPulseMobile {
+  0%   { transform: scale(1); border-color: rgba(255,255,255,0.10); background: rgba(4,5,15,0.7); }
+  20%  { transform: scale(1.03); border-color: #60A5FA; background: rgba(4,5,15,0.9); }
+  100% { transform: scale(1); border-color: rgba(255,255,255,0.10); background: rgba(4,5,15,0.7); }
+}
+
+@keyframes buttonTargetPulseMobile {
+  0%   { transform: scale(1); filter: brightness(1); }
+  20%  { transform: scale(1.05); filter: brightness(1.2); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
