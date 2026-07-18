@@ -714,3 +714,17 @@ input:-webkit-autofill:active {
   20%  { transform: scale(1.05); filter: brightness(1.2); }
   100% { transform: scale(1); filter: brightness(1); }
 }
+
+/* ─── MOBILE NAV HACK ───────────────────────────────────────── */
+@media (max-width: 768px) {
+  .arc-nav-wrapper {
+    padding: 0 !important;
+  }
+  .arc-nav {
+    width: 100% !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+  }
+}

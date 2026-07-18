@@ -39,6 +39,7 @@ export default function LandingNav(): React.JSX.Element | Promise<React.JSX.Elem
 
   return (
     <div
+      className="arc-nav-wrapper"
       style={{
         position: "fixed",
         top: 0,
@@ -52,6 +53,7 @@ export default function LandingNav(): React.JSX.Element | Promise<React.JSX.Elem
       }}
     >
       <motion.nav
+        className="arc-nav"
         initial={false}
         animate={{
           width: scrolled ? "min(680px, calc(100% - 2rem))" : "100%",
